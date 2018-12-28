@@ -1,0 +1,29 @@
+package com.leaniot.api.test;
+
+import java.util.Map;
+
+import com.leaniot.api.device.stomp.SetSubscriber;
+import com.leaniot.exception.ValueException;
+
+public class MySet extends SetSubscriber {
+
+	public MySet(Map<String, Class<?>> attType) {
+		super(attType);
+		// TODO Auto-generated constructor stub
+	}
+
+	@Override
+	public void setAttribute(String attribute, Object value) {
+		System.out.println("attribute: " + attribute);
+		if(attribute.equals("screen")) {
+			Screen s = (Screen)value;
+			if(s == null)
+				System.out.println("set null");
+			else
+				System.out.println("screen layout: " + s.getFix().getLayout());
+		}else {
+			throw new ValueException("unknonw attribute");
+		}
+	}
+
+}
