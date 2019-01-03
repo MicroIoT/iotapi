@@ -6,8 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Component;
+import org.springframework.web.socket.messaging.WebSocketStompClient;
 
-import com.leaniot.api.Session;
+import com.leaniot.api.HttpSession;
 import com.leaniot.domain.Alarm;
 import com.leaniot.domain.AlarmType;
 import com.leaniot.domain.Device;
@@ -18,8 +19,8 @@ import com.leaniot.dto.EventInfo;
 import com.leaniot.exception.NotFoundException;
 
 @Component
-public class DeviceSession extends Session {
-	protected Device device;
+public class HttpDeviceSession extends HttpSession {
+	private Device device;
 	
 	public Device getDevice() {
 		return device;
@@ -31,6 +32,10 @@ public class DeviceSession extends Session {
 	public void start(String username, String password, String uri) {
 		super.start(username, password, uri);
 		this.device = getMyInfo();
+	}
+	public WebsocketDeviceSession startWebsocket() {
+		WebSocketStompClient client = getWebsocketClient();
+		return new WebsocketDeviceSession(this, client);
 	}
 	private Device getMyInfo() {
 		return getEntity("/device/me", Device.class);

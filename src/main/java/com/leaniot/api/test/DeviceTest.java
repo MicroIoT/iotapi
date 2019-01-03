@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
-import com.leaniot.api.device.DeviceSession;
-import com.leaniot.api.device.WSDeviceSession;
+import com.leaniot.api.device.HttpDeviceSession;
+import com.leaniot.api.device.WebsocketDeviceSession;
 
 public class DeviceTest {
 
@@ -16,15 +16,10 @@ public class DeviceTest {
 //		ActionType type = session.getActionType("update_tag");
 //		session.stop();
 		
-		DeviceSession s = new DeviceSession();
+		HttpDeviceSession s = new HttpDeviceSession();
 		s.start("0969ca82-5c48-41cc-86fa-caea4149e15a", "60459872", "iotp://localhost:8082");
 		
-		Map<String, Object> info= new HashMap<String, Object>();
-		info.put("url", "http://localhost/1.jpg");
-		info.put("reason", "download fail");
-		s.reportAlarm("ProcessFailureAlarm", info);
-		
-		WSDeviceSession ws = new WSDeviceSession(s);
+		WebsocketDeviceSession ws = s.startWebsocket();
 		ws.subscribe(new MyGet());
 		Map<String, Class<?>> attType = new HashMap<String, Class<?>>();
 		attType.put("screen", Screen.class);
@@ -37,6 +32,12 @@ public class DeviceTest {
 			String line = scanner.nextLine();
 			if(line.equals("exit"))
 				scanner.close();
+			else {
+				Map<String, Object> info= new HashMap<String, Object>();
+				info.put("url", "http://localhost/1.jpg");
+				info.put("reason", "download fail");
+				s.reportAlarm("ProcessFailureAlarm", info);
+			}
 		}
 //		s.stop();
 	}

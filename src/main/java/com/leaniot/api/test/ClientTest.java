@@ -8,21 +8,19 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 
-import com.leaniot.api.client.ClientSession;
-import com.leaniot.api.client.WSClientSession;
-import com.leaniot.domain.ActionType;
-import com.leaniot.domain.Device;
+import com.leaniot.api.client.HttpClientSession;
+import com.leaniot.api.client.WebsocketClientSession;
 
 public class ClientTest {
 	public static void main(String[] args) {
 		Scanner scanner = new Scanner(System.in);
 		
-		ClientSession session = new ClientSession();
+		HttpClientSession session = new HttpClientSession();
 		session.start("admin@100001", "password", "iotp://localhost:8082");
 		String deviceId = "5c0510ab5b8faebb40c3f0a3";
 //		Device device = session.getDevice(deviceId);
 //		ActionType type = session.getActionType("update_tag");
-		WSClientSession wsSession = new WSClientSession(session, 100000);
+		WebsocketClientSession wsSession = session.startWebsocket(100000);
 		
 		Map<String, Class<?>> m = new HashMap<String, Class<?>>();
 		m.put("ProcessFailureAlarm", ProcessFailureAlarm.class);
@@ -33,6 +31,8 @@ public class ClientTest {
 			Screen s =  (Screen) wsSession.get(deviceId, "screen", Screen.class);
 			System.out.println("layout: " + s.getFix().getLayout());
 			wsSession.set(deviceId, "screen", getScreen());
+			if(line.equals("exit"))
+				scanner.close();
 		}
 		// session.stop();
 	}

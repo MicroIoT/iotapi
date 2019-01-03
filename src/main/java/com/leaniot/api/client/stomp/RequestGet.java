@@ -1,14 +1,13 @@
 package com.leaniot.api.client.stomp;
 
-import com.leaniot.api.client.WSClientSession;
 import com.leaniot.api.dto.GetRequest;
 import com.leaniot.api.stomp.PublishHandler;
 
 public class RequestGet extends PublishHandler {
 	private String attribute;
 	
-	public RequestGet(WSClientSession wsSession, String deviceId, String attribute) {
-		super(wsSession, deviceId);
+	public RequestGet(String deviceId, String attribute) {
+		super(deviceId);
 		this.topic = "get";
 		this.attribute = attribute;
 	}

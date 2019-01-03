@@ -1,10 +1,14 @@
 package com.leaniot.api;
 
+import javax.websocket.ContainerProvider;
+import javax.websocket.WebSocketContainer;
+
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -13,12 +17,15 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.UnknownHttpStatusCodeException;
+import org.springframework.web.socket.client.WebSocketClient;
+import org.springframework.web.socket.client.standard.StandardWebSocketClient;
+import org.springframework.web.socket.messaging.WebSocketStompClient;
 
 import com.leaniot.exception.StatusException;
 import com.leaniot.exception.ValueException;
 
 @Component
-public abstract class Session {
+public abstract class HttpSession {
 	private static final String WS_IOT = "/ws_iot";
 	private static final String IOTP = "iotp";
 	private static final String IOTPS = "iotps";
@@ -26,15 +33,21 @@ public abstract class Session {
 	private static final String HTTPS = "https";
 	private static final String WS = "ws";
 	private static final String WSS = "wss";
-	private static final String regex = "^(" + IOTP + "|" + IOTPS + ")://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
+	private static final String regex = "^(" + IOTP + "|" + IOTPS
+			+ ")://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
+
+	private static final int MAX_TEXT_MESSAGE_BUFFER_SIZE = 20 * 1024 * 1024;
 
 	private String sessionId;
 	private String uri;
 	protected boolean logined;
-		
-	protected RestTemplate restTemplate;
+
+	private static WebSocketClient client;
+	private static WebSocketStompClient stompClient;
 	
-	public Session() {
+	protected RestTemplate restTemplate;
+
+	public HttpSession() {
 		this.restTemplate = new RestTemplate();
 		this.logined = false;
 	}
@@ -42,9 +55,9 @@ public abstract class Session {
 	public void start(String username, String password, String uri) {
 		this.uri = uri;
 
-		if(!this.uri.matches(regex))
+		if (!this.uri.matches(regex))
 			throw new ValueException(uri);
-		
+
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
@@ -69,6 +82,18 @@ public abstract class Session {
 		}
 	}
 
+	public WebSocketStompClient getWebsocketClient() {
+		assert logined : "login first";
+		if(stompClient == null) {
+			WebSocketContainer container = ContainerProvider.getWebSocketContainer();
+			container.setDefaultMaxTextMessageBufferSize(MAX_TEXT_MESSAGE_BUFFER_SIZE);
+			client = new StandardWebSocketClient(container);
+			stompClient = new WebSocketStompClient(client);
+			stompClient.setMessageConverter(new MappingJackson2MessageConverter());
+		}
+		return stompClient;
+	}
+
 	public HttpHeaders getSessionHeader() {
 		assert logined : "login first";
 		HttpHeaders requestHeaders = new HttpHeaders();
@@ -77,52 +102,53 @@ public abstract class Session {
 	}
 
 	public String getRestUri() {
-		if(this.uri.startsWith(IOTP)) 
+		if (this.uri.startsWith(IOTP))
 			return this.uri.replaceFirst(IOTP, HTTP);
-		else if(this.uri.startsWith(IOTPS))
+		else if (this.uri.startsWith(IOTPS))
 			return this.uri.replaceFirst(IOTPS, HTTPS);
 		else
 			throw new ValueException(uri);
 	}
-	
+
 	public String getWSUri() {
 		assert logined : "login first";
-		if(this.uri.startsWith(IOTP)) 
+		if (this.uri.startsWith(IOTP))
 			return this.uri.replaceFirst(IOTP, WS) + WS_IOT;
-		else if(this.uri.startsWith(IOTPS))
+		else if (this.uri.startsWith(IOTPS))
 			return this.uri.replaceFirst(IOTPS, WSS) + WS_IOT;
 		else
 			throw new ValueException(uri);
 	}
-	
+
 	protected <T> T getEntity(String getUri, Class<T> responseType) {
 		assert logined : "login first";
 		HttpHeaders header = getSessionHeader();
 		HttpEntity<HttpHeaders> requestEntity = new HttpEntity<HttpHeaders>(null, header);
 		try {
-			ResponseEntity<T> rssResponse = restTemplate.exchange(getRestUri() + getUri, HttpMethod.GET, requestEntity, responseType);
+			ResponseEntity<T> rssResponse = restTemplate.exchange(getRestUri() + getUri, HttpMethod.GET, requestEntity,
+					responseType);
 			return rssResponse.getBody();
-		} catch(ResourceAccessException e) {
+		} catch (ResourceAccessException e) {
 			throw new StatusException(e.getMessage());
-		} catch(HttpClientErrorException | HttpServerErrorException | UnknownHttpStatusCodeException e) {
+		} catch (HttpClientErrorException | HttpServerErrorException | UnknownHttpStatusCodeException e) {
 			throw new StatusException(e.getResponseBodyAsString());
 		}
-		
+
 	}
-	
+
 	protected <T> T postEntity(String postUri, Object request, Class<T> responseType) {
 		assert logined : "login first";
 		HttpHeaders header = getSessionHeader();
 		HttpEntity<?> requestEntity = new HttpEntity<>(request, header);
-		try{
-			ResponseEntity<T> rssResponse = restTemplate.exchange(getRestUri() + postUri, HttpMethod.POST, requestEntity, responseType);
+		try {
+			ResponseEntity<T> rssResponse = restTemplate.exchange(getRestUri() + postUri, HttpMethod.POST,
+					requestEntity, responseType);
 			return rssResponse.getBody();
-		} catch(ResourceAccessException e) {
+		} catch (ResourceAccessException e) {
 			throw new StatusException(e.getMessage());
-		} catch(HttpClientErrorException | HttpServerErrorException | UnknownHttpStatusCodeException e) {
+		} catch (HttpClientErrorException | HttpServerErrorException | UnknownHttpStatusCodeException e) {
 			throw new StatusException(e.getResponseBodyAsString());
 		}
-		
-		
+
 	}
 }

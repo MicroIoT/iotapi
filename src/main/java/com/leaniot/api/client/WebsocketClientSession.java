@@ -5,7 +5,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import com.leaniot.api.WSSession;
+import org.springframework.integration.stomp.WebSocketStompSessionManager;
+import org.springframework.web.socket.WebSocketHttpHeaders;
+import org.springframework.web.socket.messaging.WebSocketStompClient;
+
 import com.leaniot.api.client.stomp.AlarmSubscriber;
 import com.leaniot.api.client.stomp.RequestAction;
 import com.leaniot.api.client.stomp.RequestGet;
@@ -22,20 +25,26 @@ import com.leaniot.exception.NotFoundException;
 import com.leaniot.exception.StatusException;
 import com.leaniot.exception.ValueException;
 
-public class WSClientSession extends WSSession {
+public class WebsocketClientSession  extends WebSocketStompSessionManager {
+	private HttpClientSession session;
+	private long timeout;
 	
-	public WSClientSession(ClientSession session, long timeout) {
-		super(session, timeout);
-		// TODO Auto-generated constructor stub
+	public WebsocketClientSession(HttpClientSession session, WebSocketStompClient webSocketStompClient, long timeout) {
+		super(webSocketStompClient, session.getWSUri());
+		this.session = session;
+		setHandshakeHeaders(new WebSocketHttpHeaders(session.getSessionHeader()));
+		this.timeout = timeout;
 	}
 
-	public WSClientSession(ClientSession session) {
-		super(session);
-		// TODO Auto-generated constructor stub
+	public WebsocketClientSession(HttpClientSession session, WebSocketStompClient webSocketStompClient) {
+		super(webSocketStompClient, session.getWSUri());
+		this.session = session;
+		setHandshakeHeaders(new WebSocketHttpHeaders(session.getSessionHeader()));
+		this.timeout = 10;
 	}
 
 	public SubscribeAlarm subscribe(String deviceId, AlarmSubscriber subscriber) {
-		SubscribeAlarm sessionHandler = new SubscribeAlarm(this, deviceId, subscriber);
+		SubscribeAlarm sessionHandler = new SubscribeAlarm(deviceId, subscriber);
         connect(sessionHandler);
         return sessionHandler;
 	}
@@ -70,13 +79,13 @@ public class WSClientSession extends WSSession {
 		return value;
 	}
 	
-	public boolean getBool(ClientSession session, String deviceId, String attribute) {
+	public boolean getBool(HttpClientSession session, String deviceId, String attribute) {
 		Boolean value = (Boolean)get(deviceId, attribute, Boolean.class);
 		return value;
 	}
 	
 	public Object get(String deviceId, String attribute, Class<?> type) {
-		Device device = ((ClientSession) session).getDevice(deviceId);
+		Device device = ((HttpClientSession) session).getDevice(deviceId);
 		if(device == null)
 			throw new NotFoundException("device: " + deviceId);
 		AttributeType attType = device.getDeviceType().getAttDefinition().get(attribute);
@@ -94,7 +103,7 @@ public class WSClientSession extends WSSession {
 	}
 	
 	private Response get(String deviceId, String attribute) {
-		RequestGet request = new RequestGet(this, deviceId, attribute);
+		RequestGet request = new RequestGet(deviceId, attribute);
         
         connect(request);
 		
@@ -106,7 +115,7 @@ public class WSClientSession extends WSSession {
 	}
 
 	public void set(String deviceId, String attribute, Object object) {
-		Device device = ((ClientSession) session).getDevice(deviceId);
+		Device device = ((HttpClientSession) session).getDevice(deviceId);
 		if(device == null)
 			throw new NotFoundException("device: " + deviceId);
 		AttributeType attType = device.getDeviceType().getAttDefinition().get(attribute);
@@ -123,7 +132,7 @@ public class WSClientSession extends WSSession {
 	}
 	
 	private Response set(String deviceId, String attribute, AttValueInfo value) {
-		RequestSet request = new RequestSet(this, deviceId, attribute, value);
+		RequestSet request = new RequestSet(deviceId, attribute, value);
         
         connect(request);
 		
@@ -170,10 +179,10 @@ public class WSClientSession extends WSSession {
 	}
 	
 	public Object action(String deviceId, String action, Object request, Class<?> type) {
-		Device device = ((ClientSession) session).getDevice(deviceId);
+		Device device = ((HttpClientSession) session).getDevice(deviceId);
 		if(device == null)
 			throw new NotFoundException("device: " + deviceId);
-		ActionType actionType = ((ClientSession) session).getActionType(action);
+		ActionType actionType = ((HttpClientSession) session).getActionType(action);
 		if(actionType == null)
 			throw new NotFoundException("action: " + action);
 		StructType requestType = new StructType(actionType.getRequest());
@@ -198,7 +207,7 @@ public class WSClientSession extends WSSession {
 	}
 	
 	private Response action(String deviceId, String action, AttValueInfo value) {
-		RequestAction request = new RequestAction(this, deviceId, action, value);
+		RequestAction request = new RequestAction(deviceId, action, value);
         
         connect(request);
 		

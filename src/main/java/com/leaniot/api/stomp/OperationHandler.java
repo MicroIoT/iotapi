@@ -3,14 +3,14 @@ package com.leaniot.api.stomp;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
 
-import com.leaniot.api.device.WSDeviceSession;
+import com.leaniot.api.device.WebsocketDeviceSession;
 import com.leaniot.api.dto.Response;
 
 public abstract class OperationHandler extends SubscribeHandler {
 	private StompSession session;
 	
-	public OperationHandler(WSDeviceSession wsSession, OperationSubscriber subscriber) {
-		super(wsSession, wsSession.getDevice().getId(), subscriber);
+	public OperationHandler(WebsocketDeviceSession wsSession, OperationSubscriber subscriber) {
+		super(wsSession.getDevice().getId(), subscriber);
 		subscriber.setDevice(wsSession.getDevice());
 	}
 

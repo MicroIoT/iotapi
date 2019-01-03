@@ -4,13 +4,13 @@ import java.lang.reflect.Type;
 
 import org.springframework.messaging.simp.stomp.StompHeaders;
 
-import com.leaniot.api.device.WSDeviceSession;
+import com.leaniot.api.device.WebsocketDeviceSession;
 import com.leaniot.api.dto.ActionRequest;
 import com.leaniot.api.stomp.OperationHandler;
 
 public class SubscribeAction extends OperationHandler {
 
-	public SubscribeAction(WSDeviceSession wsSession, ActionSubscriber subscriber) {
+	public SubscribeAction(WebsocketDeviceSession wsSession, ActionSubscriber subscriber) {
 		super(wsSession, subscriber);
 		// TODO Auto-generated constructor stub
 	}

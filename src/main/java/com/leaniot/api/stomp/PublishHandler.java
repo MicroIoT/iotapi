@@ -14,14 +14,12 @@ import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
 
-import com.leaniot.api.client.WSClientSession;
 import com.leaniot.api.dto.Request;
 import com.leaniot.api.dto.Response;
 
 public abstract class PublishHandler extends StompSessionHandlerAdapter implements Future<Response> {
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
-	private WSClientSession wsSession;
 	private String deviceId;
 	protected String topic;
 	
@@ -29,9 +27,8 @@ public abstract class PublishHandler extends StompSessionHandlerAdapter implemen
     private volatile boolean cancelled = false;
     private final CountDownLatch countDownLatch;
     
-	public PublishHandler(WSClientSession wsSession, String deviceId) {
+	public PublishHandler(String deviceId) {
 		super();
-		this.wsSession = wsSession;
 		this.deviceId = deviceId;
 		this.countDownLatch = new CountDownLatch(1);
 	}
@@ -56,7 +53,6 @@ public abstract class PublishHandler extends StompSessionHandlerAdapter implemen
 	public void handleFrame(StompHeaders headers, Object payload) {
 		Response response = (Response)payload;
 		
-		wsSession.disconnect();
 		this.result = response;
         countDownLatch.countDown();
 	}
