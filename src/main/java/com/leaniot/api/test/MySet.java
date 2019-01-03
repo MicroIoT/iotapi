@@ -21,7 +21,13 @@ public class MySet extends SetSubscriber {
 				System.out.println("set null");
 			else
 				System.out.println("screen layout: " + s.getFix().getLayout());
-		}else {
+		} else if(attribute.equals("marquee")) {
+			Marquee m = (Marquee)value;
+			if(m == null)
+				System.out.println("set marquee null");
+			else
+				System.out.println("marquee: " + m.getText());
+		} else {
 			throw new ValueException("unknonw attribute");
 		}
 	}

@@ -31,6 +31,7 @@ public class ClientTest {
 			Screen s =  (Screen) wsSession.get(deviceId, "screen", Screen.class);
 			System.out.println("layout: " + s.getFix().getLayout());
 			wsSession.set(deviceId, "screen", getScreen());
+			wsSession.set(deviceId, "marquee", getMarquee());
 			List<Tag> ts = new ArrayList<Tag>();
 			ts.add(new Tag("pm25", "101"));
 			ts.add(new Tag("pm10", "112"));
@@ -41,7 +42,15 @@ public class ClientTest {
 		}
 		// session.stop();
 	}
-	
+	private static Marquee getMarquee() {
+		Marquee m = new Marquee();
+		m.setColor("red");
+		m.setFont("arial");
+		m.setPosition(Position.Bottom);
+		m.setSize(1);
+		m.setText("hello world");
+		return m;
+	}
 	private static Screen getScreen() {
 		List<Material> materials = new ArrayList<Material>();
 		Material live = new Live("live", "http://localhost");
