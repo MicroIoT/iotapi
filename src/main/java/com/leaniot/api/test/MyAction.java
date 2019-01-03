@@ -3,6 +3,7 @@ package com.leaniot.api.test;
 import java.util.Map;
 
 import com.leaniot.api.device.stomp.ActionSubscriber;
+import com.leaniot.exception.ValueException;
 
 public class MyAction extends ActionSubscriber {
 
@@ -13,8 +14,13 @@ public class MyAction extends ActionSubscriber {
 
 	@Override
 	public Object action(String actionName, Object request) {
-		// TODO Auto-generated method stub
-		return null;
+		if(actionName.equals("update_tag")) {
+			Tags tags = (Tags)request;
+			System.out.println(tags.getScreen());
+			return null;
+		}else {
+			throw new ValueException("unknonw action: " + actionName);
+		}
 	}
 
 }

@@ -8,11 +8,11 @@ import com.leaniot.domain.Device;
 
 public class HttpClientSession extends HttpSession {
 	public WebsocketClientSession startWebsocket() {
-		WebSocketStompClient client = getWebsocketClient();
+		WebSocketStompClient client = getWebsocketClient(new long[] {10000, 10000});
 		return new WebsocketClientSession(this, client);
 	}
-	public WebsocketClientSession startWebsocket(long timeout) {
-		WebSocketStompClient client = getWebsocketClient();
+	public WebsocketClientSession startWebsocket(long timeout, long[] heartbeat) {
+		WebSocketStompClient client = getWebsocketClient(heartbeat);
 		return new WebsocketClientSession(this, client, timeout);
 	}
 	public Device getDevice(String deviceId) {

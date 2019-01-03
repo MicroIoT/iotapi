@@ -20,7 +20,7 @@ public class ClientTest {
 		String deviceId = "5c0510ab5b8faebb40c3f0a3";
 //		Device device = session.getDevice(deviceId);
 //		ActionType type = session.getActionType("update_tag");
-		WebsocketClientSession wsSession = session.startWebsocket(100000);
+		WebsocketClientSession wsSession = session.startWebsocket();
 		
 		Map<String, Class<?>> m = new HashMap<String, Class<?>>();
 		m.put("ProcessFailureAlarm", ProcessFailureAlarm.class);
@@ -31,6 +31,11 @@ public class ClientTest {
 			Screen s =  (Screen) wsSession.get(deviceId, "screen", Screen.class);
 			System.out.println("layout: " + s.getFix().getLayout());
 			wsSession.set(deviceId, "screen", getScreen());
+			List<Tag> ts = new ArrayList<Tag>();
+			ts.add(new Tag("pm25", "101"));
+			ts.add(new Tag("pm10", "112"));
+			Tags tags = new Tags(ScreenType.Fix, 1, ts);
+			wsSession.action(deviceId, "update_tag", tags, null);
 			if(line.equals("exit"))
 				scanner.close();
 		}

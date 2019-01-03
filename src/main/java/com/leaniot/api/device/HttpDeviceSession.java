@@ -34,7 +34,11 @@ public class HttpDeviceSession extends HttpSession {
 		this.device = getMyInfo();
 	}
 	public WebsocketDeviceSession startWebsocket() {
-		WebSocketStompClient client = getWebsocketClient();
+		WebSocketStompClient client = getWebsocketClient(new long[] {10000, 10000});
+		return new WebsocketDeviceSession(this, client);
+	}
+	public WebsocketDeviceSession startWebsocket(long[] heartbeat) {
+		WebSocketStompClient client = getWebsocketClient(heartbeat);
 		return new WebsocketDeviceSession(this, client);
 	}
 	private Device getMyInfo() {

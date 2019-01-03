@@ -185,21 +185,29 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 		ActionType actionType = ((HttpClientSession) session).getActionType(action);
 		if(actionType == null)
 			throw new NotFoundException("action: " + action);
-		StructType requestType = new StructType(actionType.getRequest());
-		AttValueInfo requestValue;
-		try{
-			requestValue = requestType.getAttValue(request);
-		} catch(Throwable e) {
-			throw new ValueException("action [" + action + "] request error: " + e.getMessage());
-		}	
+		AttValueInfo requestValue = null;
+		if(actionType.getRequest() != null) {
+			StructType requestType = new StructType(actionType.getRequest());
+			
+			try{
+				requestValue = requestType.getAttValue(request);
+			} catch(Throwable e) {
+				throw new ValueException("action [" + action + "] request error: " + e.getMessage());
+			}	
+		}
 		
 		try {
 			Response response = action(deviceId, action, requestValue);
 			if(!response.isSuccess())
 				throw new StatusException(response.getError());
 			else {
-				StructType responseType = new StructType(actionType.getResponse());
-				return responseType.getData(response.getValue(), type);
+				StructType responseType;
+				if(actionType.getResponse() != null) {
+					responseType = new StructType(actionType.getResponse());
+					return responseType.getData(response.getValue(), type);
+				}
+				else
+					return null;
 			}
 		} catch(Throwable e) {
 			throw new ValueException("action [" + action + "] response error: " + e.getMessage());

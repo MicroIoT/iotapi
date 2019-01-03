@@ -7,8 +7,8 @@ import com.leaniot.api.dto.ActionRequest;
 import com.leaniot.api.dto.Response;
 import com.leaniot.api.stomp.OperationSubscriber;
 import com.leaniot.domain.ActionType;
-import com.leaniot.domain.attribute.AttributeType;
 import com.leaniot.domain.attribute.DataValue;
+import com.leaniot.domain.attribute.StructType;
 import com.leaniot.exception.NotFoundException;
 
 public abstract class ActionSubscriber extends OperationSubscriber {
@@ -26,14 +26,20 @@ public abstract class ActionSubscriber extends OperationSubscriber {
 		ActionRequest req = (ActionRequest) request;
 		try {
 			ActionType aType = getActionType(req.getAction());
-			AttributeType reqType = aType.getRequest().get(req.getAction());
-			Class<?> t = actionType.get(req.getAction());
-			if(t == null)
-				throw new NotFoundException(req.getAction() + " converter");
-			Object value = reqType.getValue(req.getValue(), t);
+			Object value = null;
+			if(aType.getRequest() != null) {
+				StructType reqType = new StructType(aType.getRequest());
+				Class<?> t = actionType.get(req.getAction());
+				if(t == null)
+					throw new NotFoundException(req.getAction() + " converter");
+				value = reqType.getValue(req.getValue(), t);
+			}
 			Object res = action(req.getAction(), value);
-			AttributeType resType = aType.getResponse().get(req.getAction());
-			DataValue data = resType.getAttData(res);
+			DataValue data = null;
+			if(aType.getResponse() != null) {
+				StructType resType = new StructType(aType.getResponse());
+				data = resType.getAttData(res);
+			}
 			return new Response(true, null, data);
 		} catch(Throwable e) {
 			return new Response(false, e.getMessage(), null);

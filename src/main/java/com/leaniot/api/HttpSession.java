@@ -9,6 +9,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -82,7 +83,7 @@ public abstract class HttpSession {
 		}
 	}
 
-	public WebSocketStompClient getWebsocketClient() {
+	public WebSocketStompClient getWebsocketClient(long[] heartbeat) {
 		assert logined : "login first";
 		if(stompClient == null) {
 			WebSocketContainer container = ContainerProvider.getWebSocketContainer();
@@ -90,6 +91,10 @@ public abstract class HttpSession {
 			client = new StandardWebSocketClient(container);
 			stompClient = new WebSocketStompClient(client);
 			stompClient.setMessageConverter(new MappingJackson2MessageConverter());
+			ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
+		    taskScheduler.afterPropertiesSet();
+			stompClient.setTaskScheduler(taskScheduler);
+			stompClient.setDefaultHeartbeat(heartbeat);
 		}
 		return stompClient;
 	}

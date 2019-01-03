@@ -24,6 +24,9 @@ public class DeviceTest {
 		Map<String, Class<?>> attType = new HashMap<String, Class<?>>();
 		attType.put("screen", Screen.class);
 		ws.subscribe(new MySet(attType));
+		Map<String, Class<?>> actionType = new HashMap<String, Class<?>>();
+		actionType.put("update_tag", Tags.class);
+		ws.subscribe(new MyAction(actionType));
 //		events.put("energy", new Double(12.34));
 //		events.put("water", new Double(34.56));
 //		s.reportEvents(events);
