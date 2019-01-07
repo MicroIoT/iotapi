@@ -25,6 +25,11 @@ import org.springframework.web.socket.messaging.WebSocketStompClient;
 import com.leaniot.exception.StatusException;
 import com.leaniot.exception.ValueException;
 
+/**
+ * 建立与物联网平台的http会话
+ *
+ * @author 曹新宇
+ */
 @Component
 public abstract class HttpSession {
 	private static final String WS_IOT = "/ws_iot";
@@ -52,7 +57,12 @@ public abstract class HttpSession {
 		this.restTemplate = new RestTemplate();
 		this.logined = false;
 	}
-
+	/**
+	 * 建立http会话。
+	 * @param username http会话用户名。
+	 * @param password http会话密码。
+	 * @param uri http会话uri，格式为：iotp://host:port或者iotps://host:port。
+	 */
 	public void start(String username, String password, String uri) {
 		this.uri = uri;
 
@@ -74,7 +84,9 @@ public abstract class HttpSession {
 		this.sessionId = session[0].substring(11);
 		this.logined = true;
 	}
-
+	/**
+	 * 停止http会话。
+	 */
 	public void stop() {
 		if (logined) {
 			HttpHeaders header = getSessionHeader();
@@ -82,7 +94,11 @@ public abstract class HttpSession {
 			restTemplate.getForObject(getRestUri() + "/logout", String.class, request);
 		}
 	}
-
+	/**
+	 * 建立websocket底层连接。
+	 * @param heartbeat web socket心跳。
+	 * @return 返回websocket底层连接。
+	 */
 	public WebSocketStompClient getWebsocketClient(long[] heartbeat) {
 		assert logined : "login first";
 		if(stompClient == null) {
@@ -98,7 +114,10 @@ public abstract class HttpSession {
 		}
 		return stompClient;
 	}
-
+	/**
+	 * 获得http会话认证cookie信息。
+	 * @return 返回http头。
+	 */
 	public HttpHeaders getSessionHeader() {
 		assert logined : "login first";
 		HttpHeaders requestHeaders = new HttpHeaders();
@@ -106,6 +125,10 @@ public abstract class HttpSession {
 		return requestHeaders;
 	}
 
+	/**
+	 * 获得http会话调用REST的uri。
+	 * @return 返回调用REST的uri。
+	 */
 	public String getRestUri() {
 		if (this.uri.startsWith(IOTP))
 			return this.uri.replaceFirst(IOTP, HTTP);
@@ -115,6 +138,10 @@ public abstract class HttpSession {
 			throw new ValueException(uri);
 	}
 
+	/**
+	 * 获得http会话调用websocket的uri。
+	 * @return 返回调用websocket的uri。
+	 */
 	public String getWSUri() {
 		assert logined : "login first";
 		if (this.uri.startsWith(IOTP))
@@ -125,6 +152,11 @@ public abstract class HttpSession {
 			throw new ValueException(uri);
 	}
 
+	/**
+	 * 调用REST get。
+	 * @param getUri 调用get的uri。
+	 * @param responseType 调用get返回的类型。
+	 */
 	protected <T> T getEntity(String getUri, Class<T> responseType) {
 		assert logined : "login first";
 		HttpHeaders header = getSessionHeader();
@@ -141,6 +173,12 @@ public abstract class HttpSession {
 
 	}
 
+	/**
+	 * 调用REST post。
+	 * @param postUri 调用post的uri。
+	 * @param request 调用post输入的请求参数。
+	 * @param responseType 调用post返回的类型。
+	 */
 	protected <T> T postEntity(String postUri, Object request, Class<T> responseType) {
 		assert logined : "login first";
 		HttpHeaders header = getSessionHeader();

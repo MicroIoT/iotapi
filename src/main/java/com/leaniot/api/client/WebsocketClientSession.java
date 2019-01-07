@@ -25,10 +25,21 @@ import com.leaniot.exception.NotFoundException;
 import com.leaniot.exception.StatusException;
 import com.leaniot.exception.ValueException;
 
+/**
+ * 客户端与物联网平台的websocket会话
+ *
+ * @author 曹新宇
+ */
 public class WebsocketClientSession  extends WebSocketStompSessionManager {
 	private HttpClientSession session;
 	private long timeout;
 	
+	/**
+	 * 客户端与物联网平台websocket会话构造函数。
+	 * @param session 客户端http会话。
+	 * @param webSocketStompClient 客户端与物联网平台websocket底层连接。
+	 * @param timeout 客户端与物联网平台websocket响应超时时长，单位为秒。
+	 */
 	public WebsocketClientSession(HttpClientSession session, WebSocketStompClient webSocketStompClient, long timeout) {
 		super(webSocketStompClient, session.getWSUri());
 		this.session = session;
@@ -36,6 +47,11 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 		this.timeout = timeout;
 	}
 
+	/**
+	 * 客户端与物联网平台websocket会话构造函数。缺省超时时长为10秒。
+	 * @param session 客户端http会话。
+	 * @param webSocketStompClient 客户端与物联网平台websocket底层连接。
+	 */
 	public WebsocketClientSession(HttpClientSession session, WebSocketStompClient webSocketStompClient) {
 		super(webSocketStompClient, session.getWSUri());
 		this.session = session;
@@ -43,47 +59,103 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 		this.timeout = 10;
 	}
 
+	/**
+	 * 客户端设置收到告警后的告警处理。
+	 * @param deviceId 被监控告警的设备。
+	 * @param subscriber 收到告警后的处理。
+	 * @see com.leaniot.api.client.stomp.AlarmSubscriber
+	 * @return 返回告警处理。
+	 */
 	public SubscribeAlarm subscribe(String deviceId, AlarmSubscriber subscriber) {
 		SubscribeAlarm sessionHandler = new SubscribeAlarm(deviceId, subscriber);
         connect(sessionHandler);
         return sessionHandler;
 	}
 	
+	/**
+	 * 客户端get设备属性值。属性值类型为整型。
+	 * @param deviceId 获取属性值的设备。
+	 * @param attribute 属性名称。
+	 * @return 返回整型属性值。
+	 */
 	public int getInt(String deviceId, String attribute) {
 		int value = (Integer)get(deviceId, attribute, Integer.class);
 		return value;
 	}
 	
+	/**
+	 * 客户端get设备属性值。属性值类型为double。
+	 * @param deviceId 获取属性值的设备。
+	 * @param attribute 属性名称。
+	 * @return 返回double属性值。
+	 */
 	public double getDouble(String deviceId, String attribute) {
 		double value = (Double)get(deviceId, attribute, Double.class);
 		return value;
 	}
 	
+	/**
+	 * 客户端get设备属性值。属性值类型为字符串。
+	 * @param deviceId 获取属性值的设备。
+	 * @param attribute 属性名称。
+	 * @return 返回字符串属性值。
+	 */
 	public String getString(String deviceId, String attribute) {
 		String value = (String)get(deviceId, attribute, String.class);
 		return value;
 	}
 	
+	/**
+	 * 客户端get设备属性值。属性值类型为日期。
+	 * @param deviceId 获取属性值的设备。
+	 * @param attribute 属性名称。
+	 * @return 返回日期属性值。
+	 */
 	public Date getDate(String deviceId, String attribute) {
 		Date value = (Date)get(deviceId, attribute, Date.class);
 		return value;
 	}
 	
+	/**
+	 * 客户端get设备属性值。属性值类型为枚举。
+	 * @param deviceId 获取属性值的设备。
+	 * @param attribute 属性名称。
+	 * @return 返回枚举属性值。
+	 */
 	public String getEnum(String deviceId, String attribute) {
 		String value = (String)get(deviceId, attribute, String.class);
 		return value;
 	}
 	
+	/**
+	 * 客户端get设备属性值。属性值类型为location。
+	 * @param deviceId 获取属性值的设备。
+	 * @param attribute 属性名称。
+	 * @return 返回location属性值。
+	 */
 	public Location getLocation(String deviceId, String attribute) {
 		Location value = (Location)get(deviceId, attribute, Location.class);
 		return value;
 	}
 	
-	public boolean getBool(HttpClientSession session, String deviceId, String attribute) {
+	/**
+	 * 客户端get设备属性值。属性值类型为bool。
+	 * @param deviceId 获取属性值的设备。
+	 * @param attribute 属性名称。
+	 * @return 返回bool属性值。
+	 */
+	public boolean getBool(String deviceId, String attribute) {
 		Boolean value = (Boolean)get(deviceId, attribute, Boolean.class);
 		return value;
 	}
 	
+	/**
+	 * 客户端get设备属性值。
+	 * @param deviceId 获取属性值的设备。
+	 * @param attribute 属性名称。
+	 * @param type 返回属性值的类型。
+	 * @return 返回属性值。
+	 */
 	public Object get(String deviceId, String attribute, Class<?> type) {
 		Device device = ((HttpClientSession) session).getDevice(deviceId);
 		if(device == null)
@@ -114,6 +186,12 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 		}
 	}
 
+	/**
+	 * 客户端set设备属性值。
+	 * @param deviceId 获取属性值的设备。
+	 * @param attribute 属性名称。
+	 * @param object 属性值。
+	 */
 	public void set(String deviceId, String attribute, Object object) {
 		Device device = ((HttpClientSession) session).getDevice(deviceId);
 		if(device == null)
@@ -143,41 +221,98 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 		}
 	}
 	
+	/**
+	 * 客户端调用设备action操作。操作响应类型为整形
+	 * @param deviceId 被调用的设备。
+	 * @param action 操作名称。
+	 * @param request 操作请求值。
+	 * @return 返回整形类型操作响应。
+	 */
 	public int actionInt(String deviceId, String action, Object request) {
 		int value = (Integer)action(deviceId, action, request, Integer.class);
 		return value;
 	}
 	
+	/**
+	 * 客户端调用设备action操作。操作响应类型为double
+	 * @param deviceId 被调用的设备。
+	 * @param action 操作名称。
+	 * @param request 操作请求值。
+	 * @return 返回double类型操作响应。
+	 */
 	public double actionDouble(String deviceId, String action, Object request) {
 		double value = (Double)action(deviceId, action, request, Double.class);
 		return value;
 	}
 	
+	/**
+	 * 客户端调用设备action操作。操作响应类型为字符串
+	 * @param deviceId 被调用的设备。
+	 * @param action 操作名称。
+	 * @param request 操作请求值。
+	 * @return 返回字符串类型操作响应。
+	 */
 	public String actionString(String deviceId, String action, Object request) {
 		String value = (String)action(deviceId, action, request, String.class);
 		return value;
 	}
 	
+	/**
+	 * 客户端调用设备action操作。操作响应类型为日期。
+	 * @param deviceId 被调用的设备。
+	 * @param action 操作名称。
+	 * @param request 操作请求值。
+	 * @return 返回日期类型操作响应。
+	 */
 	public Date actionDate(String deviceId, String action, Object request) {
 		Date value = (Date)action(deviceId, action, request, Date.class);
 		return value;
 	}
 	
+	/**
+	 * 客户端调用设备action操作。操作响应类型为枚举。
+	 * @param deviceId 被调用的设备。
+	 * @param action 操作名称。
+	 * @param request 操作请求值。
+	 * @return 返回枚举类型操作响应。
+	 */
 	public String actionEnum(String deviceId, String action, Object request) {
 		String value = (String)action(deviceId, action, request, String.class);
 		return value;
 	}
 	
+	/**
+	 * 客户端调用设备action操作。操作响应类型为location。
+	 * @param deviceId 被调用的设备。
+	 * @param action 操作名称。
+	 * @param request 操作请求值。
+	 * @return 返回location类型操作响应。
+	 */
 	public Location actionLocation(String deviceId, String action, Object request) {
 		Location value = (Location)action(deviceId, action, request, Location.class);
 		return value;
 	}
 	
+	/**
+	 * 客户端调用设备action操作。操作响应类型为bool。
+	 * @param deviceId 被调用的设备。
+	 * @param action 操作名称。
+	 * @param request 操作请求值。
+	 * @return 返回bool类型操作响应。
+	 */
 	public boolean actionBool(String deviceId, String action, Object request) {
 		Boolean value = (Boolean)action(deviceId, action, request, Boolean.class);
 		return value;
 	}
 	
+	/**
+	 * 客户端调用设备action操作。
+	 * @param deviceId 被调用的设备。
+	 * @param action 操作名称。
+	 * @param request 操作请求值。
+	 * @param type 返回响应值的类型。
+	 * @return 返回操作响应。
+	 */
 	public Object action(String deviceId, String action, Object request, Class<?> type) {
 		Device device = ((HttpClientSession) session).getDevice(deviceId);
 		if(device == null)
