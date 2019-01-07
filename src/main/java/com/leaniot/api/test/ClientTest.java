@@ -24,7 +24,7 @@ public class ClientTest {
 		
 		Map<String, Class<?>> m = new HashMap<String, Class<?>>();
 		m.put("ProcessFailureAlarm", ProcessFailureAlarm.class);
-		wsSession.subscribe(deviceId, new AlarmProcessor(m));
+		wsSession.subscribe(deviceId, new MyAlarm(m));
 		
 		while(true) {
 			String line = scanner.nextLine();

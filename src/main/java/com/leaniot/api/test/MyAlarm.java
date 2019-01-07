@@ -6,9 +6,9 @@ import java.util.Map;
 import com.leaniot.api.client.stomp.AlarmSubscriber;
 import com.leaniot.domain.AlarmType;
 
-public class AlarmProcessor extends AlarmSubscriber {
+public class MyAlarm extends AlarmSubscriber {
 	
-	public AlarmProcessor(Map<String, Class<?>> attrType) {
+	public MyAlarm(Map<String, Class<?>> attrType) {
 		super(attrType);
 		// TODO Auto-generated constructor stub
 	}

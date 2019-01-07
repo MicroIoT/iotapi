@@ -25,10 +25,10 @@ public class HtmlTemplate extends Material {
 	public static String Water  = "water";
 	public static String Energy  = "energy";
 	
-	private String url;//这个是html模板的URL
-	private Period period;//代表的htmlTemplate更新的时间单位
-	private int number;//更新的时间数,比如5分钟更新一次,这个number就是5
-	private List<String> tags;//标签
+	private String url;
+	private Period period;
+	private int number;
+	private List<String> tags;
 	
 	public HtmlTemplate() {
 		super();
