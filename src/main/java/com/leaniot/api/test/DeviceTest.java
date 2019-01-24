@@ -15,11 +15,15 @@ public class DeviceTest {
 //		Device device = session.getDevice("5c0510ab5b8faebb40c3f0a3");
 //		ActionType type = session.getActionType("update_tag");
 //		session.stop();
+		HttpDeviceSession cSession = new HttpDeviceSession();
+		cSession.start("f2c1e66a-dc69-482d-af4f-f229dab72227", "18559728", "iotp://localhost:8082");
+		WebsocketDeviceSession cws = cSession.startWebsocket();
+		cws.subscribe(new ToiletGet());
 		
-		HttpDeviceSession s = new HttpDeviceSession();
-		s.start("0969ca82-5c48-41cc-86fa-caea4149e15a", "60459872", "iotp://localhost:8082");
+		HttpDeviceSession aSession = new HttpDeviceSession();
+		aSession.start("0969ca82-5c48-41cc-86fa-caea4149e15a", "60459872", "iotp://localhost:8082");
 		
-		WebsocketDeviceSession ws = s.startWebsocket();
+		WebsocketDeviceSession ws = aSession.startWebsocket();
 		ws.subscribe(new MyGet());
 		Map<String, Class<?>> attType = new HashMap<String, Class<?>>();
 		attType.put("screen", Screen.class);
@@ -40,7 +44,7 @@ public class DeviceTest {
 				Map<String, Object> info= new HashMap<String, Object>();
 				info.put("url", "http://localhost/1.jpg");
 				info.put("reason", "download fail");
-				s.reportAlarm("ProcessFailureAlarm", info);
+				aSession.reportAlarm("ProcessFailureAlarm", info);
 			}
 		}
 //		s.stop();

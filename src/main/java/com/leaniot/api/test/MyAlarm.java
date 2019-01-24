@@ -15,7 +15,9 @@ public class MyAlarm extends AlarmSubscriber {
 
 	@Override
 	public void onAlarm(AlarmType alarmType, Object alarmInfo, Date reportTime, Date receiveTime) {
+		ProcessFailureAlarm info = (ProcessFailureAlarm)alarmInfo;
 		System.out.println(alarmType.getDescription());
+		System.out.println(info.getUrl());
 	}
 	
 

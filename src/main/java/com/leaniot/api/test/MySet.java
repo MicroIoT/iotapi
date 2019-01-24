@@ -1,5 +1,6 @@
 package com.leaniot.api.test;
 
+import java.util.Date;
 import java.util.Map;
 
 import com.leaniot.api.device.stomp.SetSubscriber;
@@ -18,9 +19,9 @@ public class MySet extends SetSubscriber {
 		if(attribute.equals("screen")) {
 			Screen s = (Screen)value;
 			if(s == null)
-				System.out.println("set null");
+				System.out.println(new Date() + ": set null");
 			else
-				System.out.println("screen layout: " + s.getFix().getLayout());
+				System.out.println(new Date() + ": screen layout: " + s.getFix().getLayout());
 		} else if(attribute.equals("marquee")) {
 			Marquee m = (Marquee)value;
 			if(m == null)

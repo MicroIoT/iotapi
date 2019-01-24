@@ -1,5 +1,9 @@
 package com.leaniot.api.client;
 
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 
 import com.leaniot.api.HttpSession;
@@ -51,5 +55,14 @@ public class HttpClientSession extends HttpSession {
 	 */
 	public ActionType getActionType(String name) {
 		return getEntity("/actiontype/name/" + name, ActionType.class);
+	}
+	
+	/**
+	 * 查询符合条件的设备列表。
+	 * @param queryParams 查询条件。
+	 * @return 设备列表。
+	 */
+	public List<Device> queryDeviceList(Map<String, String> queryParams){
+		return getEntity("/devices/list", queryParams, new ParameterizedTypeReference<List<Device>>() {});
 	}
 }

@@ -28,15 +28,18 @@ public class ClientTest {
 		
 		while(true) {
 			String line = scanner.nextLine();
-			Screen s =  (Screen) wsSession.get(deviceId, "screen", Screen.class);
-			System.out.println("layout: " + s.getFix().getLayout());
-			wsSession.set(deviceId, "screen", getScreen());
-			wsSession.set(deviceId, "marquee", getMarquee());
-			List<Tag> ts = new ArrayList<Tag>();
-			ts.add(new Tag("pm25", "101"));
-			ts.add(new Tag("pm10", "112"));
-			Tags tags = new Tags(ScreenType.Fix, 1, ts);
-			wsSession.action(deviceId, "update_tag", tags, null);
+			for(int i = 0; i < 200; i ++) {
+				Screen s =  (Screen) wsSession.get(deviceId, "screen", Screen.class);
+				System.out.println("layout: " + s.getFix().getLayout());
+				wsSession.set(deviceId, "screen", getScreen());
+				wsSession.set(deviceId, "marquee", getMarquee());
+				List<Tag> ts = new ArrayList<Tag>();
+				ts.add(new Tag("pm25", "101"));
+				ts.add(new Tag("pm10", "112"));
+				Tags tags = new Tags(ScreenType.Fix, 1, ts);
+				wsSession.action(deviceId, "update_tag", tags, null);
+			}
+			
 			if(line.equals("exit"))
 				scanner.close();
 		}

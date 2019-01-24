@@ -1,8 +1,11 @@
 package com.leaniot.api;
 
+import java.util.Map;
+
 import javax.websocket.ContainerProvider;
 import javax.websocket.WebSocketContainer;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -21,6 +24,7 @@ import org.springframework.web.client.UnknownHttpStatusCodeException;
 import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.leaniot.exception.StatusException;
 import com.leaniot.exception.ValueException;
@@ -89,6 +93,7 @@ public abstract class HttpSession {
 	 */
 	public void stop() {
 		if (logined) {
+			stompClient.stop();
 			HttpHeaders header = getSessionHeader();
 			HttpEntity<String> request = new HttpEntity<String>(header);
 			restTemplate.getForObject(getRestUri() + "/logout", String.class, request);
@@ -163,6 +168,35 @@ public abstract class HttpSession {
 		HttpEntity<HttpHeaders> requestEntity = new HttpEntity<HttpHeaders>(null, header);
 		try {
 			ResponseEntity<T> rssResponse = restTemplate.exchange(getRestUri() + getUri, HttpMethod.GET, requestEntity,
+					responseType);
+			return rssResponse.getBody();
+		} catch (ResourceAccessException e) {
+			throw new StatusException(e.getMessage());
+		} catch (HttpClientErrorException | HttpServerErrorException | UnknownHttpStatusCodeException e) {
+			throw new StatusException(e.getResponseBodyAsString());
+		}
+
+	}
+
+	/**
+	 * 调用REST get，返回复杂类型。
+	 * @param getUri 调用get的uri。
+	 * @param queryParams 调用get的查询参数。
+	 * @param responseType 调用get返回的类型。
+	 */
+	protected <T> T getEntity(String getUri, Map<String, String> queryParams, ParameterizedTypeReference<T> responseType) {
+		assert logined : "login first";
+		HttpHeaders header = getSessionHeader();
+		HttpEntity<HttpHeaders> requestEntity = new HttpEntity<HttpHeaders>(null, header);
+		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(getRestUri() + getUri);
+		for(Map.Entry<String, String> queryParam : queryParams.entrySet()) {
+		    String key = queryParam.getKey();
+		    String value = queryParam.getValue();
+
+		    builder.queryParam(key, value);
+		}
+		try {
+			ResponseEntity<T> rssResponse = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, requestEntity,
 					responseType);
 			return rssResponse.getBody();
 		} catch (ResourceAccessException e) {
