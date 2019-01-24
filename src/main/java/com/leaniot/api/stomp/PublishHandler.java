@@ -1,6 +1,7 @@
 package com.leaniot.api.stomp;
 
 import java.lang.reflect.Type;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -35,11 +36,14 @@ public abstract class PublishHandler extends StompSessionHandlerAdapter implemen
 
 	@Override
 	public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
-		String opTopic = "/topic/operation."+ topic + "."  + deviceId;
-		String resultTopic = "/topic/result." + topic + "." + deviceId + "." + session.getSessionId();
-		session.subscribe(resultTopic, this);
-		Request request = getRequest(session.getSessionId());
-		session.send(opTopic, request);
+		synchronized(session) {
+			String requestId = UUID.randomUUID().toString();
+			String opTopic = "/topic/operation."+ topic + "."  + deviceId;
+			String resultTopic = "/topic/result." + topic + "." + deviceId + "." + requestId;
+			session.subscribe(resultTopic, this);
+			Request request = getRequest(requestId);
+			session.send(opTopic, request);
+		}
 	}
 	
 	protected abstract Request getRequest(String sessionId);
@@ -51,10 +55,12 @@ public abstract class PublishHandler extends StompSessionHandlerAdapter implemen
 
 	@Override
 	public void handleFrame(StompHeaders headers, Object payload) {
-		Response response = (Response)payload;
-		
-		this.result = response;
-        countDownLatch.countDown();
+		synchronized(payload) {
+			Response response = (Response)payload;
+			
+			this.result = response;
+	        countDownLatch.countDown();
+		}
 	}
 	
 	@Override

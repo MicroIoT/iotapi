@@ -28,8 +28,10 @@ public abstract class SubscribeHandler extends StompSessionHandlerAdapter {
 	
 	@Override
 	public void handleFrame(StompHeaders headers, Object payload) {
-		Object event = payload;
-		subscriber.onEvent(event);
+		synchronized(payload) {
+			Object event = payload;
+			subscriber.onEvent(event);
+		}
 	}
 
 	@Override

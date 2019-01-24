@@ -22,10 +22,12 @@ public abstract class OperationHandler extends SubscribeHandler {
 
 	@Override
 	public void handleFrame(StompHeaders headers, Object payload) {
-		super.handleFrame(headers, payload);
-		Response response = ((OperationSubscriber)subscriber).getResponse();
-		String topic = "/topic/result." + getOperation() + "." + deviceId + "." + ((OperationSubscriber)subscriber).request.getRequestId();
-		session.send(topic, response);
+		synchronized(payload) {
+			super.handleFrame(headers, payload);
+			Response response = ((OperationSubscriber)subscriber).getResponse();
+			String topic = "/topic/result." + getOperation() + "." + deviceId + "." + ((OperationSubscriber)subscriber).request.getRequestId();
+			session.send(topic, response);
+		}
 	}
 
 	@Override
