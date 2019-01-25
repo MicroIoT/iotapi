@@ -36,14 +36,12 @@ public abstract class PublishHandler extends StompSessionHandlerAdapter implemen
 
 	@Override
 	public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
-		synchronized(session) {
-			String requestId = UUID.randomUUID().toString();
-			String opTopic = "/topic/operation."+ topic + "."  + deviceId;
-			String resultTopic = "/topic/result." + topic + "." + deviceId + "." + requestId;
-			session.subscribe(resultTopic, this);
-			Request request = getRequest(requestId);
-			session.send(opTopic, request);
-		}
+		String requestId = UUID.randomUUID().toString();
+		String opTopic = "/topic/operation."+ topic + "."  + deviceId;
+		String resultTopic = "/topic/result." + topic + "." + deviceId + "." + requestId;
+		session.subscribe(resultTopic, this);
+		Request request = getRequest(requestId);
+		session.send(opTopic, request);
 	}
 	
 	protected abstract Request getRequest(String sessionId);
@@ -55,12 +53,10 @@ public abstract class PublishHandler extends StompSessionHandlerAdapter implemen
 
 	@Override
 	public void handleFrame(StompHeaders headers, Object payload) {
-		synchronized(payload) {
-			Response response = (Response)payload;
-			
-			this.result = response;
-	        countDownLatch.countDown();
-		}
+		Response response = (Response)payload;
+		
+		this.result = response;
+        countDownLatch.countDown();
 	}
 	
 	@Override
