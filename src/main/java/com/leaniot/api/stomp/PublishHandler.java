@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
+import org.springframework.messaging.simp.stomp.StompSession.Subscription;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
 
 import com.leaniot.api.dto.Request;
@@ -26,12 +27,14 @@ public abstract class PublishHandler extends StompSessionHandlerAdapter implemen
 	
 	private volatile Response result = null;
     private volatile boolean cancelled = false;
-    private final CountDownLatch countDownLatch;
+    private final CountDownLatch responsed;
+    private final CountDownLatch subscribed;
     
 	public PublishHandler(String deviceId) {
 		super();
 		this.deviceId = deviceId;
-		this.countDownLatch = new CountDownLatch(1);
+		this.responsed = new CountDownLatch(1);
+		this.subscribed = new CountDownLatch(1);
 	}
 
 	@Override
@@ -39,7 +42,23 @@ public abstract class PublishHandler extends StompSessionHandlerAdapter implemen
 		String requestId = UUID.randomUUID().toString();
 		String opTopic = "/topic/operation."+ topic + "."  + deviceId;
 		String resultTopic = "/topic/result." + topic + "." + deviceId + "." + requestId;
-		session.subscribe(resultTopic, this);
+		session.setAutoReceipt(true);
+		Subscription subscription = session.subscribe(resultTopic, this);
+		subscription.addReceiptTask(new Runnable() {
+
+			@Override
+			public void run() {
+				subscribed.countDown();
+				
+			}
+			
+		});
+		try {
+			subscribed.await();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		Request request = getRequest(requestId);
 		session.send(opTopic, request);
 	}
@@ -56,7 +75,7 @@ public abstract class PublishHandler extends StompSessionHandlerAdapter implemen
 		Response response = (Response)payload;
 		
 		this.result = response;
-        countDownLatch.countDown();
+        responsed.countDown();
 	}
 	
 	@Override
@@ -64,7 +83,7 @@ public abstract class PublishHandler extends StompSessionHandlerAdapter implemen
 		if (isDone()) {
             return false;
         } else {
-            countDownLatch.countDown();
+            responsed.countDown();
             cancelled = true;
             return !isDone();
         }
@@ -72,13 +91,13 @@ public abstract class PublishHandler extends StompSessionHandlerAdapter implemen
 
 	@Override
 	public Response get() throws InterruptedException, ExecutionException {
-		countDownLatch.await();
+		responsed.await();
         return result;
 	}
 
 	@Override
 	public Response get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-		boolean finished = countDownLatch.await(timeout, unit);
+		boolean finished = responsed.await(timeout, unit);
 		if(finished)
 			return result;
 		else
@@ -92,7 +111,7 @@ public abstract class PublishHandler extends StompSessionHandlerAdapter implemen
 
 	@Override
 	public boolean isDone() {
-		return countDownLatch.getCount() == 0;
+		return responsed.getCount() == 0;
 	}
 	
 	@Override
