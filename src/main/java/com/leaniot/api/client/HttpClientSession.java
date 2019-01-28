@@ -34,7 +34,7 @@ public class HttpClientSession extends HttpSession {
 	 * @return 返回客户端websocket会话。
 	 * @see com.leaniot.api.client.WebsocketClientSession
 	 */
-	public WebsocketClientSession startWebsocket(long timeout, long[] heartbeat) {
+	public WebsocketClientSession initWebsocketSession(long timeout, long[] heartbeat) {
 		WebSocketStompClient client = getWebsocketClient(heartbeat);
 		return new WebsocketClientSession(this, client, timeout);
 	}

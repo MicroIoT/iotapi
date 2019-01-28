@@ -60,7 +60,7 @@ public class HttpDeviceSession extends HttpSession {
 	 * @return 返回设备端websocket会话。
 	 * @see WebsocketDeviceSession
 	 */
-	public WebsocketDeviceSession getWebsocket(long[] heartbeat) {
+	public WebsocketDeviceSession initWebsocketSession(long[] heartbeat) {
 		WebSocketStompClient client = getWebsocketClient(heartbeat);
 		return new WebsocketDeviceSession(this, client);
 	}
