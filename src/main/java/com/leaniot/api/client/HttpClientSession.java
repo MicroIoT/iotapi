@@ -22,7 +22,7 @@ public class HttpClientSession extends HttpSession {
 	 * @return 返回客户端websocket会话。
 	 * @see com.leaniot.api.client.WebsocketClientSession
 	 */
-	public WebsocketClientSession startWebsocket() {
+	public WebsocketClientSession initWebsocketSession() {
 		WebSocketStompClient client = getWebsocketClient(new long[] {10000, 10000});
 		return new WebsocketClientSession(this, client);
 	}

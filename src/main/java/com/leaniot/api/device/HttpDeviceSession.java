@@ -42,7 +42,7 @@ public class HttpDeviceSession extends HttpSession {
 	@Override
 	public void start(String username, String password, String uri) {
 		super.start(username, password, uri);
-		this.device = getMyInfo();
+		this.device = getDeviceInfo();
 	}
 	/**
 	 * 建立设备端与物联网平台websocket会话。
@@ -50,7 +50,7 @@ public class HttpDeviceSession extends HttpSession {
 	 * @return 返回设备端websocket会话。
 	 * @see WebsocketDeviceSession
 	 */
-	public WebsocketDeviceSession startWebsocket() {
+	public WebsocketDeviceSession initWebsocketSession() {
 		WebSocketStompClient client = getWebsocketClient(new long[] {10000, 10000});
 		return new WebsocketDeviceSession(this, client);
 	}
@@ -60,14 +60,14 @@ public class HttpDeviceSession extends HttpSession {
 	 * @return 返回设备端websocket会话。
 	 * @see WebsocketDeviceSession
 	 */
-	public WebsocketDeviceSession startWebsocket(long[] heartbeat) {
+	public WebsocketDeviceSession getWebsocket(long[] heartbeat) {
 		WebSocketStompClient client = getWebsocketClient(heartbeat);
 		return new WebsocketDeviceSession(this, client);
 	}
 	/**
 	 * 获取设备本身信息。
 	 */
-	private Device getMyInfo() {
+	private Device getDeviceInfo() {
 		return getEntity("/device/me", Device.class);
 	}
 	/**
