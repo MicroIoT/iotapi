@@ -45,6 +45,7 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 		this.session = session;
 		setHandshakeHeaders(new WebSocketHttpHeaders(session.getSessionHeader()));
 		this.timeout = timeout;
+		this.setAutoReceipt(true);
 	}
 
 	/**
@@ -57,6 +58,7 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 		this.session = session;
 		setHandshakeHeaders(new WebSocketHttpHeaders(session.getSessionHeader()));
 		this.timeout = 10;
+		this.setAutoReceipt(true);
 	}
 
 	/**

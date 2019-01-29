@@ -28,13 +28,11 @@ public abstract class PublishHandler extends StompSessionHandlerAdapter implemen
 	private volatile Response result = null;
     private volatile boolean cancelled = false;
     private final CountDownLatch responsed;
-    private final CountDownLatch subscribed;
     
 	public PublishHandler(String deviceId) {
 		super();
 		this.deviceId = deviceId;
 		this.responsed = new CountDownLatch(1);
-		this.subscribed = new CountDownLatch(1);
 	}
 
 	@Override
@@ -42,25 +40,15 @@ public abstract class PublishHandler extends StompSessionHandlerAdapter implemen
 		String requestId = UUID.randomUUID().toString();
 		String opTopic = "/topic/operation."+ topic + "."  + deviceId;
 		String resultTopic = "/topic/result." + topic + "." + deviceId + "." + requestId;
-		session.setAutoReceipt(true);
 		Subscription subscription = session.subscribe(resultTopic, this);
 		subscription.addReceiptTask(new Runnable() {
 
 			@Override
 			public void run() {
-				subscribed.countDown();
-				
+				session.send(opTopic, getRequest(requestId));
 			}
 			
 		});
-		try {
-			subscribed.await();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		Request request = getRequest(requestId);
-		session.send(opTopic, request);
 	}
 	
 	protected abstract Request getRequest(String sessionId);
