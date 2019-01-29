@@ -25,7 +25,9 @@ public abstract class OperationHandler extends SubscribeHandler {
 		super.handleFrame(headers, payload);
 		Response response = ((OperationSubscriber)subscriber).getResponse();
 		String topic = "/topic/result." + getOperation() + "." + deviceId + "." + ((OperationSubscriber)subscriber).request.getRequestId();
-		session.send(topic, response);
+		synchronized(session) {
+			session.send(topic, response);
+		}
 	}
 
 	@Override

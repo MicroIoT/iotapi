@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
-import org.springframework.messaging.simp.stomp.StompSession.Subscription;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
 
 import com.leaniot.api.dto.Request;
@@ -40,15 +39,14 @@ public abstract class PublishHandler extends StompSessionHandlerAdapter implemen
 		String requestId = UUID.randomUUID().toString();
 		String opTopic = "/topic/operation."+ topic + "."  + deviceId;
 		String resultTopic = "/topic/result." + topic + "." + deviceId + "." + requestId;
-		Subscription subscription = session.subscribe(resultTopic, this);
-		subscription.addReceiptTask(new Runnable() {
-
-			@Override
-			public void run() {
-				session.send(opTopic, getRequest(requestId));
-			}
-			
-		});
+		synchronized(session) {
+			session.subscribe(resultTopic, this).addReceiptTask(new Runnable() {
+				@Override
+				public void run() {
+					session.send(opTopic, getRequest(requestId));
+				}
+			});
+		}
 	}
 	
 	protected abstract Request getRequest(String sessionId);
