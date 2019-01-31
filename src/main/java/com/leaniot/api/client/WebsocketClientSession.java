@@ -353,7 +353,7 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 					return null;
 			}
 		} catch(Throwable e) {
-			e.printStackTrace(new java.io.PrintStream(System.out));
+			logger.error("action [" + action + "] response error: ", e);
 			throw new ValueException("action [" + action + "] response error: " + e.getMessage());
 		}
 	}
