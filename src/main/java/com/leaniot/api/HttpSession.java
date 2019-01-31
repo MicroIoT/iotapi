@@ -11,6 +11,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
@@ -52,14 +53,13 @@ public abstract class HttpSession {
 	private String sessionId;
 	private String uri;
 	protected boolean logined;
-
-	private static WebSocketClient client;
-	private static WebSocketStompClient stompClient;
 	
-	protected RestTemplate restTemplate;
-
+	private RestTemplate restTemplate;
+	
 	public HttpSession() {
-		this.restTemplate = new RestTemplate();
+		HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+		requestFactory.setHttpClient(new HttpClientConfig().httpClient());
+		this.restTemplate = new RestTemplate(requestFactory);
 		this.logined = false;
 	}
 	/**
@@ -95,7 +95,7 @@ public abstract class HttpSession {
 	 */
 	public void stop() {
 		if (logined) {
-			stompClient.stop();
+//			stompClient.stop();
 			HttpHeaders header = getSessionHeader();
 			HttpEntity<String> request = new HttpEntity<String>(header);
 			restTemplate.getForObject(getRestUri() + "/logout", String.class, request);
@@ -108,17 +108,17 @@ public abstract class HttpSession {
 	 */
 	public WebSocketStompClient getWebsocketClient(long[] heartbeat) {
 		assert logined : "login first";
-		if(stompClient == null) {
-			WebSocketContainer container = ContainerProvider.getWebSocketContainer();
-			container.setDefaultMaxTextMessageBufferSize(MAX_TEXT_MESSAGE_BUFFER_SIZE);
-			client = new StandardWebSocketClient(container);
-			stompClient = new WebSocketStompClient(client);
-			stompClient.setMessageConverter(new MappingJackson2MessageConverter());
-			ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
-		    taskScheduler.afterPropertiesSet();
-			stompClient.setTaskScheduler(taskScheduler);
-			stompClient.setDefaultHeartbeat(heartbeat);
-		}
+		
+		WebSocketContainer container = ContainerProvider.getWebSocketContainer();
+		container.setDefaultMaxTextMessageBufferSize(MAX_TEXT_MESSAGE_BUFFER_SIZE);
+		WebSocketClient client = new StandardWebSocketClient(container);
+		WebSocketStompClient stompClient = new WebSocketStompClient(client);
+		stompClient.setMessageConverter(new MappingJackson2MessageConverter());
+		ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
+	    taskScheduler.afterPropertiesSet();
+		stompClient.setTaskScheduler(taskScheduler);
+		stompClient.setDefaultHeartbeat(heartbeat);
+		
 		return stompClient;
 	}
 	/**

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 
 import com.leaniot.api.HttpSession;
@@ -15,6 +16,7 @@ import com.leaniot.domain.Device;
  *
  * @author 曹新宇
  */
+@Component
 public class HttpClientSession extends HttpSession {
 	/**
 	 *  建立客户端与物联网平台websocket会话。

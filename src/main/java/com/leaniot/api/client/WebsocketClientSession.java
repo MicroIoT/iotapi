@@ -5,6 +5,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.integration.stomp.WebSocketStompSessionManager;
 import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
@@ -31,6 +33,7 @@ import com.leaniot.exception.ValueException;
  * @author 曹新宇
  */
 public class WebsocketClientSession  extends WebSocketStompSessionManager {
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	private HttpClientSession session;
 	private long timeout;
 	
@@ -172,6 +175,7 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 			else 
 				return attType.getData(response.getValue(), type);
 		} catch(Throwable e) {
+			logger.error("get attribute [" + attribute + "] error: ", e);
 			throw new ValueException("get attribute [" + attribute + "] error: " + e.getMessage());
 		}
 	}
@@ -207,6 +211,7 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 			if(!response.isSuccess())
 				throw new StatusException(response.getError());
 		} catch(Throwable e) {
+			logger.error("set attribute [" + attribute + "] error: ", e);
 			throw new ValueException("set attribute [" + attribute + "] error: " + e.getMessage());
 		}
 	}
@@ -329,6 +334,7 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 			try{
 				requestValue = requestType.getAttValue(request);
 			} catch(Throwable e) {
+				logger.error("action [" + action + "] request error: ", e);
 				throw new ValueException("action [" + action + "] request error: " + e.getMessage());
 			}	
 		}
@@ -347,6 +353,7 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 					return null;
 			}
 		} catch(Throwable e) {
+			e.printStackTrace(new java.io.PrintStream(System.out));
 			throw new ValueException("action [" + action + "] response error: " + e.getMessage());
 		}
 	}
