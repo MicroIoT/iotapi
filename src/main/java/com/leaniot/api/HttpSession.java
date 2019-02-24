@@ -11,7 +11,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
@@ -52,15 +51,15 @@ public abstract class HttpSession {
 
 	private String sessionId;
 	private String uri;
-	protected boolean logined;
+	protected boolean logined = false;
 	
 	private RestTemplate restTemplate;
 	
+	public void setRestTemplate(RestTemplate restTemplate) {
+		this.restTemplate = restTemplate;
+	}
+
 	public HttpSession() {
-		HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
-		requestFactory.setHttpClient(new HttpClientConfig().httpClient());
-		this.restTemplate = new RestTemplate(requestFactory);
-		this.logined = false;
 	}
 	/**
 	 * 建立http会话。

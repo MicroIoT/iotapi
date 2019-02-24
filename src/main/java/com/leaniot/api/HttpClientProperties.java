@@ -1,9 +1,7 @@
 package com.leaniot.api;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
-@Component
 @ConfigurationProperties(prefix = "httpclient")
 public class HttpClientProperties {
     /**
