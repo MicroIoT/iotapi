@@ -36,7 +36,6 @@ import com.leaniot.exception.ValueException;
  */
 @Component
 public abstract class HttpSession {
-	private static final String REMEMBER_ME = "remember-me";
 	private static final String WS_IOT = "/ws_iot";
 	private static final String IOTP = "iotp";
 	private static final String IOTPS = "iotps";
@@ -79,14 +78,13 @@ public abstract class HttpSession {
 		MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
 		map.add("username", username);
 		map.add("password", password);
-		map.add(REMEMBER_ME, "1");
 
 		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(map, headers);
 
 		ResponseEntity<String> response = restTemplate.postForEntity(getRestUri() + "/login", request, String.class);
 		String cookie = response.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
 		String[] session = cookie.split(";");
-		this.sessionId = session[0].substring(REMEMBER_ME.length() + 1);
+		this.sessionId = session[0].substring(11);
 		this.logined = true;
 	}
 	/**
@@ -127,7 +125,7 @@ public abstract class HttpSession {
 	public HttpHeaders getSessionHeader() {
 		assert logined : "login first";
 		HttpHeaders requestHeaders = new HttpHeaders();
-		requestHeaders.add("Cookie", REMEMBER_ME + "=" + this.sessionId);
+		requestHeaders.add("Cookie", "JSESSIONID=" + this.sessionId);
 		return requestHeaders;
 	}
 
