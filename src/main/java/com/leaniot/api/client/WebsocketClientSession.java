@@ -8,7 +8,6 @@ import java.util.concurrent.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.integration.stomp.WebSocketStompSessionManager;
-import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 
 import com.leaniot.api.client.stomp.AlarmSubscriber;
@@ -37,6 +36,10 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 	private HttpClientSession session;
 	private long timeout;
 	
+	public HttpClientSession getSession() {
+		return session;
+	}
+
 	/**
 	 * 客户端与物联网平台websocket会话构造函数。
 	 * @param session 客户端http会话。
@@ -46,22 +49,7 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 	public WebsocketClientSession(HttpClientSession session, WebSocketStompClient webSocketStompClient, long timeout) {
 		super(webSocketStompClient, session.getWSUri());
 		this.session = session;
-		setHandshakeHeaders(new WebSocketHttpHeaders(session.getSessionHeader()));
 		this.timeout = timeout;
-		this.setAutoReceipt(true);
-	}
-
-	/**
-	 * 客户端与物联网平台websocket会话构造函数。缺省超时时长为10秒。
-	 * @param session 客户端http会话。
-	 * @param webSocketStompClient 客户端与物联网平台websocket底层连接。
-	 */
-	public WebsocketClientSession(HttpClientSession session, WebSocketStompClient webSocketStompClient) {
-		super(webSocketStompClient, session.getWSUri());
-		this.session = session;
-		setHandshakeHeaders(new WebSocketHttpHeaders(session.getSessionHeader()));
-		this.timeout = 10;
-		this.setAutoReceipt(true);
 	}
 
 	/**
@@ -368,5 +356,10 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
 			throw new StatusException(e.getMessage());
 		}
+	}
+	
+	public void stop() {
+		destroy();
+		session.stop();
 	}
 }

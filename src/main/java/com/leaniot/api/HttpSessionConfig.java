@@ -17,12 +17,11 @@ import org.apache.http.protocol.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -32,48 +31,59 @@ import org.springframework.web.client.RestTemplate;
 import com.leaniot.api.client.HttpClientSession;
 import com.leaniot.api.device.HttpDeviceSession;
 
-@Configuration // 开启配置
-@EnableConfigurationProperties(HttpClientProperties.class) // 开启使用映射实体对象
-@ConditionalOnClass(HttpSession.class) // 存在HttpSession时初始化该配置类
-@ConditionalOnProperty// 存在对应配置信息时初始化该配置类
-(
-		prefix = "httpclient", // 存在配置前缀httpclient
-		value = "enabled", // 开启
-		matchIfMissing = true// 缺失检查
-)
+@Configuration
+@EnableConfigurationProperties(HttpClientProperties.class)
 public class HttpSessionConfig {
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	@Autowired
     private HttpClientProperties p;
 
-	@Bean
+	@Bean(initMethod = "start")
+	@Scope("prototype")
+	@ConditionalOnProperty(name = {"leaniot.iotp.type"}, havingValue = "client")
 	public HttpClientSession httpClientSession() {
-		RestTemplate restTemplate = initRestTemplate();
-		
 		HttpClientSession httpClientSession = new HttpClientSession();
-		httpClientSession.setRestTemplate(restTemplate);
+		httpClientSession.setRestTemplate(restTemplate());
 		
 		return httpClientSession;
 	}
 	
-	@Bean
+	@Bean(initMethod = "start")
+	@Scope("prototype")
+	@ConditionalOnProperty(name = {"leaniot.iotp.type"}, havingValue = "device")
 	public HttpDeviceSession httpDeviceSession() {
-		RestTemplate restTemplate = initRestTemplate();
-		
 		HttpDeviceSession httpDeviceSession = new HttpDeviceSession();
-		httpDeviceSession.setRestTemplate(restTemplate);
+		httpDeviceSession.setRestTemplate(restTemplate());
 		
 		return httpDeviceSession;
 	}
 
-	private RestTemplate initRestTemplate() {
+	@Bean
+	@Scope("prototype")
+	public RestTemplate restTemplate() {
 		HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
 		requestFactory.setHttpClient(httpClient());
 		RestTemplate restTemplate = new RestTemplate(requestFactory);
 		return restTemplate;
 	}
 	
+	@Bean
+    @Scope("prototype")
+    public HttpClient httpClient() {
+        RequestConfig requestConfig = RequestConfig.custom()
+                .setConnectionRequestTimeout(p.getRequestTimeout())
+                .setConnectTimeout(p.getConnectTimeout())
+                .setSocketTimeout(p.getSocketTimeout()).build();
+
+        return HttpClients.custom()
+                .setDefaultRequestConfig(requestConfig)
+                .setConnectionManager(poolingConnectionManager())
+                .setKeepAliveStrategy(connectionKeepAliveStrategy())
+                .setRetryHandler(new DefaultHttpRequestRetryHandler(3, true))  // 重试次数
+                .build();
+    }
+
     @Bean
     public PoolingHttpClientConnectionManager poolingConnectionManager() {
         PoolingHttpClientConnectionManager poolingConnectionManager = new PoolingHttpClientConnectionManager();
@@ -100,22 +110,6 @@ public class HttpSessionConfig {
                 return p.getDefaultKeepAliveTimeMillis();
             }
         };
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(HttpClient.class) // 缺失HttpClient实体bean时，初始化HttpClient并添加到SpringIoc
-    public HttpClient httpClient() {
-        RequestConfig requestConfig = RequestConfig.custom()
-                .setConnectionRequestTimeout(p.getRequestTimeout())
-                .setConnectTimeout(p.getConnectTimeout())
-                .setSocketTimeout(p.getSocketTimeout()).build();
-
-        return HttpClients.custom()
-                .setDefaultRequestConfig(requestConfig)
-                .setConnectionManager(poolingConnectionManager())
-                .setKeepAliveStrategy(connectionKeepAliveStrategy())
-                .setRetryHandler(new DefaultHttpRequestRetryHandler(3, true))  // 重试次数
-                .build();
     }
 
     @Bean

@@ -2,9 +2,9 @@ package com.leaniot.api;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties(prefix = "httpclient")
+@ConfigurationProperties(prefix = "leaniot.httpclient")
 public class HttpClientProperties {
-    /**
+	/**
      * 建立连接的超时时间
      */
     private int connectTimeout = 20000;
@@ -33,7 +33,7 @@ public class HttpClientProperties {
      */
     private int closeIdleConnectionWaitTimeSecs = 30;
 
-    public int getConnectTimeout() {
+	public int getConnectTimeout() {
         return connectTimeout;
     }
 

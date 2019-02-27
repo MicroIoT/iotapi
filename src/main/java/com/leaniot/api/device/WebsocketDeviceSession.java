@@ -1,7 +1,6 @@
 package com.leaniot.api.device;
 
 import org.springframework.integration.stomp.WebSocketStompSessionManager;
-import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 
 import com.leaniot.api.device.stomp.ActionSubscriber;
@@ -20,6 +19,10 @@ import com.leaniot.domain.Device;
 public class WebsocketDeviceSession extends WebSocketStompSessionManager {
 	private HttpDeviceSession session;
 	
+	public HttpDeviceSession getSession() {
+		return session;
+	}
+
 	/**
 	 * 设备端与物联网平台websocket会话构造函数。
 	 * @param session 设备端http会话。
@@ -28,7 +31,6 @@ public class WebsocketDeviceSession extends WebSocketStompSessionManager {
 	public WebsocketDeviceSession(HttpDeviceSession session, WebSocketStompClient webSocketStompClient) {
 		super(webSocketStompClient, session.getWSUri());
 		this.session = session;
-		setHandshakeHeaders(new WebSocketHttpHeaders(session.getSessionHeader()));
 	}
 	
 	/**
@@ -73,5 +75,10 @@ public class WebsocketDeviceSession extends WebSocketStompSessionManager {
 	 */
 	public Device getDevice() {
 		return session.getDevice();
+	}
+	
+	public void stop() {
+		destroy();
+		session.stop();
 	}
 }
