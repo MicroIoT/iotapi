@@ -63,23 +63,25 @@ public abstract class HttpSession {
 	 * @param uri http会话uri，格式为：iotp://host:port或者iotps://host:port。
 	 */
 	public void start() {
-		if (!uri.matches(regex))
-			throw new ValueException(uri);
+		if(!logined) {
+			if (!uri.matches(regex))
+				throw new ValueException(uri);
 
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-		MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
-		map.add("username", username);
-		map.add("password", password);
+			MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
+			map.add("username", username);
+			map.add("password", password);
 
-		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(map, headers);
+			HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(map, headers);
 
-		ResponseEntity<String> response = restTemplate.postForEntity(getRestUri() + "/login", request, String.class);
-		String cookie = response.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
-		String[] session = cookie.split(";");
-		this.sessionId = session[0].trim();
-		this.logined = true;
+			ResponseEntity<String> response = restTemplate.postForEntity(getRestUri() + "/login", request, String.class);
+			String cookie = response.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
+			String[] session = cookie.split(";");
+			this.sessionId = session[0].trim();
+			this.logined = true;
+		}
 	}
 	/**
 	 * 停止http会话。
@@ -89,6 +91,7 @@ public abstract class HttpSession {
 			HttpHeaders header = getSessionHeader();
 			HttpEntity<String> request = new HttpEntity<String>(header);
 			restTemplate.getForObject(getRestUri() + "/logout", String.class, request);
+			this.logined = false;
 		}
 	}
 	

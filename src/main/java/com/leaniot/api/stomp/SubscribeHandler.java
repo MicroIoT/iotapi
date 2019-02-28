@@ -39,4 +39,9 @@ public abstract class SubscribeHandler extends StompSessionHandlerAdapter {
 			Throwable exception) {
 		logger.error(exception.getMessage());
 	}
+	
+	@Override
+	public void handleTransportError(StompSession session, Throwable exception) {
+		logger.error("transport error: " + exception.getMessage());
+	}
 }

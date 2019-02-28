@@ -37,6 +37,7 @@ public class WebsocketSessionConfig {
 		WebsocketClientSession websocketClientSession = new WebsocketClientSession(httpClientSession, websocketStompClient(), p.getTimeout());
 		websocketClientSession.setHandshakeHeaders(new WebSocketHttpHeaders(httpClientSession.getSessionHeader()));
 		websocketClientSession.setAutoReceipt(true);
+		websocketClientSession.setAutoStartup(true);
 		
 		return websocketClientSession;
 	}
@@ -49,6 +50,7 @@ public class WebsocketSessionConfig {
 		WebsocketDeviceSession websocketDeviceSession = new WebsocketDeviceSession(httpDeviceSession, websocketStompClient());
 		websocketDeviceSession.setHandshakeHeaders(new WebSocketHttpHeaders(httpDeviceSession.getSessionHeader()));
 		websocketDeviceSession.setAutoReceipt(true);
+		websocketDeviceSession.setAutoStartup(true);
 		
 		return websocketDeviceSession;
 	}
@@ -64,6 +66,8 @@ public class WebsocketSessionConfig {
 		ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
 	    taskScheduler.afterPropertiesSet();
 		stompClient.setTaskScheduler(taskScheduler);
+		stompClient.setReceiptTimeLimit(p.getTimeout()*1000);
+		stompClient.setInboundMessageSizeLimit(p.getMessageBufferSize());
 		stompClient.setDefaultHeartbeat(p.getHeartbeat());
 		
 		return stompClient;

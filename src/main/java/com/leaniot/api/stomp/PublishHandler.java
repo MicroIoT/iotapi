@@ -105,5 +105,9 @@ public abstract class PublishHandler extends StompSessionHandlerAdapter implemen
 			Throwable exception) {
 		logger.error(exception.getMessage());
 	}
-
+	
+	@Override
+	public void handleTransportError(StompSession session, Throwable exception) {
+		logger.error("transport error: " + exception.getMessage());
+	}
 }
