@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
@@ -35,7 +34,6 @@ public class WebsocketSessionConfig {
 	public WebsocketClientSession websocketClientSession() {
 		HttpClientSession httpClientSession = httpSessionConfig.httpClientSession();
 		WebsocketClientSession websocketClientSession = new WebsocketClientSession(httpClientSession, websocketStompClient(), p.getTimeout());
-		websocketClientSession.setHandshakeHeaders(new WebSocketHttpHeaders(httpClientSession.getSessionHeader()));
 		websocketClientSession.setAutoReceipt(true);
 		websocketClientSession.setAutoStartup(true);
 		
@@ -48,7 +46,6 @@ public class WebsocketSessionConfig {
 	public WebsocketDeviceSession websocketDeviceSession() {
 		HttpDeviceSession httpDeviceSession = httpSessionConfig.httpDeviceSession();
 		WebsocketDeviceSession websocketDeviceSession = new WebsocketDeviceSession(httpDeviceSession, websocketStompClient());
-		websocketDeviceSession.setHandshakeHeaders(new WebSocketHttpHeaders(httpDeviceSession.getSessionHeader()));
 		websocketDeviceSession.setAutoReceipt(true);
 		websocketDeviceSession.setAutoStartup(true);
 		
