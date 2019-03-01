@@ -8,10 +8,6 @@ import java.util.concurrent.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.integration.stomp.WebSocketStompSessionManager;
-import org.springframework.messaging.simp.stomp.StompSession;
-import org.springframework.messaging.simp.stomp.StompSessionHandler;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 
 import com.leaniot.api.client.stomp.AlarmSubscriber;
@@ -365,15 +361,6 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 	public void stop() {
 		destroy();
 		session.stop();
-	}
-	
-	@Override
-	protected ListenableFuture<StompSession> doConnect(StompSessionHandler handler) {
-		session.stop();
-		session.start();
-		setHandshakeHeaders(new WebSocketHttpHeaders(session.getSessionHeader()));
-		
-		return super.doConnect(handler);
 	}
 
 }

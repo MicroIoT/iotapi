@@ -1,10 +1,6 @@
 package com.leaniot.api.device;
 
 import org.springframework.integration.stomp.WebSocketStompSessionManager;
-import org.springframework.messaging.simp.stomp.StompSession;
-import org.springframework.messaging.simp.stomp.StompSessionHandler;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 
 import com.leaniot.api.device.stomp.ActionSubscriber;
@@ -86,14 +82,4 @@ public class WebsocketDeviceSession extends WebSocketStompSessionManager {
 		session.stop();
 	}
 
-	@Override
-	protected ListenableFuture<StompSession> doConnect(StompSessionHandler handler) {
-		session.stop();
-		session.start();
-		setHandshakeHeaders(new WebSocketHttpHeaders(session.getSessionHeader()));
-		
-		return super.doConnect(handler);
-	}
-	
-	
 }

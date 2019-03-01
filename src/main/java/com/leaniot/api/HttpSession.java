@@ -1,5 +1,6 @@
 package com.leaniot.api;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -29,6 +30,7 @@ import com.leaniot.exception.ValueException;
  */
 @Component
 public abstract class HttpSession {
+	private static final String REMEMBER_ME = "remember-me";
 	private static final String WS_IOT = "/ws_iot";
 	private static final String IOTP = "iotp";
 	private static final String IOTPS = "iotps";
@@ -73,13 +75,13 @@ public abstract class HttpSession {
 			MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
 			map.add("username", username);
 			map.add("password", password);
-
+			map.add(REMEMBER_ME, "1");
+	
 			HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(map, headers);
-
+	
 			ResponseEntity<String> response = restTemplate.postForEntity(getRestUri() + "/login", request, String.class);
-			String cookie = response.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
-			String[] session = cookie.split(";");
-			this.sessionId = session[0].trim();
+			List<String> cookie = response.getHeaders().get(HttpHeaders.SET_COOKIE);
+			this.sessionId = cookie.get(1).split(";")[0];
 			this.logined = true;
 		}
 	}
