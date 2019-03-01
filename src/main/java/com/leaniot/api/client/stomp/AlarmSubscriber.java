@@ -6,6 +6,7 @@ import java.util.Map;
 import com.leaniot.api.stomp.EventSubscriber;
 import com.leaniot.domain.Alarm;
 import com.leaniot.domain.AlarmType;
+import com.leaniot.domain.Device;
 import com.leaniot.domain.attribute.StructType;
 import com.leaniot.domain.attribute.StructValue;
 import com.leaniot.exception.NotFoundException;
@@ -36,7 +37,7 @@ public abstract class AlarmSubscriber implements EventSubscriber{
 	 * @param reportTime 告警上报时间。
 	 * @param receiveTime 告警在平台上接收到的时间。
 	 */
-	public abstract void onAlarm(AlarmType alarmType, Object alarmInfo, Date reportTime, Date receiveTime);
+	public abstract void onAlarm(Device device, AlarmType alarmType, Object alarmInfo, Date reportTime, Date receiveTime);
 
 	/**
 	 * 将告警信息转变为用户的类型，调用设备的告警处理。
@@ -58,6 +59,6 @@ public abstract class AlarmSubscriber implements EventSubscriber{
 			info = type.getData(value, t);
 		}
 		
-		onAlarm(alarm.getAlarmType(), info, alarm.getReportTime(), alarm.getReceiveTime());
+		onAlarm(alarm.getDevice(), alarm.getAlarmType(), info, alarm.getReportTime(), alarm.getReceiveTime());
 	}
 }
