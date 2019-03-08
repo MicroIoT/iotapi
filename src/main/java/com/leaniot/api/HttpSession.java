@@ -81,7 +81,12 @@ public abstract class HttpSession {
 	
 			ResponseEntity<String> response = restTemplate.postForEntity(getRestUri() + "/login", request, String.class);
 			List<String> cookie = response.getHeaders().get(HttpHeaders.SET_COOKIE);
-			this.sessionId = cookie.get(1).split(";")[0];
+			for(String c : cookie) {
+				if(c.startsWith(REMEMBER_ME)) {
+					this.sessionId = c.split(";")[0];
+					break;
+				}
+			}
 			this.logined = true;
 		}
 	}
