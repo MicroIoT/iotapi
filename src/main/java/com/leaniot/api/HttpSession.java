@@ -148,6 +148,7 @@ public abstract class HttpSession {
 	protected <T> T getEntity(String getUri, Class<T> responseType) {
 		assert logined : "login first";
 		HttpHeaders header = getSessionHeader();
+		
 		HttpEntity<HttpHeaders> requestEntity = new HttpEntity<HttpHeaders>(null, header);
 		try {
 			ResponseEntity<T> rssResponse = restTemplate.exchange(getRestUri() + getUri, HttpMethod.GET, requestEntity,
@@ -170,6 +171,7 @@ public abstract class HttpSession {
 	protected <T> T getEntity(String getUri, Map<String, String> queryParams, ParameterizedTypeReference<T> responseType) {
 		assert logined : "login first";
 		HttpHeaders header = getSessionHeader();
+		
 		HttpEntity<HttpHeaders> requestEntity = new HttpEntity<HttpHeaders>(null, header);
 		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(getRestUri() + getUri);
 		for(Map.Entry<String, String> queryParam : queryParams.entrySet()) {
@@ -179,7 +181,7 @@ public abstract class HttpSession {
 		    builder.queryParam(key, value);
 		}
 		try {
-			ResponseEntity<T> rssResponse = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, requestEntity,
+			ResponseEntity<T> rssResponse = restTemplate.exchange(builder.build().encode().toUri(), HttpMethod.GET, requestEntity,
 					responseType);
 			return rssResponse.getBody();
 		} catch (ResourceAccessException e) {
@@ -199,6 +201,8 @@ public abstract class HttpSession {
 	protected <T> T postEntity(String postUri, Object request, Class<T> responseType) {
 		assert logined : "login first";
 		HttpHeaders header = getSessionHeader();
+		header.setContentType(MediaType.APPLICATION_JSON_UTF8);
+
 		HttpEntity<?> requestEntity = new HttpEntity<>(request, header);
 		try {
 			ResponseEntity<T> rssResponse = restTemplate.exchange(getRestUri() + postUri, HttpMethod.POST,
