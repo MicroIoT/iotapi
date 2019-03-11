@@ -3,6 +3,8 @@ package com.leaniot.api.client.stomp;
 import java.util.Date;
 import java.util.Map;
 
+import org.springframework.stereotype.Component;
+
 import com.leaniot.api.stomp.EventSubscriber;
 import com.leaniot.domain.Alarm;
 import com.leaniot.domain.AlarmType;
@@ -16,18 +18,25 @@ import com.leaniot.exception.NotFoundException;
  *
  * @author 曹新宇
  */
+@Component
 public abstract class AlarmSubscriber implements EventSubscriber{
-	private Map<String, Class<?>> attrType;
+	private Map<String, Class<?>> alarmInfoType;
 	
 	/**
-	 * 设备端告警处理操作构造函数。
-	 * @param attrType 每个key代表一个告警类型，每个value代表告警类型的类型。
+	 * 客户端告警处理构造函数。
 	 */
-	public AlarmSubscriber(Map<String, Class<?>> attrType) {
+	public AlarmSubscriber() {
 		super();
-		this.attrType = attrType;
-		this.attrType.put(AlarmType.CONNECTED, null);
-		this.attrType.put(AlarmType.DISCONNECTED, null);
+	}
+
+	/**
+	 * 设置告警类型的告警信息类型。
+	 * @param alarmInfoType 每个key代表一个告警类型，每个value代表告警类型的类型。
+	 */
+	public void setAlarmInfoType(Map<String, Class<?>> alarmInfoType) {
+		this.alarmInfoType = alarmInfoType;
+		this.alarmInfoType.put(AlarmType.CONNECTED, null);
+		this.alarmInfoType.put(AlarmType.DISCONNECTED, null);
 	}
 
 	/**
@@ -52,7 +61,7 @@ public abstract class AlarmSubscriber implements EventSubscriber{
 			
 			StructValue value = new StructValue();
 			value.setValue(alarm.getAlarmInfo());
-			Class<?> t = attrType.get(alarm.getAlarmType().getName());
+			Class<?> t = alarmInfoType.get(alarm.getAlarmType().getName());
 			if(t == null)
 				throw new NotFoundException(alarm.getAlarmType().getName() + " converter");
 			

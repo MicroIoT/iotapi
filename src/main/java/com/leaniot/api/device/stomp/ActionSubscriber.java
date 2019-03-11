@@ -3,6 +3,8 @@ package com.leaniot.api.device.stomp;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.stereotype.Component;
+
 import com.leaniot.api.dto.ActionRequest;
 import com.leaniot.api.dto.Response;
 import com.leaniot.api.stomp.OperationSubscriber;
@@ -17,16 +19,23 @@ import com.leaniot.exception.NotFoundException;
  *
  * @author 曹新宇
  */
+@Component
 public abstract class ActionSubscriber extends OperationSubscriber {
 	private Map<String, Class<?>> actionType;
 	private List<ActionType> actionTypes;
 	
 	/**
 	 * 设备端action处理操作构造函数。
+	 */
+	public ActionSubscriber() {
+		super();
+	}
+
+	/**
+	 * 设置action操作的请求类型信息。
 	 * @param actionType 每个key代表一个action操作，每个value代表action操作的请求的类型。
 	 */
-	public ActionSubscriber(Map<String, Class<?>> actionType) {
-		super();
+	public void setActionType(Map<String, Class<?>> actionType) {
 		this.actionType = actionType;
 	}
 

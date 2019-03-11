@@ -2,6 +2,8 @@ package com.leaniot.api.device.stomp;
 
 import java.util.Map;
 
+import org.springframework.stereotype.Component;
+
 import com.leaniot.api.dto.GetRequest;
 import com.leaniot.api.dto.Response;
 import com.leaniot.api.stomp.OperationSubscriber;
@@ -13,8 +15,13 @@ import com.leaniot.domain.attribute.DataValue;
  *
  * @author 曹新宇
  */
+@Component
 public abstract class GetSubscriber extends OperationSubscriber {
 	private Map<String, AttributeType> attDefinition;
+	
+	/**
+	 * 设备端get处理操作构造函数。
+	 */
 	public GetSubscriber() {
 		super();
 	}

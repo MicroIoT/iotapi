@@ -2,6 +2,8 @@ package com.leaniot.api.device.stomp;
 
 import java.util.Map;
 
+import org.springframework.stereotype.Component;
+
 import com.leaniot.api.dto.Response;
 import com.leaniot.api.dto.SetRequest;
 import com.leaniot.api.stomp.OperationSubscriber;
@@ -13,16 +15,23 @@ import com.leaniot.exception.NotFoundException;
  *
  * @author 曹新宇
  */
+@Component
 public abstract class SetSubscriber extends OperationSubscriber {
 	private Map<String, Class<?>> attType;
 	private Map<String, AttributeType> attDefinition;
 	
 	/**
 	 * 设备端set处理操作构造函数。
+	 */
+	public SetSubscriber() {
+		super();
+	}
+
+	/**
+	 * 设置set操作的请求类型信息。
 	 * @param attType 每个key代表一个属性，每个value代表属性值的类型。
 	 */
-	public SetSubscriber(Map<String, Class<?>> attType) {
-		super();
+	public void setAttType(Map<String, Class<?>> attType) {
 		this.attType = attType;
 	}
 
