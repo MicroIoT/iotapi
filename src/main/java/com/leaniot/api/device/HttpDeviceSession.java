@@ -47,7 +47,7 @@ public class HttpDeviceSession extends HttpSession {
 	 * 获取设备本身信息。
 	 */
 	private Device getDeviceInfo() {
-		return getEntity("/device/me", Device.class);
+		return getEntity("/device/me", null, Device.class);
 	}
 	/**
 	 * 设备端向物联网平台上报事件信息。可同时上报多个属性的值。

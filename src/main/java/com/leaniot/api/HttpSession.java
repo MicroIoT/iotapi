@@ -1,10 +1,12 @@
 package com.leaniot.api;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -20,6 +22,13 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.UnknownHttpStatusCodeException;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.leaniot.api.dto.RestGeoResults;
+import com.leaniot.api.dto.RestPage;
+import com.leaniot.domain.IoTObject;
+import com.leaniot.dto.DistinctInfo;
+import com.leaniot.dto.QueryInfo;
+import com.leaniot.dto.QueryNearPageInfo;
+import com.leaniot.dto.QueryPageInfo;
 import com.leaniot.exception.StatusException;
 import com.leaniot.exception.ValueException;
 
@@ -140,18 +149,91 @@ public abstract class HttpSession {
 			throw new ValueException(uri);
 	}
 
+	@SuppressWarnings("unchecked")
+	public <T> T getEntityById(IoTObject object, String id) {
+		assert logined : "login first";
+		String url = "/" + object.getName() + "s/query/id/" + id;
+		return (T) getEntity(url, null, object.getIoT());
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <T> T getOneEntity(IoTObject object, QueryInfo info) {
+		String url = "/" + object.getName() + "s/query/one";
+		Map<String, String> queryParams = buildQueryParams(info);
+		
+		return (T) getEntity(url, queryParams, object.getIoT());
+	}
+	
+	public <T> List<T> getEntityList(IoTObject object, QueryInfo info, ParameterizedTypeReference<List<T>> responseType) {
+		assert logined : "login first";
+		String url = "/" + object.getName() + "s/query/list";
+		Map<String, String> queryParams = buildQueryParams(info);
+	
+		return getEntity(url, queryParams, responseType);
+	}
+	
+	public <T> Page<T> getEntityPage(IoTObject object, QueryPageInfo info, ParameterizedTypeReference<RestPage<T>> responseType) {
+		assert logined : "login first";
+		String url = "/" + object.getName() + "s/query/page";
+		Map<String, String> queryParams = buildQueryPageParams(info);
+	
+		return getEntity(url, queryParams, responseType);
+	}
+	
+	public <T> RestGeoResults<T> getEntityGeo(IoTObject object, QueryNearPageInfo info, ParameterizedTypeReference<RestGeoResults<T>> responseType) {
+		assert logined : "login first";
+		String url = "/" + object.getName() + "s/query/geo";
+		Map<String, String> queryParams = buildQueryNearParams(info);
+	
+		return getEntity(url, queryParams, responseType);
+	}
+	
+	public <T> List<T> getEntityAggregate(IoTObject object, QueryInfo info, ParameterizedTypeReference<List<T>> responseType) {
+		assert logined : "login first";
+		String url = "/" + object.getName() + "s/query/aggregate";
+		Map<String, String> queryParams = buildQueryParams(info);
+	
+		return getEntity(url, queryParams, responseType);
+	}
+	
+	public <T> List<T> getEntityDistinct(IoTObject object, DistinctInfo info, ParameterizedTypeReference<List<T>> responseType) {
+		assert logined : "login first";
+		String url = "/" + object.getName() + "s/query/distinct";
+		Map<String, String> queryParams = buildQueryDistinctParams(info);
+	
+		return getEntity(url, queryParams, responseType);
+	}
+	
+	public int count(IoTObject object, QueryInfo info) {
+		assert logined : "login first";
+		String url = "/" + object.getName() + "s/query/count";
+		Map<String, String> queryParams = buildQueryParams(info);
+	
+		return getEntity(url, queryParams, Integer.class);
+	}
+	
+	public boolean exist(IoTObject object, QueryInfo info) {
+		assert logined : "login first";
+		String url = "/" + object.getName() + "s/query/exist";
+		Map<String, String> queryParams = buildQueryParams(info);
+	
+		return getEntity(url, queryParams, Boolean.class);
+	}
+	
 	/**
 	 * 调用REST get。
 	 * @param getUri 调用get的uri。
 	 * @param responseType 调用get返回的类型。
 	 */
-	protected <T> T getEntity(String getUri, Class<T> responseType) {
+	protected <T> T getEntity(String getUri, Map<String, String> queryParams, Class<T> responseType) {
 		assert logined : "login first";
 		HttpHeaders header = getSessionHeader();
 		
 		HttpEntity<HttpHeaders> requestEntity = new HttpEntity<HttpHeaders>(null, header);
+		UriComponentsBuilder builder = getUrl(getUri, queryParams);
+		
 		try {
-			ResponseEntity<T> rssResponse = restTemplate.exchange(getRestUri() + getUri, HttpMethod.GET, requestEntity,
+			ResponseEntity<T> rssResponse = restTemplate.exchange(builder.build().encode().toUri(), HttpMethod.GET, requestEntity,
 					responseType);
 			return rssResponse.getBody();
 		} catch (ResourceAccessException e) {
@@ -161,7 +243,46 @@ public abstract class HttpSession {
 		}
 
 	}
+	
+	private Map<String, String> buildQueryParams(QueryInfo info) {
+		Map<String, String> queryParams = new HashMap<String, String>();
+		if(info != null) {
+			if(info.getFilter() != null)
+				queryParams.put("filter", info.getFilter());
+			if(info.getSort() != null)
+				queryParams.put("sort", info.getSort());
+			if(info.getCollation() != null)
+				queryParams.put("collation", info.getCollation());
+		}
+		return queryParams;
+	}
+	
+	private Map<String, String> buildQueryPageParams(QueryPageInfo info) {
+		Map<String, String> queryParams = buildQueryParams(info);
+		queryParams.put("pageNumber", String.valueOf(info.getPageNumber()));
+		queryParams.put("pageSize", String.valueOf(info.getPageSize()));
 
+		return queryParams;
+	}
+	
+	private Map<String, String> buildQueryNearParams(QueryNearPageInfo info) {
+		Map<String, String> queryParams = buildQueryPageParams(info);
+		queryParams.put("x", String.valueOf(info.getX()));
+		queryParams.put("y", String.valueOf(info.getY()));
+		queryParams.put("maxDistance", String.valueOf(info.getMaxDistance()));
+		queryParams.put("metrics", info.getMetrics().toString());
+
+		return queryParams;
+	}
+	
+	private Map<String, String> buildQueryDistinctParams(DistinctInfo info) {
+		Map<String, String> queryParams = buildQueryPageParams(info);
+		queryParams.put("field", info.getField());
+		queryParams.put("returnClass", info.getReturnClass().toString());
+
+		return queryParams;
+	}
+	
 	/**
 	 * 调用REST get，返回复杂类型。
 	 * @param getUri 调用get的uri。
@@ -173,13 +294,8 @@ public abstract class HttpSession {
 		HttpHeaders header = getSessionHeader();
 		
 		HttpEntity<HttpHeaders> requestEntity = new HttpEntity<HttpHeaders>(null, header);
-		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(getRestUri() + getUri);
-		for(Map.Entry<String, String> queryParam : queryParams.entrySet()) {
-		    String key = queryParam.getKey();
-		    String value = queryParam.getValue();
-
-		    builder.queryParam(key, value);
-		}
+		UriComponentsBuilder builder = getUrl(getUri, queryParams);
+		
 		try {
 			ResponseEntity<T> rssResponse = restTemplate.exchange(builder.build().encode().toUri(), HttpMethod.GET, requestEntity,
 					responseType);
@@ -214,5 +330,18 @@ public abstract class HttpSession {
 			throw new StatusException(e.getResponseBodyAsString());
 		}
 
+	}
+	
+	private UriComponentsBuilder getUrl(String getUri, Map<String, String> queryParams) {
+		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(getRestUri() + getUri);
+		if(queryParams != null) {
+			for(Map.Entry<String, String> queryParam : queryParams.entrySet()) {
+			    String key = queryParam.getKey();
+			    String value = queryParam.getValue();
+
+			    builder.queryParam(key, value);
+			}
+		}
+		return builder;
 	}
 }

@@ -23,7 +23,7 @@ public class HttpClientSession extends HttpSession {
 	 * @return 返回设备信息。
 	 */
 	public Device getDevice(String deviceId) {
-		return getEntity("/device/" + deviceId, Device.class);
+		return getEntity("/device/" + deviceId, null, Device.class);
 	}
 
 	/**
@@ -32,7 +32,7 @@ public class HttpClientSession extends HttpSession {
 	 * @return 返回操作类型信息。
 	 */
 	public ActionType getActionType(String name) {
-		return getEntity("/actiontype/name/" + name, ActionType.class);
+		return getEntity("/actiontype/name/" + name, null, ActionType.class);
 	}
 	
 	/**
