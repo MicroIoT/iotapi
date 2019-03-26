@@ -7,7 +7,6 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 
 import com.leaniot.api.HttpSession;
-import com.leaniot.domain.ActionType;
 import com.leaniot.domain.Device;
 
 /**
@@ -24,15 +23,6 @@ public class HttpClientSession extends HttpSession {
 	 */
 	public Device getDevice(String deviceId) {
 		return getEntity("/device/" + deviceId, null, Device.class);
-	}
-
-	/**
-	 * 获取操作类型信息。
-	 * @param name 操作类型名称。
-	 * @return 返回操作类型信息。
-	 */
-	public ActionType getActionType(String name) {
-		return getEntity("/actiontype/name/" + name, null, ActionType.class);
 	}
 	
 	/**

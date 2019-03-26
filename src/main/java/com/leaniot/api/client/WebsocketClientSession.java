@@ -312,7 +312,7 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 		Device device = ((HttpClientSession) session).getDevice(deviceId);
 		if(device == null)
 			throw new NotFoundException("device: " + deviceId);
-		ActionType actionType = ((HttpClientSession) session).getActionType(action);
+		ActionType actionType = device.getDeviceType().getActionTypes().get(action);
 		if(actionType == null)
 			throw new NotFoundException("action: " + action);
 		AttValueInfo requestValue = null;

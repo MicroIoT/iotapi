@@ -1,6 +1,5 @@
 package com.leaniot.api.device.stomp;
 
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Component;
@@ -22,7 +21,7 @@ import com.leaniot.exception.NotFoundException;
 @Component
 public abstract class ActionSubscriber extends OperationSubscriber {
 	private Map<String, Class<?>> actionType;
-	private List<ActionType> actionTypes;
+	private Map<String, ActionType> actionTypes;
 	
 	/**
 	 * 设备端action处理操作构造函数。
@@ -49,7 +48,7 @@ public abstract class ActionSubscriber extends OperationSubscriber {
 		this.actionTypes = this.getDevice().getDeviceType().getActionTypes();
 		ActionRequest req = (ActionRequest) request;
 		try {
-			ActionType aType = getActionType(req.getAction());
+			ActionType aType = this.actionTypes.get(req.getAction());
 			Object value = null;
 			if(aType.getRequest() != null) {
 				StructType reqType = new StructType(aType.getRequest());
@@ -77,12 +76,4 @@ public abstract class ActionSubscriber extends OperationSubscriber {
 	 * @return 返回响应值。
 	 */
 	public abstract Object action(String actionName, Object request);
-	
-	private ActionType getActionType(String actionName) {
-		for(ActionType actionType : this.actionTypes) {
-			if(actionType.getName().equals(actionName))
-				return actionType;
-		}
-		throw new NotFoundException("action : " + actionName);
-	}
 }

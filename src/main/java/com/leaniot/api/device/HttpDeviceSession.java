@@ -2,7 +2,6 @@ package com.leaniot.api.device;
 
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Component;
@@ -75,12 +74,8 @@ public class HttpDeviceSession extends HttpSession {
 	 * @param alarmInfo 告警详细信息，一个key对应一个报警属性，一个value对应一个告警属性值。
 	 */
 	public void reportAlarm(String alarmType, Map<String, Object> alarmInfo) {
-		List<AlarmType> types = device.getDeviceType().getAlarmTypes();
-		AlarmType type = null;
-		for(AlarmType aType : types) {
-			if(aType.getName().equals(alarmType))
-				type = aType;
-		}
+		Map<String, AlarmType> types = device.getDeviceType().getAlarmTypes();
+		AlarmType type = types.get(alarmType);
 		if(type == null)
 			throw new NotFoundException("alarm type [" + alarmType + "]");
 		Map<String, AttributeType> alarmAttr = type.getAttDefinition();

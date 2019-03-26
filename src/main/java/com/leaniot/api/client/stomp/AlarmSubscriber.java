@@ -46,7 +46,7 @@ public abstract class AlarmSubscriber implements EventSubscriber{
 	 * @param reportTime 告警上报时间。
 	 * @param receiveTime 告警在平台上接收到的时间。
 	 */
-	public abstract void onAlarm(Device device, AlarmType alarmType, Object alarmInfo, Date reportTime, Date receiveTime);
+	public abstract void onAlarm(Device device, String alarmType, Object alarmInfo, Date reportTime, Date receiveTime);
 
 	/**
 	 * 将告警信息转变为用户的类型，调用设备的告警处理。
@@ -57,13 +57,13 @@ public abstract class AlarmSubscriber implements EventSubscriber{
 		Alarm alarm = (Alarm)event;
 		Object info = null;
 		if(alarm.getAlarmInfo() != null && !alarm.getAlarmInfo().isEmpty()) {
-			StructType type = new StructType(alarm.getAlarmType().getAttDefinition());
+			StructType type = new StructType(alarm.getDevice().getDeviceType().getAlarmTypes().get(alarm.getAlarmType()).getAttDefinition());
 			
 			StructValue value = new StructValue();
 			value.setValue(alarm.getAlarmInfo());
-			Class<?> t = alarmInfoType.get(alarm.getAlarmType().getName());
+			Class<?> t = alarmInfoType.get(alarm.getAlarmType());
 			if(t == null)
-				throw new NotFoundException(alarm.getAlarmType().getName() + " converter");
+				throw new NotFoundException(alarm.getAlarmType() + " converter");
 			
 			info = type.getData(value, t);
 		}
