@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
+import com.leaniot.api.client.WebsocketClientSession;
 import com.leaniot.api.stomp.EventSubscriber;
 import com.leaniot.domain.Alarm;
 import com.leaniot.domain.AlarmType;
@@ -21,6 +22,7 @@ import com.leaniot.exception.NotFoundException;
 @Component
 public abstract class AlarmSubscriber implements EventSubscriber{
 	private Map<String, Class<?>> alarmInfoType;
+	private WebsocketClientSession websocketClientSession;
 	
 	/**
 	 * 客户端告警处理构造函数。
@@ -37,6 +39,14 @@ public abstract class AlarmSubscriber implements EventSubscriber{
 		this.alarmInfoType = alarmInfoType;
 		this.alarmInfoType.put(AlarmType.CONNECTED, null);
 		this.alarmInfoType.put(AlarmType.DISCONNECTED, null);
+	}
+
+	public WebsocketClientSession getWebsocketClientSession() {
+		return websocketClientSession;
+	}
+
+	public void setWebsocketClientSession(WebsocketClientSession websocketClientSession) {
+		this.websocketClientSession = websocketClientSession;
 	}
 
 	/**

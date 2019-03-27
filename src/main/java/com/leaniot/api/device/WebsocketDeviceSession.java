@@ -40,6 +40,7 @@ public class WebsocketDeviceSession extends WebSocketStompSessionManager {
 	 * @return 返回get处理。
 	 */
 	public SubscribeGet subscribe(GetSubscriber subscriber) {
+		subscriber.setWebsocketDeviceSession(this);
 		SubscribeGet sessionHandler = new SubscribeGet(this, subscriber);
         connect(sessionHandler);
         return sessionHandler;
@@ -52,6 +53,7 @@ public class WebsocketDeviceSession extends WebSocketStompSessionManager {
 	 * @return 返回set处理。
 	 */
 	public SubscribeSet subscribe(SetSubscriber subscriber) {
+		subscriber.setWebsocketDeviceSession(this);
 		SubscribeSet sessionHandler = new SubscribeSet(this, subscriber);
         connect(sessionHandler);
         return sessionHandler;
@@ -64,6 +66,7 @@ public class WebsocketDeviceSession extends WebSocketStompSessionManager {
 	 * @return 返回action处理。
 	 */
 	public SubscribeAction subscribe(ActionSubscriber subscriber) {
+		subscriber.setWebsocketDeviceSession(this);
 		SubscribeAction sessionHandler = new SubscribeAction(this, subscriber);
         connect(sessionHandler);
         return sessionHandler;
