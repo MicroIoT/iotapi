@@ -73,7 +73,7 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 	 * @return 返回整型属性值。
 	 */
 	public int getInt(String deviceId, String attribute) {
-		int value = (Integer)get(deviceId, attribute, Integer.class);
+		int value = get(deviceId, attribute, Integer.class);
 		return value;
 	}
 	
@@ -84,7 +84,7 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 	 * @return 返回double属性值。
 	 */
 	public double getDouble(String deviceId, String attribute) {
-		double value = (Double)get(deviceId, attribute, Double.class);
+		double value = get(deviceId, attribute, Double.class);
 		return value;
 	}
 	
@@ -95,7 +95,7 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 	 * @return 返回字符串属性值。
 	 */
 	public String getString(String deviceId, String attribute) {
-		String value = (String)get(deviceId, attribute, String.class);
+		String value = get(deviceId, attribute, String.class);
 		return value;
 	}
 	
@@ -106,7 +106,7 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 	 * @return 返回日期属性值。
 	 */
 	public Date getDate(String deviceId, String attribute) {
-		Date value = (Date)get(deviceId, attribute, Date.class);
+		Date value = get(deviceId, attribute, Date.class);
 		return value;
 	}
 	
@@ -117,7 +117,7 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 	 * @return 返回枚举属性值。
 	 */
 	public String getEnum(String deviceId, String attribute) {
-		String value = (String)get(deviceId, attribute, String.class);
+		String value = get(deviceId, attribute, String.class);
 		return value;
 	}
 	
@@ -128,7 +128,7 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 	 * @return 返回location属性值。
 	 */
 	public Location getLocation(String deviceId, String attribute) {
-		Location value = (Location)get(deviceId, attribute, Location.class);
+		Location value = get(deviceId, attribute, Location.class);
 		return value;
 	}
 	
@@ -139,7 +139,7 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 	 * @return 返回bool属性值。
 	 */
 	public boolean getBool(String deviceId, String attribute) {
-		Boolean value = (Boolean)get(deviceId, attribute, Boolean.class);
+		Boolean value = get(deviceId, attribute, Boolean.class);
 		return value;
 	}
 	
@@ -150,7 +150,8 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 	 * @param type 返回属性值的类型。
 	 * @return 返回属性值。
 	 */
-	public Object get(String deviceId, String attribute, Class<?> type) {
+	@SuppressWarnings("unchecked")
+	public <T> T get(String deviceId, String attribute, Class<T> type) {
 		Device device = ((HttpClientSession) session).getDevice(deviceId);
 		if(device == null)
 			throw new NotFoundException("device: " + deviceId);
@@ -162,7 +163,7 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 			if(!response.isSuccess())
 				throw new StatusException(response.getError());
 			else 
-				return attType.getData(response.getValue(), type);
+				return (T) attType.getData(response.getValue(), type);
 		} catch(Throwable e) {
 			logger.error("get attribute [" + attribute + "] error: ", e);
 			throw new ValueException("get attribute [" + attribute + "] error: " + e.getMessage());
@@ -225,7 +226,7 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 	 * @return 返回整形类型操作响应。
 	 */
 	public int actionInt(String deviceId, String action, Object request) {
-		int value = (Integer)action(deviceId, action, request, Integer.class);
+		int value = action(deviceId, action, request, Integer.class);
 		return value;
 	}
 	
@@ -237,7 +238,7 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 	 * @return 返回double类型操作响应。
 	 */
 	public double actionDouble(String deviceId, String action, Object request) {
-		double value = (Double)action(deviceId, action, request, Double.class);
+		double value = action(deviceId, action, request, Double.class);
 		return value;
 	}
 	
@@ -249,7 +250,7 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 	 * @return 返回字符串类型操作响应。
 	 */
 	public String actionString(String deviceId, String action, Object request) {
-		String value = (String)action(deviceId, action, request, String.class);
+		String value = action(deviceId, action, request, String.class);
 		return value;
 	}
 	
@@ -261,7 +262,7 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 	 * @return 返回日期类型操作响应。
 	 */
 	public Date actionDate(String deviceId, String action, Object request) {
-		Date value = (Date)action(deviceId, action, request, Date.class);
+		Date value = action(deviceId, action, request, Date.class);
 		return value;
 	}
 	
@@ -273,7 +274,7 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 	 * @return 返回枚举类型操作响应。
 	 */
 	public String actionEnum(String deviceId, String action, Object request) {
-		String value = (String)action(deviceId, action, request, String.class);
+		String value = action(deviceId, action, request, String.class);
 		return value;
 	}
 	
@@ -285,7 +286,7 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 	 * @return 返回location类型操作响应。
 	 */
 	public Location actionLocation(String deviceId, String action, Object request) {
-		Location value = (Location)action(deviceId, action, request, Location.class);
+		Location value =action(deviceId, action, request, Location.class);
 		return value;
 	}
 	
@@ -297,7 +298,7 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 	 * @return 返回bool类型操作响应。
 	 */
 	public boolean actionBool(String deviceId, String action, Object request) {
-		Boolean value = (Boolean)action(deviceId, action, request, Boolean.class);
+		Boolean value = action(deviceId, action, request, Boolean.class);
 		return value;
 	}
 	
@@ -309,7 +310,8 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 	 * @param type 返回响应值的类型。
 	 * @return 返回操作响应。
 	 */
-	public Object action(String deviceId, String action, Object request, Class<?> type) {
+	@SuppressWarnings("unchecked")
+	public <T> T action(String deviceId, String action, Object request, Class<T> type) {
 		Device device = ((HttpClientSession) session).getDevice(deviceId);
 		if(device == null)
 			throw new NotFoundException("device: " + deviceId);
@@ -336,7 +338,7 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 				StructType responseType;
 				if(actionType.getResponse() != null) {
 					responseType = new StructType(actionType.getResponse());
-					return responseType.getData(response.getValue(), type);
+					return (T) responseType.getData(response.getValue(), type);
 				}
 				else
 					return null;
