@@ -184,11 +184,11 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 
 	/**
 	 * 客户端set设备属性值。
-	 * @param deviceId 获取属性值的设备。
+	 * @param deviceId 设置属性值的设备。
 	 * @param attribute 属性名称。
-	 * @param object 属性值。
+	 * @param value 属性值。
 	 */
-	public void set(String deviceId, String attribute, Object object) {
+	public void set(String deviceId, String attribute, Object value) {
 		Device device = ((HttpClientSession) session).getDevice(deviceId);
 		if(device == null)
 			throw new NotFoundException("device: " + deviceId);
@@ -196,8 +196,8 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 		if(attType == null)
 			throw new NotFoundException("attribute: " + attribute);
 		try{
-			AttValueInfo value = attType.getAttValue(object);
-			Response response = set(deviceId, attribute, value);
+			AttValueInfo attributeValue = attType.getAttValue(value);
+			Response response = set(deviceId, attribute, attributeValue);
 			if(!response.isSuccess())
 				throw new StatusException(response.getError());
 		} catch(Throwable e) {
@@ -307,11 +307,11 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 	 * @param deviceId 被调用的设备。
 	 * @param action 操作名称。
 	 * @param request 操作请求值。
-	 * @param type 返回响应值的类型。
+	 * @param reponseType 返回响应值的类型。
 	 * @return 返回操作响应。
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> T action(String deviceId, String action, Object request, Class<T> type) {
+	public <T> T action(String deviceId, String action, Object request, Class<T> reponseType) {
 		Device device = ((HttpClientSession) session).getDevice(deviceId);
 		if(device == null)
 			throw new NotFoundException("device: " + deviceId);
@@ -338,7 +338,7 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 				StructType responseType;
 				if(actionType.getResponse() != null) {
 					responseType = new StructType(actionType.getResponse());
-					return (T) responseType.getData(response.getValue(), type);
+					return (T) responseType.getData(response.getValue(), reponseType);
 				}
 				else
 					return null;
