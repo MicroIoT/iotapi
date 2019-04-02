@@ -20,8 +20,8 @@ import com.leaniot.domain.ActionType;
 import com.leaniot.domain.Device;
 import com.leaniot.domain.attribute.AttValueInfo;
 import com.leaniot.domain.attribute.AttributeType;
+import com.leaniot.domain.attribute.DataType;
 import com.leaniot.domain.attribute.Location;
-import com.leaniot.domain.attribute.StructType;
 import com.leaniot.exception.NotFoundException;
 import com.leaniot.exception.StatusException;
 import com.leaniot.exception.ValueException;
@@ -320,7 +320,7 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 			throw new NotFoundException("action: " + action);
 		AttValueInfo requestValue = null;
 		if(actionType.getRequest() != null) {
-			StructType requestType = new StructType(actionType.getRequest());
+			DataType requestType = actionType.getRequest().getDataType();
 			
 			try{
 				requestValue = requestType.getAttValue(request);
@@ -335,10 +335,10 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 			if(!response.isSuccess())
 				throw new StatusException(response.getError());
 			else {
-				StructType responseType;
+				DataType responseType;
 				if(actionType.getResponse() != null) {
-					responseType = new StructType(actionType.getResponse());
-					return (T) responseType.getData(response.getValue(), reponseType);
+					responseType = actionType.getResponse().getDataType();
+					return  (T) responseType.getData(response.getValue(), reponseType);
 				}
 				else
 					return null;

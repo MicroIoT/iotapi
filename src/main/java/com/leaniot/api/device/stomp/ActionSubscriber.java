@@ -8,8 +8,8 @@ import com.leaniot.api.dto.ActionRequest;
 import com.leaniot.api.dto.Response;
 import com.leaniot.api.stomp.OperationSubscriber;
 import com.leaniot.domain.ActionType;
+import com.leaniot.domain.attribute.DataType;
 import com.leaniot.domain.attribute.DataValue;
-import com.leaniot.domain.attribute.StructType;
 import com.leaniot.exception.NotFoundException;
 
 /**
@@ -51,7 +51,9 @@ public abstract class ActionSubscriber extends OperationSubscriber {
 			ActionType aType = this.actionTypes.get(req.getAction());
 			Object value = null;
 			if(aType.getRequest() != null) {
-				StructType reqType = new StructType(aType.getRequest());
+				DataType reqType = aType.getRequest().getDataType();
+				if(actionType == null)
+					throw new NotFoundException(req.getAction() + " converter");
 				Class<?> t = actionType.get(req.getAction());
 				if(t == null)
 					throw new NotFoundException(req.getAction() + " converter");
@@ -60,7 +62,7 @@ public abstract class ActionSubscriber extends OperationSubscriber {
 			Object res = action(req.getAction(), value);
 			DataValue data = null;
 			if(aType.getResponse() != null) {
-				StructType resType = new StructType(aType.getResponse());
+				DataType resType = aType.getResponse().getDataType();
 				data = resType.getAttData(res);
 			}
 			return new Response(true, null, data);
@@ -71,9 +73,9 @@ public abstract class ActionSubscriber extends OperationSubscriber {
 
 	/**
 	 * 不同设备的具体action操作的实现。
-	 * @param actionName action操作的名称。
+	 * @param action action操作的名称。
 	 * @param request action操作的请求值。
 	 * @return 返回响应值。
 	 */
-	public abstract Object action(String actionName, Object request);
+	public abstract Object action(String action, Object request);
 }

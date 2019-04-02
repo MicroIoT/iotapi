@@ -10,8 +10,7 @@ import com.leaniot.api.stomp.EventSubscriber;
 import com.leaniot.domain.Alarm;
 import com.leaniot.domain.AlarmType;
 import com.leaniot.domain.Device;
-import com.leaniot.domain.attribute.StructType;
-import com.leaniot.domain.attribute.StructValue;
+import com.leaniot.domain.attribute.DataType;
 import com.leaniot.exception.NotFoundException;
 
 /**
@@ -66,16 +65,16 @@ public abstract class AlarmSubscriber implements EventSubscriber{
 	public void onEvent(Object event) {
 		Alarm alarm = (Alarm)event;
 		Object info = null;
-		if(alarm.getAlarmInfo() != null && !alarm.getAlarmInfo().isEmpty()) {
-			StructType type = new StructType(alarm.getDevice().getDeviceType().getAlarmTypes().get(alarm.getAlarmType()).getAttDefinition());
+		if(alarm.getAlarmInfo() != null) {
+			DataType type = alarm.getDevice().getDeviceType().getAlarmTypes().get(alarm.getAlarmType()).getDataType();
 			
-			StructValue value = new StructValue();
-			value.setValue(alarm.getAlarmInfo());
+			if(alarmInfoType == null )
+				throw new NotFoundException(alarm.getAlarmType() + " converter");
 			Class<?> t = alarmInfoType.get(alarm.getAlarmType());
 			if(t == null)
 				throw new NotFoundException(alarm.getAlarmType() + " converter");
 			
-			info = type.getData(value, t);
+			info = type.getData(alarm.getAlarmInfo(), t);
 		}
 		
 		onAlarm(alarm.getDevice(), alarm.getAlarmType(), info, alarm.getReportTime(), alarm.getReceiveTime());

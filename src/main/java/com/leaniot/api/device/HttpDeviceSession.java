@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 import com.leaniot.api.HttpSession;
 import com.leaniot.domain.Alarm;
-import com.leaniot.domain.AlarmType;
 import com.leaniot.domain.Device;
 import com.leaniot.domain.attribute.AttValueInfo;
 import com.leaniot.domain.attribute.AttributeType;
@@ -71,23 +70,15 @@ public class HttpDeviceSession extends HttpSession {
 	/**
 	 * 设备端向物联网平台上报告警信息。
 	 * @param alarmType 告警类型名称。
-	 * @param alarmInfo 告警详细信息，一个key对应一个报警属性，一个value对应一个告警属性值。
+	 * @param alarmInfo 告警详细信息。
 	 */
-	public void reportAlarm(String alarmType, Map<String, Object> alarmInfo) {
-		Map<String, AlarmType> types = device.getDeviceType().getAlarmTypes();
-		AlarmType type = types.get(alarmType);
+	public void reportAlarm(String alarmType, Object alarmInfo) {
+		Map<String, AttributeType> types = device.getDeviceType().getAlarmTypes();
+		AttributeType type = types.get(alarmType);
 		if(type == null)
 			throw new NotFoundException("alarm type [" + alarmType + "]");
-		Map<String, AttributeType> alarmAttr = type.getAttDefinition();
-		Map<String, AttValueInfo> values = new HashMap<String, AttValueInfo>();
-		for(String attribute : alarmInfo.keySet()) {
-			AttributeType attrType = alarmAttr.get(attribute);
-			if(attrType == null)
-				throw new NotFoundException("attribute [" + attribute + "]");
-			Object alarmValue = alarmInfo.get(attribute);
-			AttValueInfo value = attrType.getAttValue(alarmValue);
-			values.put(attribute, value);
-		}
+		
+		AttValueInfo values = type.getDataType().getAttValue(alarmInfo);
 		
 		AlarmInfo info = new AlarmInfo();
 		info.setAlarmType(alarmType);
