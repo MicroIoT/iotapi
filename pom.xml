@@ -10,7 +10,7 @@
 	<packaging>jar</packaging>
 
 	<name>iotapi</name>
-	<description>IOT platform client API</description>
+	<description>leanIoT platform API</description>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -61,6 +61,6 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		
+
 	</dependencies>
 </project>
