@@ -1,0 +1,38 @@
+{
+  "name": "共享单车",
+  "dataType": "Class",
+  "description": "企业在校园、地铁站点、公交站点、居民区、商业区、公共服务区等提供自行车单车共享服务。",
+  "optional": true,
+  "additional": [
+     {
+      "name": "city",
+      "description": "共享单车所属城市",
+      "dataType": "String",
+      "dataTypeInfos": {
+        "string.min": "0",
+        "string.max": "255"
+      },
+      "optional": true
+    },
+    {
+      "name": "model",
+      "description": "共享单车的型号",
+      "dataType": "String",
+      "dataTypeInfos": {
+        "string.min": "0",
+        "string.max": "255"
+      },
+      "optional": true
+    },
+    {
+      "name": "sn",
+      "description": "共享单车的序列号",
+      "dataType": "String",
+      "dataTypeInfos": {
+        "string.min": "0",
+        "string.max": "255"
+      },
+      "optional": true
+    }
+  ]
+}

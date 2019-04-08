@@ -1,0 +1,133 @@
+{
+  "name": "智能车锁",
+  "description": "共享单车智能车锁",
+  "dataType": "Class",
+  "optional": false,
+  "additional": [
+    {
+      "name": "location",
+      "description": "共享单车当前地理位置",
+      "dataType": "Location",
+      "optional": false,
+      "dataTypeInfos": {
+        "attribute.get": "true",
+        "attribute.set": "false",
+        "attribute.report": "true"
+      }
+    },
+    {
+      "name": "locked",
+      "description": "共享单车当前锁状态",
+      "dataType": "Bool",
+      "optional": false,
+      "dataTypeInfos": {
+        "attribute.get": "true",
+        "attribute.set": "true",
+        "attribute.report": "false"
+      }
+    }
+  ],
+  "actionTypeInfos": [
+    {
+      "name": "getHistory",
+      "description": "获取共享单车某段时间骑行数据历史记录",
+      "requestInfo": {
+        "description": "查询条件",
+        "dataType": "Struct",
+        "optional": false,
+        "additional": [
+          {
+            "name": "startDate",
+            "dataType": "DateTime",
+            "description": "查询开始日期",
+            "dataTypeInfos": {
+              "date.format": "yyyy-MM-dd"
+            },
+            "optional": true
+          },
+          {
+            "name": "endDate",
+            "dataType": "DateTime",
+            "description": "查询结束日期",
+            "dataTypeInfos": {
+              "date.format": "yyyy-MM-dd"
+            },
+            "optional": true
+          }
+        ]
+      },
+      "responseInfo": {
+        "description": "骑行记录",
+        "dataType": "Struct",
+        "optional": false,
+        "additional": [
+          {
+            "name": "records",
+            "dataType": "Array",
+            "description": "标签名称",
+            "dataTypeInfos": {
+              "array.type": "Struct"
+            },
+            "optional": false,
+            "additional": [
+              {
+                "name": "sessionid",
+                "description": "会话id",
+                "dataType": "String",
+                "dataTypeInfos": {
+                  "string.min": "1",
+                  "string.max": "20"
+                },
+                "optional": false
+              },
+              {
+                "name": "startTime",
+                "description": "会话开始时间",
+                "dataType": "DateTime",
+                "dataTypeInfos": {
+                  "date.format": "yyyy-MM-dd HH:mm:ss"
+                },
+                "optional": false
+              },
+              {
+                "name": "endTime",
+                "description": "会话结束时间",
+                "dataType": "DateTime",
+                "dataTypeInfos": {
+                  "date.format": "yyyy-MM-dd HH:mm:ss"
+                },
+                "optional": false
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "alarmTypeInfos": [
+    {
+      "name": "StateChangedAlarm",
+      "dataType": "Struct",
+      "description": "车锁状态改变告警",
+      "optional": true,
+      "additional": [
+        {
+          "name": "sessionid",
+          "description": "会话id",
+          "dataType": "String",
+          "dataTypeInfos": {
+            "string.min": "1",
+            "string.max": "20"
+          },
+          "optional": false
+        },
+        {
+          "name": "locked",
+          "description": "车锁状态",
+          "dataType": "Bool",
+          "optional": false
+        }
+      ]
+    }
+  ]
+}
