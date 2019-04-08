@@ -316,12 +316,28 @@ public abstract class HttpSession {
 	 */
 	protected <T> T postEntity(String postUri, Object request, Class<T> responseType) {
 		assert logined : "login first";
+		HttpMethod method = HttpMethod.POST;
+		return manageEntity(postUri, method, request, responseType);
+	}
+	
+	protected <T> T patchEntity(String patchUri, Object request, Class<T> responseType) {
+		assert logined : "login first";
+		HttpMethod method = HttpMethod.PATCH;
+		return manageEntity(patchUri, method, request, responseType);
+	}
+
+	protected <T> T deleteEntity(String deleteUri, Object request, Class<T> responseType) {
+		assert logined : "login first";
+		HttpMethod method = HttpMethod.DELETE;
+		return manageEntity(deleteUri, method, request, responseType);
+	}
+	private <T> T manageEntity(String uri, HttpMethod method, Object request, Class<T> responseType) {
 		HttpHeaders header = getSessionHeader();
 		header.setContentType(MediaType.APPLICATION_JSON_UTF8);
 
 		HttpEntity<?> requestEntity = new HttpEntity<>(request, header);
 		try {
-			ResponseEntity<T> rssResponse = restTemplate.exchange(getRestUri() + postUri, HttpMethod.POST,
+			ResponseEntity<T> rssResponse = restTemplate.exchange(getRestUri() + uri, method,
 					requestEntity, responseType);
 			return rssResponse.getBody();
 		} catch (ResourceAccessException e) {
@@ -329,7 +345,6 @@ public abstract class HttpSession {
 		} catch (HttpClientErrorException | HttpServerErrorException | UnknownHttpStatusCodeException e) {
 			throw new StatusException(e.getResponseBodyAsString());
 		}
-
 	}
 	
 	private UriComponentsBuilder getUrl(String getUri, Map<String, String> queryParams) {
