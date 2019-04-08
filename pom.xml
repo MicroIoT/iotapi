@@ -10,7 +10,7 @@
 	<packaging>jar</packaging>
 
 	<name>iotapi</name>
-	<description>leanIoT platform API</description>
+	<description>LeanIoT Platform API</description>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
