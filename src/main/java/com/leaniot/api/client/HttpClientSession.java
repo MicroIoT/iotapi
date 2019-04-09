@@ -11,9 +11,12 @@ import org.springframework.stereotype.Component;
 import com.leaniot.api.HttpSession;
 import com.leaniot.api.dto.RestPage;
 import com.leaniot.domain.Device;
+import com.leaniot.domain.DeviceType;
 import com.leaniot.domain.User;
+import com.leaniot.dto.DeviceTypeInfo;
 import com.leaniot.dto.PageInfo;
 import com.leaniot.dto.UserInfo;
+import com.leaniot.dto.UserUpdateInfo;
 import com.leaniot.exception.ValueException;
 
 /**
@@ -74,5 +77,16 @@ public class HttpClientSession extends HttpSession {
 		queryParams.put("numPerPage", Integer.toString(info.getNumPerPage()));
 		
 		return getEntity(userUrl + "s", queryParams, new ParameterizedTypeReference<RestPage<User>>() {});
+	}
+	
+	public User updateUserArea(UserUpdateInfo info) {
+		return patchEntity(userUrl, info, userType);
+	}
+	
+	private Class<DeviceType> deviceTypeType = DeviceType.class;
+	private String deviceTypeUrl = "/devicetype";
+	
+	public DeviceType addDevicetype(DeviceTypeInfo info) {
+		return postEntity(deviceTypeUrl, info, deviceTypeType);
 	}
 }
