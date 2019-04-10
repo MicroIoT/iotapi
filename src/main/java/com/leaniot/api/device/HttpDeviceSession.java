@@ -11,6 +11,7 @@ import com.leaniot.domain.Alarm;
 import com.leaniot.domain.Device;
 import com.leaniot.domain.attribute.AttValueInfo;
 import com.leaniot.domain.attribute.AttributeType;
+import com.leaniot.domain.attribute.DeviceAttributeType;
 import com.leaniot.dto.AlarmInfo;
 import com.leaniot.dto.EventInfo;
 import com.leaniot.exception.NotFoundException;
@@ -53,7 +54,7 @@ public class HttpDeviceSession extends HttpSession {
 	 */
 	public void reportEvents(Map<String, Object> events) {
 		Map<String, AttValueInfo> values = new HashMap<String, AttValueInfo>();
-		Map<String, AttributeType> types = device.getDeviceType().getAttDefinition();
+		Map<String, DeviceAttributeType> types = device.getDeviceType().getAttDefinition();
 		for(String attribute : events.keySet()) {
 			AttributeType type = types.get(attribute);
 			if(type == null)

@@ -2,6 +2,7 @@ package com.leaniot.api.device.stomp;
 
 import java.util.Map;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 
 import com.leaniot.api.dto.ActionRequest;
@@ -20,7 +21,7 @@ import com.leaniot.exception.NotFoundException;
  */
 @Component
 public abstract class ActionSubscriber extends OperationSubscriber {
-	private Map<String, Class<?>> actionType;
+	private Map<String, Object> actionType;
 	private Map<String, ActionType> actionTypes;
 	
 	/**
@@ -34,7 +35,8 @@ public abstract class ActionSubscriber extends OperationSubscriber {
 	 * 设置action操作的请求类型信息。
 	 * @param actionType 每个key代表一个action操作，每个value代表action操作的请求的类型。
 	 */
-	public void setActionType(Map<String, Class<?>> actionType) {
+	public void setActionType(Map<String, Object> actionType) {
+		checkType(actionType);
 		this.actionType = actionType;
 	}
 
@@ -54,10 +56,15 @@ public abstract class ActionSubscriber extends OperationSubscriber {
 				DataType reqType = aType.getRequest().getDataType();
 				if(actionType == null)
 					throw new NotFoundException(req.getAction() + " converter");
-				Class<?> t = actionType.get(req.getAction());
-				if(t == null)
-					throw new NotFoundException(req.getAction() + " converter");
-				value = reqType.getValue(req.getValue(), t);
+				Object type = getType(req);
+				if(type instanceof Class<?>) {
+					Class<?> t = (Class<?>) type;
+					value = reqType.getValue(req.getValue(), t);
+				}
+				else if(type instanceof ParameterizedTypeReference<?>) {
+					ParameterizedTypeReference<?> t = (ParameterizedTypeReference<?>) type;
+					value = reqType.getValue(req.getValue(), t);
+				}
 			}
 			Object res = action(req.getAction(), value);
 			DataValue data = null;
@@ -69,6 +76,10 @@ public abstract class ActionSubscriber extends OperationSubscriber {
 		} catch(Throwable e) {
 			return new Response(false, e.getMessage(), null);
 		}
+	}
+
+	private Object getType(ActionRequest req) {
+		return actionType.get(req.getAction());
 	}
 
 	/**

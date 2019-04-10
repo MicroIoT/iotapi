@@ -7,6 +7,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.integration.stomp.WebSocketStompSessionManager;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 
@@ -147,41 +148,18 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 	 * 客户端get设备属性值。
 	 * @param deviceId 获取属性值的设备。
 	 * @param attribute 属性名称。
-	 * @param type 返回属性值的类型。
+	 * @param responseType 返回属性值的类型。
 	 * @return 返回属性值。
 	 */
-	@SuppressWarnings("unchecked")
-	public <T> T get(String deviceId, String attribute, Class<T> type) {
-		Device device = ((HttpClientSession) session).getDevice(deviceId);
-		if(device == null)
-			throw new NotFoundException("device: " + deviceId);
-		AttributeType attType = device.getDeviceType().getAttDefinition().get(attribute);
-		if(attType == null)
-			throw new NotFoundException("attribute: " + attribute);
-		try {
-			Response response = get(deviceId, attribute);
-			if(!response.isSuccess())
-				throw new StatusException(response.getError());
-			else 
-				return (T) attType.getData(response.getValue(), type);
-		} catch(Throwable e) {
-			logger.error("get attribute [" + attribute + "] error: ", e);
-			throw new ValueException("get attribute [" + attribute + "] error: " + e.getMessage());
-		}
-	}
-	
-	private Response get(String deviceId, String attribute) {
-		RequestGet request = new RequestGet(deviceId, attribute);
-        
-        connect(request);
-		
-        try {
-			return request.get(timeout, TimeUnit.SECONDS);
-		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			throw new StatusException(e.getMessage());
-		}
+	public <T> T get(String deviceId, String attribute, Class<T> responseType) {
+		GetHandler<T> g = new GetHandler<T>(session, deviceId, attribute, responseType);
+		return g.get();
 	}
 
+	public <T> T get(String deviceId, String attribute, ParameterizedTypeReference<T> responseType) {
+		GetHandler<T> a = new GetHandler<T>(session, deviceId, attribute, responseType);
+		return a.get();
+	}
 	/**
 	 * 客户端set设备属性值。
 	 * @param deviceId 设置属性值的设备。
@@ -189,7 +167,7 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 	 * @param value 属性值。
 	 */
 	public void set(String deviceId, String attribute, Object value) {
-		Device device = ((HttpClientSession) session).getDevice(deviceId);
+		Device device = session.getDevice(deviceId);
 		if(device == null)
 			throw new NotFoundException("device: " + deviceId);
 		AttributeType attType = device.getDeviceType().getAttDefinition().get(attribute);
@@ -307,58 +285,23 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 	 * @param deviceId 被调用的设备。
 	 * @param action 操作名称。
 	 * @param request 操作请求值。
-	 * @param reponseType 返回响应值的类型。
+	 * @param responseType 返回响应值的类型。
 	 * @return 返回操作响应。
 	 */
-	@SuppressWarnings("unchecked")
-	public <T> T action(String deviceId, String action, Object request, Class<T> reponseType) {
-		Device device = ((HttpClientSession) session).getDevice(deviceId);
-		if(device == null)
-			throw new NotFoundException("device: " + deviceId);
-		ActionType actionType = device.getDeviceType().getActionTypes().get(action);
-		if(actionType == null)
-			throw new NotFoundException("action: " + action);
-		AttValueInfo requestValue = null;
-		if(actionType.getRequest() != null) {
-			DataType requestType = actionType.getRequest().getDataType();
-			
-			try{
-				requestValue = requestType.getAttValue(request);
-			} catch(Throwable e) {
-				logger.error("action [" + action + "] request error: ", e);
-				throw new ValueException("action [" + action + "] request error: " + e.getMessage());
-			}	
-		}
-		
-		try {
-			Response response = action(deviceId, action, requestValue);
-			if(!response.isSuccess())
-				throw new StatusException(response.getError());
-			else {
-				DataType responseType;
-				if(actionType.getResponse() != null) {
-					responseType = actionType.getResponse().getDataType();
-					return  (T) responseType.getData(response.getValue(), reponseType);
-				}
-				else
-					return null;
-			}
-		} catch(Throwable e) {
-			logger.error("action [" + action + "] response error: ", e);
-			throw new ValueException("action [" + action + "] response error: " + e.getMessage());
-		}
+	public <T> T action(String deviceId, String action, Object request, Class<T> responseType) {
+		ActionHandler<T> a = new ActionHandler<T>(session, deviceId, action, request, responseType);
+		return a.action();
 	}
 	
-	private Response action(String deviceId, String action, AttValueInfo value) {
-		RequestAction request = new RequestAction(deviceId, action, value);
-        
-        connect(request);
-		
-        try {
-			return request.get(timeout, TimeUnit.SECONDS);
-		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			throw new StatusException(e.getMessage());
-		}
+	public <T> T action(String deviceId, String action, Object request, ParameterizedTypeReference<T> responseType) {
+		ActionHandler<T> a = new ActionHandler<T>(session, deviceId, action, request, responseType);
+		return a.action();
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public void action(String deviceId, String action, Object request) {
+		ActionHandler a = new ActionHandler(session, deviceId, action, request);
+		a.action();
 	}
 	
 	public void stop() {
@@ -366,4 +309,166 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 		session.stop();
 	}
 
+	private class GetHandler<T> {
+		private HttpClientSession session;
+		private String deviceId;
+		private String attribute;
+		private Response response;
+		private DataType responseDataType;
+		
+		private Class<T> responseTypeClass = null;
+		private ParameterizedTypeReference<T> responseType = null;
+		
+		public GetHandler(HttpClientSession session, String deviceId, String attribute, Class<T> responseTypeClass) {
+			super();
+			this.session = session;
+			this.deviceId = deviceId;
+			this.attribute = attribute;
+			this.responseTypeClass = responseTypeClass;
+		}
+		
+		public GetHandler(HttpClientSession session, String deviceId, String attribute, ParameterizedTypeReference<T> responseType) {
+			super();
+			this.session = session;
+			this.deviceId = deviceId;
+			this.attribute = attribute;
+			this.responseType = responseType;
+		}
+		
+		public T get() {
+			Device device = session.getDevice(deviceId);
+			if(device == null)
+				throw new NotFoundException("device: " + deviceId);
+			responseDataType = device.getDeviceType().getAttDefinition().get(attribute).getDataType();
+			if(responseDataType == null)
+				throw new NotFoundException("attribute: " + attribute);
+			try {
+				response = get(deviceId, attribute);
+				if(!response.isSuccess())
+					throw new StatusException(response.getError());
+				else
+					return getResponse();
+			} catch(Throwable e) {
+				logger.error("get attribute [" + attribute + "] error: ", e);
+				throw new ValueException("get attribute [" + attribute + "] error: " + e.getMessage());
+			}
+		}
+		
+		@SuppressWarnings("unchecked")
+		private T getResponse() {
+			if(responseType == null)
+				return (T) responseDataType.getData(response.getValue(), responseTypeClass);
+			else
+				return (T) responseDataType.getData(response.getValue(), responseType);
+		}
+		
+		private Response get(String deviceId, String attribute) {
+			RequestGet request = new RequestGet(deviceId, attribute);
+	        
+	        connect(request);
+			
+	        try {
+				return request.get(timeout, TimeUnit.SECONDS);
+			} catch (InterruptedException | ExecutionException | TimeoutException e) {
+				throw new StatusException(e.getMessage());
+			}
+		}
+	}
+	
+	private class ActionHandler<T> {
+		private HttpClientSession session;
+		private String deviceId;
+		private String action;
+		private Object request;
+		private Response response;
+		private DataType responseDataType;
+		
+		private Class<T> responseTypeClass = null;
+		private ParameterizedTypeReference<T> responseType = null;
+		
+		public ActionHandler(HttpClientSession session, String deviceId, String action, Object request) {
+			super();
+			this.session = session;
+			this.deviceId = deviceId;
+			this.action = action;
+			this.request = request;
+		}
+		
+		public ActionHandler(HttpClientSession session, String deviceId, String action, Object request, Class<T> responseTypeClass) {
+			super();
+			this.session = session;
+			this.deviceId = deviceId;
+			this.action = action;
+			this.request = request;
+			this.responseTypeClass = responseTypeClass;
+		}
+
+		public ActionHandler(HttpClientSession session, String deviceId, String action, Object request, ParameterizedTypeReference<T> responseType) {
+			super();
+			this.session = session;
+			this.deviceId = deviceId;
+			this.action = action;
+			this.request = request;
+			this.responseType = responseType;
+		}
+		
+		public T action() {
+			Device device = ((HttpClientSession) session).getDevice(deviceId);
+			if(device == null)
+				throw new NotFoundException("device: " + deviceId);
+			ActionType actionType = device.getDeviceType().getActionTypes().get(action);
+			if(actionType == null)
+				throw new NotFoundException("action: " + action);
+			AttValueInfo requestValue = null;
+			if(actionType.getRequest() != null) {
+				DataType requestType = actionType.getRequest().getDataType();
+				
+				try{
+					requestValue = requestType.getAttValue(request);
+				} catch(Throwable e) {
+					logger.error("action [" + action + "] request error: ", e);
+					throw new ValueException("action [" + action + "] request error: " + e.getMessage());
+				}	
+			}
+			
+			try {
+				response = action(deviceId, action, requestValue);
+				if(!response.isSuccess())
+					throw new StatusException(response.getError());
+				else {
+					if(actionType.getResponse() != null) {
+						responseDataType = actionType.getResponse().getDataType();
+						return getResponse();
+					}
+					else
+						return null;
+				}
+			} catch(Throwable e) {
+				logger.error("action [" + action + "] response error: ", e);
+				throw new ValueException("action [" + action + "] response error: " + e.getMessage());
+			}
+		}
+		
+		@SuppressWarnings("unchecked")
+		protected T getResponse() {
+			if(responseTypeClass != null)
+				return  (T) responseDataType.getData(response.getValue(), responseTypeClass);
+			else if(responseType != null)
+				return  (T) responseDataType.getData(response.getValue(), responseType);
+			else
+				return null;
+		}
+		
+		private Response action(String deviceId, String action, AttValueInfo value) {
+			RequestAction request = new RequestAction(deviceId, action, value);
+	        
+	        connect(request);
+			
+	        try {
+				return request.get(timeout, TimeUnit.SECONDS);
+			} catch (InterruptedException | ExecutionException | TimeoutException e) {
+				throw new StatusException(e.getMessage());
+			}
+		}
+	}
 }

@@ -9,6 +9,7 @@ import com.leaniot.api.dto.Response;
 import com.leaniot.api.stomp.OperationSubscriber;
 import com.leaniot.domain.attribute.AttributeType;
 import com.leaniot.domain.attribute.DataValue;
+import com.leaniot.domain.attribute.DeviceAttributeType;
 
 /**
  * 设备端get操作处理，设备收到get操作请求后，返回属性值，将属性值转换为底层响应的格式。
@@ -17,7 +18,7 @@ import com.leaniot.domain.attribute.DataValue;
  */
 @Component
 public abstract class GetSubscriber extends OperationSubscriber {
-	private Map<String, AttributeType> attDefinition;
+	private Map<String, DeviceAttributeType> attDefinition;
 	
 	/**
 	 * 设备端get处理操作构造函数。

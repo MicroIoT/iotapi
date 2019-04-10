@@ -5,7 +5,7 @@ import com.leaniot.api.dto.Request;
 import com.leaniot.api.dto.Response;
 import com.leaniot.domain.Device;
 
-public abstract class OperationSubscriber implements EventSubscriber {
+public abstract class OperationSubscriber extends AbstractEventSubscriber {
 	protected Request request;
 	private Device device;
 	private WebsocketDeviceSession websocketDeviceSession;

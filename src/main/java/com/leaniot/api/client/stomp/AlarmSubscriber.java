@@ -3,10 +3,11 @@ package com.leaniot.api.client.stomp;
 import java.util.Date;
 import java.util.Map;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 
 import com.leaniot.api.client.WebsocketClientSession;
-import com.leaniot.api.stomp.EventSubscriber;
+import com.leaniot.api.stomp.AbstractEventSubscriber;
 import com.leaniot.domain.Alarm;
 import com.leaniot.domain.AlarmType;
 import com.leaniot.domain.Device;
@@ -19,8 +20,8 @@ import com.leaniot.exception.NotFoundException;
  * @author 曹新宇
  */
 @Component
-public abstract class AlarmSubscriber implements EventSubscriber{
-	private Map<String, Class<?>> alarmInfoType;
+public abstract class AlarmSubscriber extends AbstractEventSubscriber{
+	private Map<String, Object> alarmInfoType;
 	private WebsocketClientSession websocketClientSession;
 	
 	/**
@@ -34,7 +35,8 @@ public abstract class AlarmSubscriber implements EventSubscriber{
 	 * 设置告警类型的告警信息类型。
 	 * @param alarmInfoType 每个key代表一个告警类型，每个value代表告警类型的类型。
 	 */
-	public void setAlarmInfoType(Map<String, Class<?>> alarmInfoType) {
+	public void setAlarmInfoType(Map<String, Object> alarmInfoType) {
+		checkType(alarmInfoType);
 		this.alarmInfoType = alarmInfoType;
 		this.alarmInfoType.put(AlarmType.CONNECTED, null);
 		this.alarmInfoType.put(AlarmType.DISCONNECTED, null);
@@ -70,13 +72,23 @@ public abstract class AlarmSubscriber implements EventSubscriber{
 			
 			if(alarmInfoType == null )
 				throw new NotFoundException(alarm.getAlarmType() + " converter");
-			Class<?> t = alarmInfoType.get(alarm.getAlarmType());
-			if(t == null)
+			Object typeInfo = getType(alarm);
+			if(typeInfo instanceof Class<?>) {
+				Class<?> t = (Class<?>) typeInfo;
+				info = type.getData(alarm.getAlarmInfo(), t);
+			}
+			else if(typeInfo instanceof ParameterizedTypeReference<?>) {
+				ParameterizedTypeReference<?> t = (ParameterizedTypeReference<?>) typeInfo;
+				info = type.getData(alarm.getAlarmInfo(), t);
+			}
+			else
 				throw new NotFoundException(alarm.getAlarmType() + " converter");
-			
-			info = type.getData(alarm.getAlarmInfo(), t);
 		}
 		
 		onAlarm(alarm.getDevice(), alarm.getAlarmType(), info, alarm.getReportTime(), alarm.getReceiveTime());
+	}
+
+	private Object getType(Alarm alarm) {
+		return alarmInfoType.get(alarm.getAlarmType());
 	}
 }

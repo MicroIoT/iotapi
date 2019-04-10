@@ -2,12 +2,14 @@ package com.leaniot.api.device.stomp;
 
 import java.util.Map;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 
 import com.leaniot.api.dto.Response;
 import com.leaniot.api.dto.SetRequest;
 import com.leaniot.api.stomp.OperationSubscriber;
-import com.leaniot.domain.attribute.AttributeType;
+import com.leaniot.domain.attribute.DataType;
+import com.leaniot.domain.attribute.DeviceAttributeType;
 import com.leaniot.exception.NotFoundException;
 
 /**
@@ -17,8 +19,8 @@ import com.leaniot.exception.NotFoundException;
  */
 @Component
 public abstract class SetSubscriber extends OperationSubscriber {
-	private Map<String, Class<?>> attType;
-	private Map<String, AttributeType> attDefinition;
+	private Map<String, Object> attType;
+	private Map<String, DeviceAttributeType> attDefinition;
 	
 	/**
 	 * 设备端set处理操作构造函数。
@@ -31,7 +33,8 @@ public abstract class SetSubscriber extends OperationSubscriber {
 	 * 设置set操作的请求类型信息。
 	 * @param attType 每个key代表一个属性，每个value代表属性值的类型。
 	 */
-	public void setAttType(Map<String, Class<?>> attType) {
+	public void setAttType(Map<String, Object> attType) {
+		checkType(attType);
 		this.attType = attType;
 	}
 
@@ -44,16 +47,31 @@ public abstract class SetSubscriber extends OperationSubscriber {
 		this.attDefinition = this.getDevice().getDeviceType().getAttDefinition();
 		SetRequest req = (SetRequest) request;
 		try {
-			AttributeType type = this.attDefinition.get(req.getAttribute());
-			Class<?> t = attType.get(req.getAttribute());
-			if(t == null)
+			DataType type = this.attDefinition.get(req.getAttribute()).getDataType();
+			Object value;
+			if(attType == null)
 				throw new NotFoundException(req.getAttribute() + " converter");
-			Object value = type.getValue(req.getValue(), t);
+			Object t = getType(req);
+			if(t instanceof Class<?>) {
+				Class<?> tclass = (Class<?>) t;
+				value = type.getValue(req.getValue(), tclass);
+			}
+			else if(t instanceof ParameterizedTypeReference<?>) {
+				ParameterizedTypeReference<?> tclass = (ParameterizedTypeReference<?>) t;
+				value = type.getValue(req.getValue(), tclass);
+			}
+			else
+				throw new NotFoundException(req.getAttribute() + " converter");
+			
 			setAttribute(req.getAttribute(), value);
 			return new Response(true, null, null);
 		} catch(Throwable e) {
 			return new Response(false, e.getMessage(), null);
 		}
+	}
+
+	private Object getType(SetRequest req) {
+		return attType.get(req.getAttribute());
 	}
 
 	/**
