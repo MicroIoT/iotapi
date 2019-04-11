@@ -32,6 +32,7 @@
       "name": "getHistory",
       "description": "获取共享单车某段时间骑行数据历史记录",
       "requestInfo": {
+        "name": "filter",
         "description": "查询条件",
         "dataType": "Struct",
         "optional": false,
@@ -57,6 +58,7 @@
         ]
       },
       "responseInfo": {
+      	"name": "records",
         "description": "骑行记录",
         "dataType": "Struct",
         "optional": false,
