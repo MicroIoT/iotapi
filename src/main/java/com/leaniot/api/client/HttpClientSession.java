@@ -13,13 +13,16 @@ import com.leaniot.api.dto.RestPage;
 import com.leaniot.domain.Device;
 import com.leaniot.domain.DeviceType;
 import com.leaniot.domain.IoTObject;
+import com.leaniot.domain.SiteType;
 import com.leaniot.domain.User;
 import com.leaniot.domain.attribute.AttTypeInfo;
+import com.leaniot.domain.attribute.ClassTypeInfo;
 import com.leaniot.domain.attribute.IDeviceAttTypeInfo;
 import com.leaniot.dto.ActionTypeInfo;
 import com.leaniot.dto.DeviceTypeInfo;
 import com.leaniot.dto.DeviceTypeRenameInfo;
 import com.leaniot.dto.PageInfo;
+import com.leaniot.dto.SiteTypeRenameInfo;
 import com.leaniot.dto.UserInfo;
 import com.leaniot.dto.UserUpdateInfo;
 import com.leaniot.exception.ValueException;
@@ -158,5 +161,44 @@ public class HttpClientSession extends HttpSession {
 			deleteEntity(deviceTypeUrl + "/" + id + "/alarmtype/" + alarmtype, null, deviceTypeType);
 		else
 			throw new ValueException("id and alarmtype can't be empty");
+	}
+	
+	private Class<SiteType> siteTypeType = SiteType.class;
+	private String siteTypeUrl = "/" + IoTObject.sitetype.getName();
+	
+	public SiteType addSitetype(ClassTypeInfo info) {
+		return postEntity(siteTypeUrl, info, siteTypeType);
+	}
+	
+	public SiteType getSiteType(String id) {
+		if(id != null && !id.isEmpty()) {
+			return getEntity(siteTypeUrl + "/" + id, null, siteTypeType);
+		} else
+			throw new ValueException("id can't be empty");
+	}
+	
+	public Page<SiteType> getSiteTypePage(PageInfo info) {
+		if(info == null)
+			info = new PageInfo();
+		Map<String, String> queryParams= new HashMap<String, String>();
+		queryParams.put("currentPage", Integer.toString(info.getCurrentPage()));
+		queryParams.put("numPerPage", Integer.toString(info.getNumPerPage()));
+		
+		return getEntity(siteTypeUrl + "s/page", queryParams, new ParameterizedTypeReference<RestPage<SiteType>>() {});
+	}
+	
+	public List<SiteType> getSiteTypeList() {
+		return getEntity(siteTypeUrl + "s/list", null, new ParameterizedTypeReference<List<SiteType>>() {});
+	}
+	
+	public SiteType renameSiteType(SiteTypeRenameInfo info) {
+		return patchEntity(siteTypeUrl + "/name", info, siteTypeType);
+	}
+	
+	public void deleteSiteType(String id) {
+		if(id != null && !id.isEmpty())
+			deleteEntity(siteTypeUrl + "/" + id, null, siteTypeType);
+		else
+			throw new ValueException("id can't be empty");
 	}
 }
