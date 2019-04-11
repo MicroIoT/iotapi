@@ -12,8 +12,13 @@ import com.leaniot.api.HttpSession;
 import com.leaniot.api.dto.RestPage;
 import com.leaniot.domain.Device;
 import com.leaniot.domain.DeviceType;
+import com.leaniot.domain.IoTObject;
 import com.leaniot.domain.User;
+import com.leaniot.domain.attribute.AttTypeInfo;
+import com.leaniot.domain.attribute.IDeviceAttTypeInfo;
+import com.leaniot.dto.ActionTypeInfo;
 import com.leaniot.dto.DeviceTypeInfo;
+import com.leaniot.dto.DeviceTypeRenameInfo;
 import com.leaniot.dto.PageInfo;
 import com.leaniot.dto.UserInfo;
 import com.leaniot.dto.UserUpdateInfo;
@@ -84,9 +89,74 @@ public class HttpClientSession extends HttpSession {
 	}
 	
 	private Class<DeviceType> deviceTypeType = DeviceType.class;
-	private String deviceTypeUrl = "/devicetype";
+	private String deviceTypeUrl = "/" + IoTObject.devicetype.getName();
 	
 	public DeviceType addDevicetype(DeviceTypeInfo info) {
 		return postEntity(deviceTypeUrl, info, deviceTypeType);
+	}
+	
+	public DeviceType getDeviceType(String id) {
+		if(id != null && !id.isEmpty()) {
+			return getEntity(deviceTypeUrl + "/" + id, null, deviceTypeType);
+		} else
+			throw new ValueException("id can't be empty");
+	}
+	
+	public Page<DeviceType> getDeviceTypePage(PageInfo info) {
+		if(info == null)
+			info = new PageInfo();
+		Map<String, String> queryParams= new HashMap<String, String>();
+		queryParams.put("currentPage", Integer.toString(info.getCurrentPage()));
+		queryParams.put("numPerPage", Integer.toString(info.getNumPerPage()));
+		
+		return getEntity(deviceTypeUrl + "s/page", queryParams, new ParameterizedTypeReference<RestPage<DeviceType>>() {});
+	}
+	
+	public List<DeviceType> getDeviceTypeList() {
+		return getEntity(deviceTypeUrl + "s/list", null, new ParameterizedTypeReference<List<DeviceType>>() {});
+	}
+	
+	public DeviceType renameDeviceType(DeviceTypeRenameInfo info) {
+		return patchEntity(deviceTypeUrl + "/name", info, deviceTypeType);
+	}
+	
+	public void deleteDeviceType(String id) {
+		if(id != null && !id.isEmpty())
+			deleteEntity(deviceTypeUrl + "/" + id, null, deviceTypeType);
+		else
+			throw new ValueException("id can't be empty");
+	}
+	
+	public DeviceType addDevicetypeAttribute(String id, IDeviceAttTypeInfo info) {
+		return postEntity(deviceTypeUrl + "/" + id + "/attribute", info, deviceTypeType);
+	}
+	
+	public void deleteDeviceTypeAttribute(String id, String attribute) {
+		if(id != null && !id.isEmpty() && attribute != null && !attribute.isEmpty())
+			deleteEntity(deviceTypeUrl + "/" + id + "/attribute/" + attribute, null, deviceTypeType);
+		else
+			throw new ValueException("id and attribute can't be empty");
+	}
+	
+	public DeviceType addDevicetypeActiontype(String id, ActionTypeInfo info) {
+		return postEntity(deviceTypeUrl + "/" + id + "/actiontype", info, deviceTypeType);
+	}
+	
+	public void deleteDeviceTypeActiontype(String id, String actiontype) {
+		if(id != null && !id.isEmpty() && actiontype != null && !actiontype.isEmpty())
+			deleteEntity(deviceTypeUrl + "/" + id + "/actiontype/" + actiontype, null, deviceTypeType);
+		else
+			throw new ValueException("id and actiontype can't be empty");
+	}
+	
+	public DeviceType addDevicetypeAlarmtype(String id, AttTypeInfo info) {
+		return postEntity(deviceTypeUrl + "/" + id + "/alarmtype", info, deviceTypeType);
+	}
+	
+	public void deleteDeviceTypeAlarmtype(String id, String alarmtype) {
+		if(id != null && !id.isEmpty() && alarmtype != null && !alarmtype.isEmpty())
+			deleteEntity(deviceTypeUrl + "/" + id + "/alarmtype/" + alarmtype, null, deviceTypeType);
+		else
+			throw new ValueException("id and alarmtype can't be empty");
 	}
 }
