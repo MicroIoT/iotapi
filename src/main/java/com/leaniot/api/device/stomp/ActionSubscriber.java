@@ -53,7 +53,7 @@ public abstract class ActionSubscriber extends OperationSubscriber {
 			ActionType aType = this.actionTypes.get(req.getAction());
 			Object value = null;
 			if(aType.getRequest() != null) {
-				DataType reqType = aType.getRequest().getDataType();
+				DataType reqType = aType.getRequestAttributeType().getDataType();
 				if(actionType == null)
 					throw new NotFoundException(req.getAction() + " converter");
 				Object type = getType(req);
@@ -69,7 +69,7 @@ public abstract class ActionSubscriber extends OperationSubscriber {
 			Object res = action(req.getAction(), value);
 			DataValue data = null;
 			if(aType.getResponse() != null) {
-				DataType resType = aType.getResponse().getDataType();
+				DataType resType = aType.getResponseAttributeType().getDataType();
 				data = resType.getAttData(res);
 			}
 			return new Response(true, null, data);

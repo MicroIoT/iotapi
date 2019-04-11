@@ -421,7 +421,7 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 				throw new NotFoundException("action: " + action);
 			AttValueInfo requestValue = null;
 			if(actionType.getRequest() != null) {
-				DataType requestType = actionType.getRequest().getDataType();
+				DataType requestType = actionType.getRequestAttributeType().getDataType();
 				
 				try{
 					requestValue = requestType.getAttValue(request);
@@ -437,7 +437,7 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 					throw new StatusException(response.getError());
 				else {
 					if(actionType.getResponse() != null) {
-						responseDataType = actionType.getResponse().getDataType();
+						responseDataType = actionType.getResponseAttributeType().getDataType();
 						return getResponse();
 					}
 					else
