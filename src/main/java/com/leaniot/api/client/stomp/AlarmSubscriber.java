@@ -1,15 +1,15 @@
 package com.leaniot.api.client.stomp;
 
 import java.util.Date;
-import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 
 import com.leaniot.api.client.WebsocketClientSession;
 import com.leaniot.api.stomp.AbstractEventSubscriber;
 import com.leaniot.domain.Alarm;
-import com.leaniot.domain.AlarmType;
 import com.leaniot.domain.Device;
 import com.leaniot.domain.attribute.DataType;
 import com.leaniot.exception.NotFoundException;
@@ -21,7 +21,8 @@ import com.leaniot.exception.NotFoundException;
  */
 @Component
 public abstract class AlarmSubscriber extends AbstractEventSubscriber{
-	private Map<String, Object> alarmInfoType;
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
+	
 	private WebsocketClientSession websocketClientSession;
 	
 	/**
@@ -29,17 +30,6 @@ public abstract class AlarmSubscriber extends AbstractEventSubscriber{
 	 */
 	public AlarmSubscriber() {
 		super();
-	}
-
-	/**
-	 * 设置告警类型的告警信息类型。
-	 * @param alarmInfoType 每个key代表一个告警类型，每个value代表告警类型的类型。
-	 */
-	public void setAlarmInfoType(Map<String, Object> alarmInfoType) {
-		checkType(alarmInfoType);
-		this.alarmInfoType = alarmInfoType;
-		this.alarmInfoType.put(AlarmType.CONNECTED, null);
-		this.alarmInfoType.put(AlarmType.DISCONNECTED, null);
 	}
 
 	public WebsocketClientSession getWebsocketClientSession() {
@@ -66,12 +56,11 @@ public abstract class AlarmSubscriber extends AbstractEventSubscriber{
 	@Override
 	public void onEvent(Object event) {
 		Alarm alarm = (Alarm)event;
+		logger.debug("alarm: " + alarm.getAlarmType());
 		Object info = null;
 		if(alarm.getAlarmInfo() != null) {
 			DataType type = alarm.getDevice().getDeviceType().getAlarmTypes().get(alarm.getAlarmType()).getDataType();
 			
-			if(alarmInfoType == null )
-				throw new NotFoundException(alarm.getAlarmType() + " converter");
 			Object typeInfo = getType(alarm);
 			if(typeInfo instanceof Class<?>) {
 				Class<?> t = (Class<?>) typeInfo;
@@ -89,6 +78,6 @@ public abstract class AlarmSubscriber extends AbstractEventSubscriber{
 	}
 
 	private Object getType(Alarm alarm) {
-		return alarmInfoType.get(alarm.getAlarmType());
+		return types.get(alarm.getAlarmType());
 	}
 }

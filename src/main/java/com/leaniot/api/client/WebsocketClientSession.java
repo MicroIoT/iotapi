@@ -61,6 +61,7 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 	 * @return 返回告警处理。
 	 */
 	public SubscribeAlarm subscribe(String deviceId, AlarmSubscriber subscriber) {
+		subscriber.init();
 		subscriber.setWebsocketClientSession(this);
 		SubscribeAlarm sessionHandler = new SubscribeAlarm(deviceId, subscriber);
         connect(sessionHandler);

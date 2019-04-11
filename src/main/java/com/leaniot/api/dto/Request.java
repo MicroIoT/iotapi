@@ -20,4 +20,10 @@ public class Request {
 	public void setRequestId(String requestId) {
 		this.requestId = requestId;
 	}
+
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		return "request: " + requestId;
+	}
 }

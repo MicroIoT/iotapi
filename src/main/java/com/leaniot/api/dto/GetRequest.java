@@ -19,4 +19,10 @@ public class GetRequest extends Request{
 	public void setAttribute(String attribute) {
 		this.attribute = attribute;
 	}
+
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		return super.toString() + " get: " + attribute;
+	}
 }

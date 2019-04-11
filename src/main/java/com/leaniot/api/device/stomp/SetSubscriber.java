@@ -19,7 +19,6 @@ import com.leaniot.exception.NotFoundException;
  */
 @Component
 public abstract class SetSubscriber extends OperationSubscriber {
-	private Map<String, Object> attType;
 	private Map<String, DeviceAttributeType> attDefinition;
 	
 	/**
@@ -27,15 +26,6 @@ public abstract class SetSubscriber extends OperationSubscriber {
 	 */
 	public SetSubscriber() {
 		super();
-	}
-
-	/**
-	 * 设置set操作的请求类型信息。
-	 * @param attType 每个key代表一个属性，每个value代表属性值的类型。
-	 */
-	public void setAttType(Map<String, Object> attType) {
-		checkType(attType);
-		this.attType = attType;
 	}
 
 	/**
@@ -48,22 +38,20 @@ public abstract class SetSubscriber extends OperationSubscriber {
 		SetRequest req = (SetRequest) request;
 		try {
 			DataType type = this.attDefinition.get(req.getAttribute()).getDataType();
-			Object value;
-			if(attType == null)
-				throw new NotFoundException(req.getAttribute() + " converter");
+			Object attributeValue;
 			Object t = getType(req);
 			if(t instanceof Class<?>) {
 				Class<?> tclass = (Class<?>) t;
-				value = type.getValue(req.getValue(), tclass);
+				attributeValue = type.getValue(req.getValue(), tclass);
 			}
 			else if(t instanceof ParameterizedTypeReference<?>) {
 				ParameterizedTypeReference<?> tclass = (ParameterizedTypeReference<?>) t;
-				value = type.getValue(req.getValue(), tclass);
+				attributeValue = type.getValue(req.getValue(), tclass);
 			}
 			else
 				throw new NotFoundException(req.getAttribute() + " converter");
 			
-			setAttribute(req.getAttribute(), value);
+			setAttribute(req.getAttribute(), attributeValue);
 			return new Response(true, null, null);
 		} catch(Throwable e) {
 			return new Response(false, e.getMessage(), null);
@@ -71,7 +59,7 @@ public abstract class SetSubscriber extends OperationSubscriber {
 	}
 
 	private Object getType(SetRequest req) {
-		return attType.get(req.getAttribute());
+		return types.get(req.getAttribute());
 	}
 
 	/**

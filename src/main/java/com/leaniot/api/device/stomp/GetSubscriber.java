@@ -38,8 +38,8 @@ public abstract class GetSubscriber extends OperationSubscriber {
 		try {
 			Object res = getAttributeValue(req.getAttribute());
 			AttributeType type = this.attDefinition.get(req.getAttribute());
-			DataValue data = type.getAttData(res);
-			return new Response(true, null, data);
+			DataValue responseValue = type.getAttData(res);
+			return new Response(true, null, responseValue);
 		} catch(Throwable e) {
 			return new Response(false, e.getMessage(), null);
 		}

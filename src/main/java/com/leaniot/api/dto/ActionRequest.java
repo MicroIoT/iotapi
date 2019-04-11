@@ -32,4 +32,10 @@ public class ActionRequest extends Request{
 	public void setValue(AttValueInfo value) {
 		this.value = value;
 	}
+	
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		return super.toString() + " action: " + action;
+	}
 }
