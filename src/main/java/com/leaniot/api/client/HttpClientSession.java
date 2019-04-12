@@ -1,5 +1,6 @@
 package com.leaniot.api.client;
 
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,8 +11,10 @@ import org.springframework.stereotype.Component;
 
 import com.leaniot.api.HttpSession;
 import com.leaniot.api.dto.RestPage;
+import com.leaniot.domain.Alarm;
 import com.leaniot.domain.Device;
 import com.leaniot.domain.DeviceType;
+import com.leaniot.domain.Event;
 import com.leaniot.domain.IoTObject;
 import com.leaniot.domain.Site;
 import com.leaniot.domain.SiteType;
@@ -22,6 +25,7 @@ import com.leaniot.domain.attribute.AttributeType;
 import com.leaniot.domain.attribute.ClassTypeInfo;
 import com.leaniot.domain.attribute.IDeviceAttTypeInfo;
 import com.leaniot.dto.ActionTypeInfo;
+import com.leaniot.dto.AlarmPageInfo;
 import com.leaniot.dto.DeviceInfo;
 import com.leaniot.dto.DeviceInfo1;
 import com.leaniot.dto.DeviceMoveInfo;
@@ -30,6 +34,8 @@ import com.leaniot.dto.DeviceRenameInfo;
 import com.leaniot.dto.DeviceTypeInfo;
 import com.leaniot.dto.DeviceTypeRenameInfo;
 import com.leaniot.dto.DeviceUpdateInfo;
+import com.leaniot.dto.EventPageInfo;
+import com.leaniot.dto.NotificationPageInfo;
 import com.leaniot.dto.PageInfo;
 import com.leaniot.dto.QueryInfo;
 import com.leaniot.dto.SiteInfo;
@@ -422,5 +428,71 @@ public class HttpClientSession extends HttpSession {
 			queryParams.put("deviceType", deviceType);
 		
 		return getEntity(deviceUrl + "s/count", queryParams, Long.class);
+	}
+	
+	private Class<Alarm> alarmType = Alarm.class;
+	private String alarmUrl = "/" + IoTObject.alarm.getName();
+	
+	public Alarm getAlarm(String id) {
+		if(id != null && !id.isEmpty()) {
+			return getEntity(alarmUrl + "/" + id, null, alarmType);
+		} else
+			throw new ValueException("id can't be empty");
+	}
+	
+	public Page<Alarm> getAlarmPage(AlarmPageInfo info) {
+		SimpleDateFormat format = new SimpleDateFormat(NotificationPageInfo.FORMAT);
+		if(info == null)
+			info = new AlarmPageInfo();
+		Map<String, String> queryParams= new HashMap<String, String>();
+		queryParams.put("currentPage", Integer.toString(info.getCurrentPage()));
+		queryParams.put("numPerPage", Integer.toString(info.getNumPerPage()));
+		if(info.getDeviceId() != null)
+			queryParams.put("siteId", info.getDeviceId());
+		if(info.getReportFrom() != null)
+			queryParams.put("reportFrom", format.format(info.getReportFrom()));
+		if(info.getReportTo() != null)
+			queryParams.put("reportTo", format.format(info.getReportTo()));
+		if(info.getReceiveFrom() != null)
+			queryParams.put("receiveFrom", format.format(info.getReceiveFrom()));
+		if(info.getReceiveTo() != null)
+			queryParams.put("receiveTo", format.format(info.getReceiveTo()));
+		if(info.getAlarmType() != null)
+			queryParams.put("alarmType", info.getAlarmType());
+		
+		return getEntity(alarmUrl + "s", queryParams, new ParameterizedTypeReference<RestPage<Alarm>>() {});
+	}
+	
+	private Class<Event> eventType = Event.class;
+	private String eventUrl = "/" + IoTObject.event.getName();
+	
+	public Event getEvent(String id) {
+		if(id != null && !id.isEmpty()) {
+			return getEntity(eventUrl + "/" + id, null, eventType);
+		} else
+			throw new ValueException("id can't be empty");
+	}
+	
+	public Page<Event> getEventPage(EventPageInfo info) {
+		SimpleDateFormat format = new SimpleDateFormat(NotificationPageInfo.FORMAT);
+		if(info == null)
+			info = new EventPageInfo();
+		Map<String, String> queryParams= new HashMap<String, String>();
+		queryParams.put("currentPage", Integer.toString(info.getCurrentPage()));
+		queryParams.put("numPerPage", Integer.toString(info.getNumPerPage()));
+		if(info.getDeviceId() != null)
+			queryParams.put("siteId", info.getDeviceId());
+		if(info.getAttribute() != null)
+			queryParams.put("attribute", info.getAttribute());
+		if(info.getReportFrom() != null)
+			queryParams.put("reportFrom", format.format(info.getReportFrom()));
+		if(info.getReportTo() != null)
+			queryParams.put("reportTo", format.format(info.getReportTo()));
+		if(info.getReceiveFrom() != null)
+			queryParams.put("receiveFrom", format.format(info.getReceiveFrom()));
+		if(info.getReceiveTo() != null)
+			queryParams.put("receiveTo", format.format(info.getReceiveTo()));
+		
+		return getEntity(eventUrl + "s", queryParams, new ParameterizedTypeReference<RestPage<Event>>() {});
 	}
 }
