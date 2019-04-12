@@ -22,8 +22,14 @@ import com.leaniot.domain.attribute.AttributeType;
 import com.leaniot.domain.attribute.ClassTypeInfo;
 import com.leaniot.domain.attribute.IDeviceAttTypeInfo;
 import com.leaniot.dto.ActionTypeInfo;
+import com.leaniot.dto.DeviceInfo;
+import com.leaniot.dto.DeviceInfo1;
+import com.leaniot.dto.DeviceMoveInfo;
+import com.leaniot.dto.DevicePageInfo;
+import com.leaniot.dto.DeviceRenameInfo;
 import com.leaniot.dto.DeviceTypeInfo;
 import com.leaniot.dto.DeviceTypeRenameInfo;
+import com.leaniot.dto.DeviceUpdateInfo;
 import com.leaniot.dto.PageInfo;
 import com.leaniot.dto.QueryInfo;
 import com.leaniot.dto.SiteInfo;
@@ -43,15 +49,6 @@ import com.leaniot.exception.ValueException;
  */
 @Component
 public class HttpClientSession extends HttpSession {
-	/**
-	 * 获取设备信息。
-	 * @param deviceId 设备标识符。
-	 * @return 返回设备信息。
-	 */
-	public Device getDevice(String deviceId) {
-		return getEntity("/device/" + deviceId, null, Device.class);
-	}
-	
 	/**
 	 * 查询符合条件的设备列表。
 	 * @param queryParams 查询条件。
@@ -112,6 +109,16 @@ public class HttpClientSession extends HttpSession {
 			return getEntity(deviceTypeUrl + "/" + id, null, deviceTypeType);
 		} else
 			throw new ValueException("id can't be empty");
+	}
+	
+	public DeviceType getDevicetypeByName(String name) {
+		QueryInfo q = new QueryInfo();
+		String filter = String.format("{\"name\": \"%s\"}", name);
+		q.setFilter(filter);
+		DeviceType dt = this.getOneEntity(IoTObject.devicetype, q);
+		if(dt == null)
+			throw new NotFoundException("device type");
+		return dt;
 	}
 	
 	public Page<DeviceType> getDeviceTypePage(PageInfo info) {
@@ -186,6 +193,16 @@ public class HttpClientSession extends HttpSession {
 			throw new ValueException("id can't be empty");
 	}
 	
+	public SiteType getSitetypeByName(String name) {
+		QueryInfo q = new QueryInfo();
+		String filter = String.format("{\"name\": \"%s\"}", name);
+		q.setFilter(filter);
+		SiteType st = this.getOneEntity(IoTObject.sitetype, q);
+		if(st == null)
+			throw new NotFoundException("site type");
+		return st;
+	}
+
 	public Page<SiteType> getSiteTypePage(PageInfo info) {
 		if(info == null)
 			info = new PageInfo();
@@ -215,47 +232,37 @@ public class HttpClientSession extends HttpSession {
 	private String siteUrl = "/" + IoTObject.site.getName();
 	
 	public Site addSite(SiteInfo<Object> info) {
-		SiteType st = getSiteByName(info.getSiteType());
+		SiteType st = getSitetypeByName(info.getSiteType());
 		
-		SiteInfo<AttValueInfo> i = new SiteInfo<AttValueInfo>();
-		i.setName(info.getName());
-		i.setParentId(info.getParentId());
-		i.setSiteType(info.getSiteType());
+		SiteInfo<AttValueInfo> siteValue = new SiteInfo<AttValueInfo>();
+		siteValue.setName(info.getName());
+		siteValue.setParentId(info.getParentId());
+		siteValue.setSiteType(info.getSiteType());
 		Map<String, Object> attInfos = info.getAttInfos();
 		Map<String, AttributeType> attDefinition = st.getAttDefinition();
 		
 		Map<String, AttValueInfo> attValues = getAttInfos(attInfos, attDefinition);
-		i.setAttInfos(attValues);
+		siteValue.setAttInfos(attValues);
 		
-		return postEntity(siteUrl, i, siteType);
-	}
-
-	public SiteType getSiteByName(String name) {
-		QueryInfo q = new QueryInfo();
-		String filter = String.format("{\"name\": \"%s\"}", name);
-		q.setFilter(filter);
-		SiteType st = this.getOneEntity(IoTObject.sitetype, q);
-		if(st == null)
-			throw new NotFoundException("site type");
-		return st;
+		return postEntity(siteUrl, siteValue, siteType);
 	}
 
 	private Map<String, AttValueInfo> getAttInfos(Map<String, Object> attInfos,
-			Map<String, AttributeType> attDefinition) {
-		Map<String, AttValueInfo> iValue = new HashMap<String, AttValueInfo>();
+			Map<String, ? extends AttributeType> attDefinition) {
+		Map<String, AttValueInfo> attValue = new HashMap<String, AttValueInfo>();
 		
-		for (Map.Entry<String, AttributeType> entry : attDefinition.entrySet()) {
+		for (Map.Entry<String, ? extends AttributeType> entry : attDefinition.entrySet()) {
 			String key = entry.getKey();
 			AttributeType attType = entry.getValue();
 			Object value = attInfos.get(key);
 			
 			try{
-				iValue.put(key, attType.getAttValue(value));
+				attValue.put(key, attType.getAttValue(value));
 			} catch(ValueException e) {
 				throw new ValueException(key + ":" + e.getMessage());
 			}
 		}
-		return iValue;
+		return attValue;
 	}
 	
 	public Site getSite(String id) {
@@ -316,5 +323,104 @@ public class HttpClientSession extends HttpSession {
 			queryParams.put("siteTypeId", siteTypeId);
 		
 		return getEntity(siteUrl + "s/count", queryParams, Long.class);
+	}
+	
+	private Class<Device> deviceType = Device.class;
+	private String deviceUrl = "/" + IoTObject.device.getName();
+	
+	public Device addDevice(DeviceInfo<Object> info) {
+		DeviceType dt = getDevicetypeByName(info.getType());
+		
+		DeviceInfo<AttValueInfo> deviceValue = new DeviceInfo<AttValueInfo>();
+		deviceValue.setSimNo(info.getSimNo());
+		deviceValue.setType(info.getType());
+		deviceValue.setDeviceName(info.getDeviceName());
+		deviceValue.setSites(info.getSites());
+		Map<String, Object> attInfos = info.getAttInfos();
+		Map<String, AttributeType> attDefinition = dt.getStaticAttDefinition();
+		
+		Map<String, AttValueInfo> attValues = getAttInfos(attInfos, attDefinition);
+		deviceValue.setAttInfos(attValues);
+		
+		return postEntity(deviceUrl, deviceValue, deviceType);
+	}
+	
+	public Device addDevice(DeviceInfo1<Object> info) {
+		DeviceType dt = getDevicetypeByName(info.getType());
+		
+		DeviceInfo1<AttValueInfo> deviceValue = new DeviceInfo1<AttValueInfo>();
+		deviceValue.setSimNo(info.getSimNo());
+		deviceValue.setType(info.getType());
+		deviceValue.setDeviceName(info.getDeviceName());
+		deviceValue.setSiteId(info.getSiteId());
+		Map<String, Object> attInfos = info.getAttInfos();
+		Map<String, AttributeType> attDefinition = dt.getStaticAttDefinition();
+		
+		Map<String, AttValueInfo> attValues = getAttInfos(attInfos, attDefinition);
+		deviceValue.setAttInfos(attValues);
+		
+		return postEntity(deviceUrl, deviceValue, deviceType);
+	}
+	
+	/**
+	 * 获取设备信息。
+	 * @param deviceId 设备标识符。
+	 * @return 返回设备信息。
+	 */
+	public Device getDevice(String id) {
+		if(id != null && !id.isEmpty()) {
+			return getEntity(deviceUrl + "/" + id, null, deviceType);
+		} else
+			throw new ValueException("id can't be empty");
+	}
+	
+	public Device renameDevice(DeviceRenameInfo info) {
+		return patchEntity(deviceUrl + "/name", info, deviceType);
+	}
+	
+	public Device updateDevice(DeviceUpdateInfo<Object> info) {
+		DeviceType st = getDevice(info.getId()).getDeviceType();
+		
+		DeviceUpdateInfo<AttValueInfo> deviceValue = new DeviceUpdateInfo<AttValueInfo>();
+		deviceValue.setId(info.getId());
+		Map<String, Object> attInfos = info.getAttInfos();
+		Map<String, AttributeType> attDefinition = st.getStaticAttDefinition();
+		
+		Map<String, AttValueInfo> attValues = getAttInfos(attInfos, attDefinition);
+		deviceValue.setAttInfos(attValues);
+		
+		return patchEntity(deviceUrl, deviceValue, deviceType);
+	}
+	
+	public Device moveDevice(DeviceMoveInfo info) {
+		return patchEntity(deviceUrl + "/site", info, deviceType);
+	}
+	
+	public Page<Device> getDevicePage(DevicePageInfo info) {
+		if(info == null)
+			info = new DevicePageInfo();
+		Map<String, String> queryParams= new HashMap<String, String>();
+		queryParams.put("currentPage", Integer.toString(info.getCurrentPage()));
+		queryParams.put("numPerPage", Integer.toString(info.getNumPerPage()));
+		if(info.getSiteId() != null)
+			queryParams.put("siteId", info.getSiteId());
+		if(info.getDeviceName() != null)
+			queryParams.put("deviceName", info.getDeviceName());
+		if(info.getDeviceType() != null)
+			queryParams.put("deviceType", info.getDeviceType());
+		
+		return getEntity(deviceUrl + "s", queryParams, new ParameterizedTypeReference<RestPage<Device>>() {});
+	}
+	
+	public long getDeviceCount(String siteId, String deviceName, String deviceType) {
+		Map<String, String> queryParams= new HashMap<String, String>();
+		if(siteId != null)
+			queryParams.put("siteId", siteId);
+		if(deviceName != null)
+			queryParams.put("deviceName", deviceName);
+		if(deviceType != null)
+			queryParams.put("deviceType", deviceType);
+		
+		return getEntity(deviceUrl + "s/count", queryParams, Long.class);
 	}
 }
