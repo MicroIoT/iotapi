@@ -13,18 +13,27 @@ import com.leaniot.api.dto.RestPage;
 import com.leaniot.domain.Device;
 import com.leaniot.domain.DeviceType;
 import com.leaniot.domain.IoTObject;
+import com.leaniot.domain.Site;
 import com.leaniot.domain.SiteType;
 import com.leaniot.domain.User;
 import com.leaniot.domain.attribute.AttTypeInfo;
+import com.leaniot.domain.attribute.AttValueInfo;
+import com.leaniot.domain.attribute.AttributeType;
 import com.leaniot.domain.attribute.ClassTypeInfo;
 import com.leaniot.domain.attribute.IDeviceAttTypeInfo;
 import com.leaniot.dto.ActionTypeInfo;
 import com.leaniot.dto.DeviceTypeInfo;
 import com.leaniot.dto.DeviceTypeRenameInfo;
 import com.leaniot.dto.PageInfo;
+import com.leaniot.dto.QueryInfo;
+import com.leaniot.dto.SiteInfo;
+import com.leaniot.dto.SitePageInfo;
+import com.leaniot.dto.SiteRenameInfo;
 import com.leaniot.dto.SiteTypeRenameInfo;
+import com.leaniot.dto.SiteUpdateInfo;
 import com.leaniot.dto.UserInfo;
 import com.leaniot.dto.UserUpdateInfo;
+import com.leaniot.exception.NotFoundException;
 import com.leaniot.exception.ValueException;
 
 /**
@@ -200,5 +209,112 @@ public class HttpClientSession extends HttpSession {
 			deleteEntity(siteTypeUrl + "/" + id, null, siteTypeType);
 		else
 			throw new ValueException("id can't be empty");
+	}
+	
+	private Class<Site> siteType = Site.class;
+	private String siteUrl = "/" + IoTObject.site.getName();
+	
+	public Site addSite(SiteInfo<Object> info) {
+		SiteType st = getSiteByName(info.getSiteType());
+		
+		SiteInfo<AttValueInfo> i = new SiteInfo<AttValueInfo>();
+		i.setName(info.getName());
+		i.setParentId(info.getParentId());
+		i.setSiteType(info.getSiteType());
+		Map<String, Object> attInfos = info.getAttInfos();
+		Map<String, AttributeType> attDefinition = st.getAttDefinition();
+		
+		Map<String, AttValueInfo> attValues = getAttInfos(attInfos, attDefinition);
+		i.setAttInfos(attValues);
+		
+		return postEntity(siteUrl, i, siteType);
+	}
+
+	public SiteType getSiteByName(String name) {
+		QueryInfo q = new QueryInfo();
+		String filter = String.format("{\"name\": \"%s\"}", name);
+		q.setFilter(filter);
+		SiteType st = this.getOneEntity(IoTObject.sitetype, q);
+		if(st == null)
+			throw new NotFoundException("site type");
+		return st;
+	}
+
+	private Map<String, AttValueInfo> getAttInfos(Map<String, Object> attInfos,
+			Map<String, AttributeType> attDefinition) {
+		Map<String, AttValueInfo> iValue = new HashMap<String, AttValueInfo>();
+		
+		for (Map.Entry<String, AttributeType> entry : attDefinition.entrySet()) {
+			String key = entry.getKey();
+			AttributeType attType = entry.getValue();
+			Object value = attInfos.get(key);
+			
+			try{
+				iValue.put(key, attType.getAttValue(value));
+			} catch(ValueException e) {
+				throw new ValueException(key + ":" + e.getMessage());
+			}
+		}
+		return iValue;
+	}
+	
+	public Site getSite(String id) {
+		if(id != null && !id.isEmpty()) {
+			return getEntity(siteUrl + "/" + id, null, siteType);
+		} else
+			throw new ValueException("id can't be empty");
+	}
+	
+	public void deleteSite(String id) {
+		if(id != null && !id.isEmpty())
+			deleteEntity(siteUrl + "/" + id, null, siteType);
+		else
+			throw new ValueException("id can't be empty");
+	}
+	
+	public Site renameSite(SiteRenameInfo info) {
+		return patchEntity(siteUrl + "/name", info, siteType);
+	}
+	
+	public Site updateSite(SiteUpdateInfo<Object> info) {
+		SiteType st = getSite(info.getId()).getSiteType();
+		
+		SiteUpdateInfo<AttValueInfo> siteValue = new SiteUpdateInfo<AttValueInfo>();
+		siteValue.setId(info.getId());
+		Map<String, Object> attInfos = info.getAttInfos();
+		Map<String, AttributeType> attDefinition = st.getAttDefinition();
+		
+		Map<String, AttValueInfo> attValues = getAttInfos(attInfos, attDefinition);
+		siteValue.setAttInfos(attValues);
+		
+		return patchEntity(siteUrl, siteValue, siteType);
+	}
+	
+	public Page<Site> getSitePage(SitePageInfo info) {
+		if(info == null)
+			info = new SitePageInfo();
+		Map<String, String> queryParams= new HashMap<String, String>();
+		queryParams.put("currentPage", Integer.toString(info.getCurrentPage()));
+		queryParams.put("numPerPage", Integer.toString(info.getNumPerPage()));
+		if(info.getParentId() != null)
+			queryParams.put("parentId", info.getParentId());
+		if(info.getSiteName() != null)
+			queryParams.put("siteName", info.getSiteName());
+		if(info.getSiteTypeId() != null)
+			queryParams.put("siteTypeId", info.getSiteTypeId());
+		
+		return getEntity(siteUrl + "s", queryParams, new ParameterizedTypeReference<RestPage<Site>>() {});
+	}
+	
+	public long getSiteCount(String parentId, String siteName, String siteTypeId) {
+		Map<String, String> queryParams= new HashMap<String, String>();
+		if(parentId != null)
+			queryParams.put("parentId", parentId);
+		if(siteName != null)
+			queryParams.put("siteName", siteName);
+		if(siteTypeId != null)
+			queryParams.put("siteTypeId", siteTypeId);
+		
+		return getEntity(siteUrl + "s/count", queryParams, Long.class);
 	}
 }
