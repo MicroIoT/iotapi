@@ -58,49 +58,41 @@
         ]
       },
       "responseInfo": {
-      	"name": "records",
-        "description": "骑行记录",
-        "dataType": "Struct",
+        "name": "records",
+        "dataType": "Array",
+        "description": "标签名称",
+        "dataTypeInfos": {
+          "array.type": "Struct"
+        },
         "optional": false,
         "additional": [
           {
-            "name": "records",
-            "dataType": "Array",
-            "description": "标签名称",
+            "name": "sessionid",
+            "description": "会话id",
+            "dataType": "String",
             "dataTypeInfos": {
-              "array.type": "Struct"
+              "string.min": "1",
+              "string.max": "20"
             },
-            "optional": false,
-            "additional": [
-              {
-                "name": "sessionid",
-                "description": "会话id",
-                "dataType": "String",
-                "dataTypeInfos": {
-                  "string.min": "1",
-                  "string.max": "20"
-                },
-                "optional": false
-              },
-              {
-                "name": "startTime",
-                "description": "会话开始时间",
-                "dataType": "DateTime",
-                "dataTypeInfos": {
-                  "date.format": "yyyy-MM-dd HH:mm:ss"
-                },
-                "optional": false
-              },
-              {
-                "name": "endTime",
-                "description": "会话结束时间",
-                "dataType": "DateTime",
-                "dataTypeInfos": {
-                  "date.format": "yyyy-MM-dd HH:mm:ss"
-                },
-                "optional": false
-              }
-            ]
+            "optional": false
+          },
+          {
+            "name": "startTime",
+            "description": "会话开始时间",
+            "dataType": "DateTime",
+            "dataTypeInfos": {
+              "date.format": "yyyy-MM-dd HH:mm:ss"
+            },
+            "optional": false
+          },
+          {
+            "name": "endTime",
+            "description": "会话结束时间",
+            "dataType": "DateTime",
+            "dataTypeInfos": {
+              "date.format": "yyyy-MM-dd HH:mm:ss"
+            },
+            "optional": false
           }
         ]
       }
