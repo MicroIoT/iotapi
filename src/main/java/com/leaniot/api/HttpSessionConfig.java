@@ -80,15 +80,15 @@ public class HttpSessionConfig {
                 .setDefaultRequestConfig(requestConfig)
                 .setConnectionManager(poolingConnectionManager())
                 .setKeepAliveStrategy(connectionKeepAliveStrategy())
-                .setRetryHandler(new DefaultHttpRequestRetryHandler(3, true))  // 重试次数
+                .setRetryHandler(new DefaultHttpRequestRetryHandler(3, true))  
                 .build();
     }
 
     @Bean
     public PoolingHttpClientConnectionManager poolingConnectionManager() {
         PoolingHttpClientConnectionManager poolingConnectionManager = new PoolingHttpClientConnectionManager();
-        poolingConnectionManager.setMaxTotal(p.getMaxTotalConnections());  //最大连接数
-        poolingConnectionManager.setDefaultMaxPerRoute(p.getDefaultMaxPerRoute());  //同路由并发数
+        poolingConnectionManager.setMaxTotal(p.getMaxTotalConnections());  
+        poolingConnectionManager.setDefaultMaxPerRoute(p.getDefaultMaxPerRoute());  
         return poolingConnectionManager;
     }
 

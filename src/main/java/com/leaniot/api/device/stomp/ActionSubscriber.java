@@ -12,28 +12,14 @@ import com.leaniot.domain.ActionType;
 import com.leaniot.domain.attribute.DataType;
 import com.leaniot.domain.attribute.DataValue;
 
-/**
- * 设备端action操作处理，设备收到action操作请求后，将请求值转换为用户定义的类型，供用户处理action请求，
- * 返回响应值，将响应值转换为底层响应的格式。
- *
- * @author 曹新宇
- */
 @Component
 public abstract class ActionSubscriber extends OperationSubscriber {
 	private Map<String, ActionType> actionTypes;
 	
-	/**
-	 * 设备端action处理操作构造函数。
-	 */
 	public ActionSubscriber() {
 		super();
 	}
 
-	/**
-	 *  将action请求中的请求值转变为用户的类型，调用设备的action操作，
-	 *  将返回的响应值转换为协议要求的格式，返回操作Response。
-	 * @return 返回Response。
-	 */
 	@Override
 	public Response getResponse() {
 		this.actionTypes = this.getDevice().getDeviceType().getActionTypes();
@@ -69,11 +55,5 @@ public abstract class ActionSubscriber extends OperationSubscriber {
 		return types.get(req.getAction());
 	}
 
-	/**
-	 * 不同设备的具体action操作的实现。
-	 * @param action action操作的名称。
-	 * @param request action操作的请求值。
-	 * @return 返回响应值。
-	 */
 	public abstract Object action(String action, Object request);
 }

@@ -48,18 +48,8 @@ import com.leaniot.dto.UserUpdateInfo;
 import com.leaniot.exception.NotFoundException;
 import com.leaniot.exception.ValueException;
 
-/**
- * 客户端与物联网平台的http会话
- *
- * @author 曹新宇
- */
 @Component
 public class HttpClientSession extends HttpSession {
-	/**
-	 * 查询符合条件的设备列表。
-	 * @param queryParams 查询条件。
-	 * @return 设备列表。
-	 */
 	public List<Device> queryDeviceList(Map<String, String> queryParams){
 		return getEntity("/devices/list", queryParams, new ParameterizedTypeReference<List<Device>>() {});
 	}
@@ -368,11 +358,6 @@ public class HttpClientSession extends HttpSession {
 		return postEntity(deviceUrl, deviceValue, deviceType);
 	}
 	
-	/**
-	 * 获取设备信息。
-	 * @param deviceId 设备标识符。
-	 * @return 返回设备信息。
-	 */
 	public Device getDevice(String id) {
 		if(id != null && !id.isEmpty()) {
 			return getEntity(deviceUrl + "/" + id, null, deviceType);

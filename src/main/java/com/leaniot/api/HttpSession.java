@@ -32,11 +32,6 @@ import com.leaniot.dto.QueryPageInfo;
 import com.leaniot.exception.StatusException;
 import com.leaniot.exception.ValueException;
 
-/**
- * 建立与物联网平台的http会话
- *
- * @author 曹新宇
- */
 @Component
 public abstract class HttpSession {
 	private static final String REMEMBER_ME = "remember-me";
@@ -67,12 +62,7 @@ public abstract class HttpSession {
 
 	public HttpSession() {
 	}
-	/**
-	 * 建立http会话。
-	 * @param username http会话用户名。
-	 * @param password http会话密码。
-	 * @param uri http会话uri，格式为：iotp://host:port或者iotps://host:port。
-	 */
+	
 	public void start() {
 		if(!logined) {
 			if (!uri.matches(regex))
@@ -99,9 +89,7 @@ public abstract class HttpSession {
 			this.logined = true;
 		}
 	}
-	/**
-	 * 停止http会话。
-	 */
+	
 	public void stop() {
 		if (logined) {
 			HttpHeaders header = getSessionHeader();
@@ -111,10 +99,6 @@ public abstract class HttpSession {
 		}
 	}
 	
-	/**
-	 * 获得http会话认证cookie信息。
-	 * @return 返回http头。
-	 */
 	public HttpHeaders getSessionHeader() {
 		assert logined : "login first";
 		HttpHeaders requestHeaders = new HttpHeaders();
@@ -122,10 +106,6 @@ public abstract class HttpSession {
 		return requestHeaders;
 	}
 
-	/**
-	 * 获得http会话调用REST的uri。
-	 * @return 返回调用REST的uri。
-	 */
 	public String getRestUri() {
 		if (uri.startsWith(IOTP))
 			return uri.replaceFirst(IOTP, HTTP);
@@ -135,10 +115,6 @@ public abstract class HttpSession {
 			throw new ValueException(uri);
 	}
 
-	/**
-	 * 获得http会话调用websocket的uri。
-	 * @return 返回调用websocket的uri。
-	 */
 	public String getWSUri() {
 		assert logined : "login first";
 		if (uri.startsWith(IOTP))
@@ -220,11 +196,6 @@ public abstract class HttpSession {
 		return getEntity(url, queryParams, Boolean.class);
 	}
 	
-	/**
-	 * 调用REST get。
-	 * @param getUri 调用get的uri。
-	 * @param responseType 调用get返回的类型。
-	 */
 	protected <T> T getEntity(String getUri, Map<String, String> queryParams, Class<T> responseType) {
 		assert logined : "login first";
 		HttpHeaders header = getSessionHeader();
@@ -283,12 +254,6 @@ public abstract class HttpSession {
 		return queryParams;
 	}
 	
-	/**
-	 * 调用REST get，返回复杂类型。
-	 * @param getUri 调用get的uri。
-	 * @param queryParams 调用get的查询参数。
-	 * @param responseType 调用get返回的类型。
-	 */
 	protected <T> T getEntity(String getUri, Map<String, String> queryParams, ParameterizedTypeReference<T> responseType) {
 		assert logined : "login first";
 		HttpHeaders header = getSessionHeader();
@@ -308,12 +273,6 @@ public abstract class HttpSession {
 
 	}
 
-	/**
-	 * 调用REST post。
-	 * @param postUri 调用post的uri。
-	 * @param request 调用post输入的请求参数。
-	 * @param responseType 调用post返回的类型。
-	 */
 	protected <T> T postEntity(String postUri, Object request, Class<T> responseType) {
 		assert logined : "login first";
 		HttpMethod method = HttpMethod.POST;
