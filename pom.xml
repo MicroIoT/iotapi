@@ -4,14 +4,14 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.github.ileaniot</groupId>
+	<groupId>top.microiot</groupId>
 	<artifactId>iotapi</artifactId>
 	<version>1.0.0</version>
 	<packaging>jar</packaging>
 
 	<name>iotapi</name>
-	<description>LeanIoT Platform API</description>
-	<url>https://github.com/iLeanIot/iotapi</url>
+	<description>MicroIoT Platform API</description>
+	<url>https://github.com/MicroIoT/iotapi</url>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -40,7 +40,7 @@
 			<artifactId>spring-integration-stomp</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.leaniot</groupId>
+			<groupId>top.microiot</groupId>
 			<artifactId>iotdomain</artifactId>
 			<version>1.0.0</version>
 		</dependency>
@@ -135,15 +135,15 @@
 		<developer>
 			<name>caoxinyu</name>
 			<email>caoxinyu@gmail.com</email>
-			<organization>ileaniot</organization>
+			<organization>MicroIoT</organization>
 			<url>https://github.com/caoxinyu</url>
 		</developer>
 	</developers>
 
 	<scm>
-		<connection>scm:git:https://github.com/iLeanIot/iotapi.git</connection>
-		<developerConnection>scm:git:https://github.com/iLeanIot/iotapi.git</developerConnection>
-		<url>https://github.com/iLeanIot/iotapi</url>
+		<connection>scm:git:https://github.com/MicroIoT/iotapi.git</connection>
+		<developerConnection>scm:git:https://github.com/MicroIoT/iotapi.git</developerConnection>
+		<url>https://github.com/MicroIoT/iotapi</url>
 		<tag>1.0.0</tag>
 	</scm>
 
