@@ -17,7 +17,6 @@ import org.apache.http.protocol.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,29 +31,31 @@ import top.microiot.api.client.HttpClientSession;
 import top.microiot.api.device.HttpDeviceSession;
 
 @Configuration
-@EnableConfigurationProperties(HttpClientProperties.class)
+@EnableConfigurationProperties({HttpClientProperties.class, HttpSessionProperties.class})
 public class HttpSessionConfig {
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	@Autowired
     private HttpClientProperties p;
-
+	@Autowired
+	private HttpSessionProperties p1;
+	
 	@Bean(initMethod = "start")
 	@Scope("prototype")
-	@ConditionalOnProperty(name = {"microiot.type"}, havingValue = "client")
 	public HttpClientSession httpClientSession() {
 		HttpClientSession httpClientSession = new HttpClientSession();
 		httpClientSession.setRestTemplate(restTemplate());
+		httpClientSession.setHttpSessionProperties(p1);
 		
 		return httpClientSession;
 	}
 	
 	@Bean(initMethod = "start")
 	@Scope("prototype")
-	@ConditionalOnProperty(name = {"microiot.type"}, havingValue = "device")
 	public HttpDeviceSession httpDeviceSession() {
 		HttpDeviceSession httpDeviceSession = new HttpDeviceSession();
 		httpDeviceSession.setRestTemplate(restTemplate());
+		httpDeviceSession.setHttpSessionProperties(p1);
 		
 		return httpDeviceSession;
 	}

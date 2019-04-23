@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpEntity;
@@ -47,13 +46,13 @@ public abstract class HttpSession {
 
 	private String sessionId;
 	protected boolean logined = false;
-	@Value("${microiot.username}")
-	private String username;
-	@Value("${microiot.password}")
-	private String password;
-	@Value("${microiot.uri}")
-	private String uri;
 	
+    private HttpSessionProperties p;
+	
+	public void setHttpSessionProperties(HttpSessionProperties p) {
+		this.p = p;
+	}
+
 	private RestTemplate restTemplate;
 	
 	public void setRestTemplate(RestTemplate restTemplate) {
@@ -65,15 +64,15 @@ public abstract class HttpSession {
 	
 	public void start() {
 		if(!logined) {
-			if (!uri.matches(regex))
-				throw new ValueException(uri);
+			if (!getUri().matches(regex))
+				throw new ValueException(p.getUri());
 
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
 			MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
-			map.add("username", username);
-			map.add("password", password);
+			map.add("username", p.getUsername());
+			map.add("password", p.getPassword());
 			map.add(REMEMBER_ME, "1");
 	
 			HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(map, headers);
@@ -107,24 +106,27 @@ public abstract class HttpSession {
 	}
 
 	public String getRestUri() {
-		if (uri.startsWith(IOTP))
-			return uri.replaceFirst(IOTP, HTTP);
-		else if (uri.startsWith(IOTPS))
-			return uri.replaceFirst(IOTPS, HTTPS);
+		if (getUri().startsWith(IOTP))
+			return getUri().replaceFirst(IOTP, HTTP);
+		else if (getUri().startsWith(IOTPS))
+			return getUri().replaceFirst(IOTPS, HTTPS);
 		else
-			throw new ValueException(uri);
+			throw new ValueException(getUri());
 	}
 
 	public String getWSUri() {
 		assert logined : "login first";
-		if (uri.startsWith(IOTP))
-			return uri.replaceFirst(IOTP, WS) + WS_IOT;
-		else if (uri.startsWith(IOTPS))
-			return uri.replaceFirst(IOTPS, WSS) + WS_IOT;
+		if (getUri().startsWith(IOTP))
+			return getUri().replaceFirst(IOTP, WS) + WS_IOT;
+		else if (getUri().startsWith(IOTPS))
+			return getUri().replaceFirst(IOTPS, WSS) + WS_IOT;
 		else
-			throw new ValueException(uri);
+			throw new ValueException(getUri());
 	}
 
+	private String getUri() {
+		return p.getUri();
+	}
 	@SuppressWarnings("unchecked")
 	public <T> T getEntityById(IoTObject object, String id) {
 		assert logined : "login first";

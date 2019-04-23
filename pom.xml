@@ -6,7 +6,7 @@
 
 	<groupId>top.microiot</groupId>
 	<artifactId>iotapi</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	<packaging>jar</packaging>
 
 	<name>iotapi</name>
@@ -144,7 +144,7 @@
 		<connection>scm:git:https://github.com/MicroIoT/iotapi.git</connection>
 		<developerConnection>scm:git:https://github.com/MicroIoT/iotapi.git</developerConnection>
 		<url>https://github.com/MicroIoT/iotapi</url>
-		<tag>1.0.0</tag>
+		<tag>1.0.1</tag>
 	</scm>
 
 	<distributionManagement>
@@ -160,4 +160,7 @@
 		</repository>
 	</distributionManagement>
 
+	<organization>
+		<name>MicroIoT</name>
+	</organization>
 </project>

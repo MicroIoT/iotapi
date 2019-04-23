@@ -4,7 +4,6 @@ import javax.websocket.ContainerProvider;
 import javax.websocket.WebSocketContainer;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,7 +30,6 @@ public class WebsocketSessionConfig {
 	
 	@Bean
 	@Scope("prototype")
-	@ConditionalOnProperty(name = {"microiot.type"}, havingValue = "client")
 	public WebsocketClientSession websocketClientSession() {
 		HttpClientSession httpClientSession = httpSessionConfig.httpClientSession();
 		WebsocketClientSession websocketClientSession = new WebsocketClientSession(httpClientSession, websocketStompClient(), p.getTimeout());
@@ -44,7 +42,6 @@ public class WebsocketSessionConfig {
 	
 	@Bean
 	@Scope("prototype")
-	@ConditionalOnProperty(name = {"microiot.type"}, havingValue = "device")
 	public WebsocketDeviceSession websocketDeviceSession() {
 		HttpDeviceSession httpDeviceSession = httpSessionConfig.httpDeviceSession();
 		WebsocketDeviceSession websocketDeviceSession = new WebsocketDeviceSession(httpDeviceSession, websocketStompClient());
