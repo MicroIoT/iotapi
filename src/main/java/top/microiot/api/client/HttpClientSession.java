@@ -432,8 +432,8 @@ public class HttpClientSession extends HttpSession {
 		Map<String, String> queryParams= new HashMap<String, String>();
 		queryParams.put("currentPage", Integer.toString(info.getCurrentPage()));
 		queryParams.put("numPerPage", Integer.toString(info.getNumPerPage()));
-		if(info.getDeviceId() != null)
-			queryParams.put("siteId", info.getDeviceId());
+		if(info.getNotifyObjectId() != null)
+			queryParams.put("notifyObjectId", info.getNotifyObjectId());
 		if(info.getReportFrom() != null)
 			queryParams.put("reportFrom", format.format(info.getReportFrom()));
 		if(info.getReportTo() != null)
@@ -466,7 +466,7 @@ public class HttpClientSession extends HttpSession {
 		queryParams.put("currentPage", Integer.toString(info.getCurrentPage()));
 		queryParams.put("numPerPage", Integer.toString(info.getNumPerPage()));
 		if(info.getDeviceId() != null)
-			queryParams.put("siteId", info.getDeviceId());
+			queryParams.put("deviceId", info.getDeviceId());
 		if(info.getAttribute() != null)
 			queryParams.put("attribute", info.getAttribute());
 		if(info.getReportFrom() != null)
