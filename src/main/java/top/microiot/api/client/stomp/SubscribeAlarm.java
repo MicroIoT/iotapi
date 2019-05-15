@@ -7,6 +7,11 @@ import org.springframework.messaging.simp.stomp.StompHeaders;
 import top.microiot.api.stomp.SubscribeHandler;
 import top.microiot.domain.Alarm;
 
+/**
+ * 客户端告警接收处理类。
+ *
+ * @author 曹新宇
+ */
 public class SubscribeAlarm extends SubscribeHandler {
 	public SubscribeAlarm(String deviceId, AlarmSubscriber subscriber) {
 		super(deviceId, subscriber);

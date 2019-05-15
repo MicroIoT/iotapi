@@ -16,6 +16,11 @@ import top.microiot.dto.AlarmInfo;
 import top.microiot.dto.EventInfo;
 import top.microiot.exception.NotFoundException;
 
+/**
+ * 设备端与物联网平台的http会话类
+ *
+ * @author 曹新宇
+ */
 @Component
 public class HttpDeviceSession extends HttpSession {
 	private Device device;
@@ -27,16 +32,26 @@ public class HttpDeviceSession extends HttpSession {
 		this.device = device;
 	}
 	
+	/**
+	 * 建立http会话。
+	 */
 	@Override
 	public void start() {
 		super.start();
 		this.device = getDeviceInfo();
 	}
 	
+	/**
+	 * 获取设备本身信息。
+	 */
 	private Device getDeviceInfo() {
 		return getEntity("/device/me", null, Device.class);
 	}
 	
+	/**
+	 * 设备端向物联网平台上报事件信息。可同时上报多个属性的值。
+	 * @param events 设备的多个属性的值。
+	 */
 	public void reportEvents(Map<String, Object> events) {
 		Map<String, AttValueInfo> values = new HashMap<String, AttValueInfo>();
 		Map<String, DeviceAttributeType> types = device.getDeviceType().getAttDefinition();
@@ -54,6 +69,11 @@ public class HttpDeviceSession extends HttpSession {
 		postEntity("/event", info, null);
 	}
 	
+	/**
+	 * 设备端向物联网平台上报告警信息。
+	 * @param alarmType 告警类型名称。
+	 * @param alarmInfo 告警详细信息。
+	 */
 	public void reportAlarm(String alarmType, Object alarmInfo) {
 		Map<String, AttributeType> types = device.getDeviceType().getAlarmTypes();
 		AttributeType type = types.get(alarmType);

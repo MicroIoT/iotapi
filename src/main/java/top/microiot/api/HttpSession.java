@@ -31,6 +31,11 @@ import top.microiot.dto.QueryPageInfo;
 import top.microiot.exception.StatusException;
 import top.microiot.exception.ValueException;
 
+/**
+ * 建立与物联网平台的http会话类
+ *
+ * @author 曹新宇
+ */
 @Component
 public abstract class HttpSession {
 	private static final String REMEMBER_ME = "remember-me";
@@ -62,6 +67,9 @@ public abstract class HttpSession {
 	public HttpSession() {
 	}
 	
+	/**
+	 * 建立http会话。
+	 */
 	public void start() {
 		if(!logined) {
 			if (!getUri().matches(regex))
@@ -89,6 +97,9 @@ public abstract class HttpSession {
 		}
 	}
 	
+	/**
+	 * 停止http会话。
+	 */
 	public void stop() {
 		if (logined) {
 			HttpHeaders header = getSessionHeader();
@@ -98,6 +109,10 @@ public abstract class HttpSession {
 		}
 	}
 	
+	/**
+	 * 获得http会话认证cookie信息。
+	 * @return 返回http头。
+	 */
 	public HttpHeaders getSessionHeader() {
 		assert logined : "login first";
 		HttpHeaders requestHeaders = new HttpHeaders();
@@ -105,6 +120,10 @@ public abstract class HttpSession {
 		return requestHeaders;
 	}
 
+	/**
+	 * 获得http会话调用REST的uri。
+	 * @return 返回调用REST的uri。
+	 */
 	public String getRestUri() {
 		if (getUri().startsWith(IOTP))
 			return getUri().replaceFirst(IOTP, HTTP);
@@ -114,6 +133,10 @@ public abstract class HttpSession {
 			throw new ValueException(getUri());
 	}
 
+	/**
+	 * 获得http会话调用websocket的uri。
+	 * @return 返回调用websocket的uri。
+	 */
 	public String getWSUri() {
 		assert logined : "login first";
 		if (getUri().startsWith(IOTP))

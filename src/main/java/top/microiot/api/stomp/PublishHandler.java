@@ -18,6 +18,11 @@ import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
 import top.microiot.api.dto.Request;
 import top.microiot.api.dto.Response;
 
+/**
+ * websocket发布处理抽象类，用于处理发布信息。
+ *
+ * @author 曹新宇
+ */
 public abstract class PublishHandler extends StompSessionHandlerAdapter implements Future<Response> {
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	

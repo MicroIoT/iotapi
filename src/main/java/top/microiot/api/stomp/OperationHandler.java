@@ -6,6 +6,11 @@ import org.springframework.messaging.simp.stomp.StompSession;
 import top.microiot.api.device.WebsocketDeviceSession;
 import top.microiot.api.dto.Response;
 
+/**
+ * 设备端请求处理抽象类。
+ *
+ * @author 曹新宇
+ */
 public abstract class OperationHandler extends SubscribeHandler {
 	private StompSession session;
 	

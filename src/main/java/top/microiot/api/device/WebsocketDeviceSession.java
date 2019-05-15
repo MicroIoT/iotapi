@@ -11,6 +11,11 @@ import top.microiot.api.device.stomp.SubscribeGet;
 import top.microiot.api.device.stomp.SubscribeSet;
 import top.microiot.domain.Device;
 
+/**
+ * 设备端与物联网平台的websocket会话类
+ *
+ * @author 曹新宇
+ */
 public class WebsocketDeviceSession extends WebSocketStompSessionManager {
 	private HttpDeviceSession session;
 	
@@ -18,11 +23,21 @@ public class WebsocketDeviceSession extends WebSocketStompSessionManager {
 		return session;
 	}
 
+	/**
+	 * 设备端与物联网平台websocket会话构造函数。
+	 * @param session 设备端http会话。
+	 * @param webSocketStompClient 设备端与物联网平台websocket底层连接。
+	 */
 	public WebsocketDeviceSession(HttpDeviceSession session, WebSocketStompClient webSocketStompClient) {
 		super(webSocketStompClient, session.getWSUri());
 		this.session = session;
 	}
 	
+	/**
+	 * 设备端设置收到获取请求后的处理操作。
+	 * @param subscriber 收到获取请求后的处理。
+	 * @return 返回获取请求处理。
+	 */
 	public SubscribeGet subscribe(GetSubscriber subscriber) {
 		subscriber.init();
 		subscriber.setWebsocketDeviceSession(this);
@@ -31,6 +46,11 @@ public class WebsocketDeviceSession extends WebSocketStompSessionManager {
         return sessionHandler;
 	}
 	
+	/**
+	 * 设备端设置收到设置请求后的处理操作。
+	 * @param subscriber 收到设置请求后的处理。
+	 * @return 返回设置请求处理。
+	 */
 	public SubscribeSet subscribe(SetSubscriber subscriber) {
 		subscriber.init();
 		subscriber.setWebsocketDeviceSession(this);
@@ -39,6 +59,11 @@ public class WebsocketDeviceSession extends WebSocketStompSessionManager {
         return sessionHandler;
 	}
 	
+	/**
+	 * 设备端设置收到操作请求后的处理操作。
+	 * @param subscriber 收到操作请求后的处理。
+	 * @return 返回操作请求处理。
+	 */
 	public SubscribeAction subscribe(ActionSubscriber subscriber) {
 		subscriber.init();
 		subscriber.setWebsocketDeviceSession(this);

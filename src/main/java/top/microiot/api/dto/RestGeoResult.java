@@ -3,6 +3,11 @@ package top.microiot.api.dto;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * 地理位置查询结果类。
+ *
+ * @author 曹新宇
+ */
 public class RestGeoResult<T> {
 	private T content;
 	private RestDistance distance;

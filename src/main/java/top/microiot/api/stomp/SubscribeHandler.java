@@ -7,6 +7,11 @@ import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
 
+/**
+ * websocket订阅处理抽象类，用于处理订阅信息。
+ *
+ * @author 曹新宇
+ */
 public abstract class SubscribeHandler extends StompSessionHandlerAdapter {
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	

@@ -1,5 +1,10 @@
 package top.microiot.api.dto;
 
+/**
+ * 获取请求类。
+ *
+ * @author 曹新宇
+ */
 public class GetRequest extends Request{
 	private String attribute;
 

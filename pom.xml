@@ -6,11 +6,11 @@
 
 	<groupId>top.microiot</groupId>
 	<artifactId>iotapi</artifactId>
-	<version>1.0.2</version>
+	<version>1.0.3</version>
 	<packaging>jar</packaging>
 
 	<name>iotapi</name>
-	<description>MicroIoT Platform API</description>
+	<description>MicroIoT Platform Java API</description>
 	<url>https://github.com/MicroIoT/iotapi</url>
 
 	<parent>
@@ -42,7 +42,7 @@
 		<dependency>
 			<groupId>top.microiot</groupId>
 			<artifactId>iotdomain</artifactId>
-			<version>1.0.0</version>
+			<version>1.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
@@ -142,9 +142,9 @@
 
 	<scm>
 		<connection>scm:git:https://github.com/MicroIoT/iotapi.git</connection>
-		<developerConnection>scm:git:https://github.com/MicroIoT/iotapi.git</developerConnection>
+		<developerConnection>caoxinyu</developerConnection>
 		<url>https://github.com/MicroIoT/iotapi</url>
-		<tag>1.0.1</tag>
+		<tag>MicroIoT Java API</tag>
 	</scm>
 
 	<distributionManagement>

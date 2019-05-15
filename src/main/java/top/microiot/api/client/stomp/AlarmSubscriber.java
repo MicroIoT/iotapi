@@ -14,12 +14,20 @@ import top.microiot.domain.NotifyObject;
 import top.microiot.domain.attribute.DataType;
 import top.microiot.exception.NotFoundException;
 
+/**
+ * 客户端告警处理，客户端收到告警通知后，将告警通知转换为用户定义的类型，供用户处理告警。
+ *
+ * @author 曹新宇
+ */
 @Component
 public abstract class AlarmSubscriber extends AbstractEventSubscriber{
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	private WebsocketClientSession websocketClientSession;
 	
+	/**
+	 * 客户端告警处理构造函数。
+	 */
 	public AlarmSubscriber() {
 		super();
 	}
@@ -32,8 +40,20 @@ public abstract class AlarmSubscriber extends AbstractEventSubscriber{
 		this.websocketClientSession = websocketClientSession;
 	}
 
+	/**
+	 * 不同客户端的具体告警处理的实现。
+	 * @param notifyObject 上报告警的对象，可以是设备，也可以是场地。
+	 * @param alarmType 告警类型名称。
+	 * @param alarmInfo 告警具体信息。
+	 * @param reportTime 告警上报时间。
+	 * @param receiveTime 告警在平台上接收到的时间。
+	 */
 	public abstract void onAlarm(NotifyObject notifyObject, String alarmType, Object alarmInfo, Date reportTime, Date receiveTime);
 
+	/**
+	 * 将告警信息转变为用户的类型，调用设备的告警处理。
+	 * @param event 告警通知。
+	 */
 	@Override
 	public void onEvent(Object event) {
 		Alarm alarm = (Alarm)event;

@@ -48,8 +48,18 @@ import top.microiot.dto.UserUpdateInfo;
 import top.microiot.exception.NotFoundException;
 import top.microiot.exception.ValueException;
 
+/**
+ * 客户端与物联网平台的http会话类
+ *
+ * @author 曹新宇
+ */
 @Component
 public class HttpClientSession extends HttpSession {
+	/**
+	 * 查询符合条件的设备列表。
+	 * @param queryParams 查询条件。
+	 * @return 设备列表。
+	 */
 	public List<Device> queryDeviceList(Map<String, String> queryParams){
 		return getEntity("/devices/list", queryParams, new ParameterizedTypeReference<List<Device>>() {});
 	}
@@ -57,14 +67,28 @@ public class HttpClientSession extends HttpSession {
 	private Class<User> userType = User.class;
 	private String userUrl = "/user";
 	
+	/**
+	 * 添加平台用户。
+	 * @param info 被添加的用户信息。
+	 * @return 返回添加成功的用户。
+	 */
 	public User addUser(UserInfo info) {
 		return postEntity(userUrl, info, userType);
 	}
 	
+	/**
+	 * 获取当前登录用户的信息。
+	 * @return 返回当前用户信息。
+	 */
 	public User getCurrentUser() {
 		return getEntity(userUrl + "/me", null, userType);
 	}
 	
+	/**
+	 * 获取指定用户的信息。
+	 * @param username 指定用户的用户名
+	 * @return 返回指定用户信息。
+	 */
 	public User getUser(String username) {
 		if(username != null && !username.isEmpty()) {
 			return getEntity(userUrl + "/" + username, null, userType);
@@ -72,6 +96,10 @@ public class HttpClientSession extends HttpSession {
 			throw new ValueException("username can't be empty");
 	}
 	
+	/**
+	 * 删除指定用户。
+	 * @param userId 指定用户的标识符
+	 */
 	public void deleteUser(String userId) {
 		if(userId != null && !userId.isEmpty())
 			deleteEntity(userUrl + "/" + userId, null, userType);
@@ -79,6 +107,11 @@ public class HttpClientSession extends HttpSession {
 			throw new ValueException("userid can't be empty");
 	}
 	
+	/**
+	 * 获取系统用户列表页。
+	 * @param info 指定页查询信息
+	 * @return 返回指定页的用户。
+	 */
 	public Page<User> getUserPage(PageInfo info) {
 		if(info == null)
 			info = new PageInfo();
@@ -89,6 +122,11 @@ public class HttpClientSession extends HttpSession {
 		return getEntity(userUrl + "s", queryParams, new ParameterizedTypeReference<RestPage<User>>() {});
 	}
 	
+	/**
+	 * 修改区域管理员用户负责的区域。
+	 * @param info 用户负责的区域的信息，包括用户标识符和区域标识符列表。
+	 * @return 返回用户信息。
+	 */
 	public User updateUserArea(UserUpdateInfo info) {
 		return patchEntity(userUrl, info, userType);
 	}
@@ -96,10 +134,20 @@ public class HttpClientSession extends HttpSession {
 	private Class<DeviceType> deviceTypeType = DeviceType.class;
 	private String deviceTypeUrl = "/" + IoTObject.devicetype.getName();
 	
+	/**
+	 * 添加设备类型。
+	 * @param info 设备类型信息，包括动态属性信息，静态属性信息，告警类型信息，操作类型信息。
+	 * @return 返回添加成功的设备类型。
+	 */
 	public DeviceType addDevicetype(DeviceTypeInfo info) {
 		return postEntity(deviceTypeUrl, info, deviceTypeType);
 	}
 	
+	/**
+	 * 获取指定设备类型的信息。
+	 * @param id 设备类型标识符。
+	 * @return 返回指定设备类型。
+	 */
 	public DeviceType getDeviceType(String id) {
 		if(id != null && !id.isEmpty()) {
 			return getEntity(deviceTypeUrl + "/" + id, null, deviceTypeType);
@@ -107,6 +155,11 @@ public class HttpClientSession extends HttpSession {
 			throw new ValueException("id can't be empty");
 	}
 	
+	/**
+	 * 获取指定设备类型的信息。
+	 * @param name 设备类型名称。
+	 * @return 返回指定设备类型。
+	 */
 	public DeviceType getDevicetypeByName(String name) {
 		QueryInfo q = new QueryInfo();
 		String filter = String.format("{\"name\": \"%s\"}", name);
@@ -117,6 +170,11 @@ public class HttpClientSession extends HttpSession {
 		return dt;
 	}
 	
+	/**
+	 * 获取设备类型列表页。
+	 * @param info 指定页查询信息
+	 * @return 返回指定页的设备类型。
+	 */
 	public Page<DeviceType> getDeviceTypePage(PageInfo info) {
 		if(info == null)
 			info = new PageInfo();
@@ -127,14 +185,27 @@ public class HttpClientSession extends HttpSession {
 		return getEntity(deviceTypeUrl + "s/page", queryParams, new ParameterizedTypeReference<RestPage<DeviceType>>() {});
 	}
 	
+	/**
+	 * 获取设备类型列表。
+	 * @return 返回设备类型列表。
+	 */
 	public List<DeviceType> getDeviceTypeList() {
 		return getEntity(deviceTypeUrl + "s/list", null, new ParameterizedTypeReference<List<DeviceType>>() {});
 	}
 	
+	/**
+	 * 修改设备类型名称。
+	 * @param info 设备类型修改信息，包括设备类型标识符和新的名称和描述。
+	 * @return 返回设备类型。
+	 */
 	public DeviceType renameDeviceType(DeviceTypeRenameInfo info) {
 		return patchEntity(deviceTypeUrl + "/name", info, deviceTypeType);
 	}
 	
+	/**
+	 *删除指定设备类型。
+	 * @param id 设备类型标识符
+	 */
 	public void deleteDeviceType(String id) {
 		if(id != null && !id.isEmpty())
 			deleteEntity(deviceTypeUrl + "/" + id, null, deviceTypeType);
@@ -142,10 +213,21 @@ public class HttpClientSession extends HttpSession {
 			throw new ValueException("id can't be empty");
 	}
 	
+	/**
+	 * 修改设备类型，添加动态属性。
+	 * @param id 设备类型标识符
+	 * @param info 新添加的动态属性信息
+	 * @return 返回修改成功的设备类型。
+	 */
 	public DeviceType addDevicetypeAttribute(String id, IDeviceAttTypeInfo info) {
 		return postEntity(deviceTypeUrl + "/" + id + "/attribute", info, deviceTypeType);
 	}
 	
+	/**
+	 * 修改设备类型，删除动态属性。
+	* @param id 设备类型标识符
+	 * @param attribute 要删除的动态属性名称
+	 */
 	public void deleteDeviceTypeAttribute(String id, String attribute) {
 		if(id != null && !id.isEmpty() && attribute != null && !attribute.isEmpty())
 			deleteEntity(deviceTypeUrl + "/" + id + "/attribute/" + attribute, null, deviceTypeType);
@@ -153,10 +235,21 @@ public class HttpClientSession extends HttpSession {
 			throw new ValueException("id and attribute can't be empty");
 	}
 	
+	/**
+	 * 修改设备类型，添加操作类型。
+	 * @param id 设备类型标识符。
+	 * @param info 新添加的操作类型信息。
+	 * @return 返回修改成功的设备类型。
+	 */
 	public DeviceType addDevicetypeActiontype(String id, ActionTypeInfo info) {
 		return postEntity(deviceTypeUrl + "/" + id + "/actiontype", info, deviceTypeType);
 	}
 	
+	/**
+	 * 修改设备类型，删除操作类型。
+	* @param id 设备类型标识符。
+	 * @param actiontype 要删除的操作类型名称。
+	 */
 	public void deleteDeviceTypeActiontype(String id, String actiontype) {
 		if(id != null && !id.isEmpty() && actiontype != null && !actiontype.isEmpty())
 			deleteEntity(deviceTypeUrl + "/" + id + "/actiontype/" + actiontype, null, deviceTypeType);
@@ -164,10 +257,21 @@ public class HttpClientSession extends HttpSession {
 			throw new ValueException("id and actiontype can't be empty");
 	}
 	
+	/**
+	 * 修改设备类型，添加告警类型。
+	 * @param id 设备类型标识符。
+	 * @param info 新添加的告警类型信息。
+	 * @return 返回修改成功的设备类型。
+	 */
 	public DeviceType addDevicetypeAlarmtype(String id, AttTypeInfo info) {
 		return postEntity(deviceTypeUrl + "/" + id + "/alarmtype", info, deviceTypeType);
 	}
 	
+	/**
+	 * 修改设备类型，删除告警类型。
+	* @param id 设备类型标识符。
+	 * @param alarmtype 要删除的告警类型名称。
+	 */
 	public void deleteDeviceTypeAlarmtype(String id, String alarmtype) {
 		if(id != null && !id.isEmpty() && alarmtype != null && !alarmtype.isEmpty())
 			deleteEntity(deviceTypeUrl + "/" + id + "/alarmtype/" + alarmtype, null, deviceTypeType);
@@ -178,10 +282,20 @@ public class HttpClientSession extends HttpSession {
 	private Class<SiteType> siteTypeType = SiteType.class;
 	private String siteTypeUrl = "/" + IoTObject.sitetype.getName();
 	
+	/**
+	 * 添加场地类型。
+	 * @param info 场地类型信息，包括属性信息等。
+	 * @return 返回添加成功的场地类型。
+	 */
 	public SiteType addSitetype(ClassTypeInfo info) {
 		return postEntity(siteTypeUrl, info, siteTypeType);
 	}
 	
+	/**
+	 * 获取指定场地类型的信息。
+	 * @param id 场地类型标识符。
+	 * @return 返回指定场地类型。
+	 */
 	public SiteType getSiteType(String id) {
 		if(id != null && !id.isEmpty()) {
 			return getEntity(siteTypeUrl + "/" + id, null, siteTypeType);
@@ -189,6 +303,11 @@ public class HttpClientSession extends HttpSession {
 			throw new ValueException("id can't be empty");
 	}
 	
+	/**
+	 * 获取指定场地类型的信息。
+	 * @param name 场地类型名称。
+	 * @return 返回指定场地类型。
+	 */
 	public SiteType getSitetypeByName(String name) {
 		QueryInfo q = new QueryInfo();
 		String filter = String.format("{\"name\": \"%s\"}", name);
@@ -199,6 +318,11 @@ public class HttpClientSession extends HttpSession {
 		return st;
 	}
 
+	/**
+	 * 获取场地类型列表页。
+	 * @param info 指定页查询信息
+	 * @return 返回指定页的场地类型。
+	 */
 	public Page<SiteType> getSiteTypePage(PageInfo info) {
 		if(info == null)
 			info = new PageInfo();
@@ -209,14 +333,27 @@ public class HttpClientSession extends HttpSession {
 		return getEntity(siteTypeUrl + "s/page", queryParams, new ParameterizedTypeReference<RestPage<SiteType>>() {});
 	}
 	
+	/**
+	 * 获取场地类型列表。
+	 * @return 返回场地类型列表。
+	 */
 	public List<SiteType> getSiteTypeList() {
 		return getEntity(siteTypeUrl + "s/list", null, new ParameterizedTypeReference<List<SiteType>>() {});
 	}
 	
+	/**
+	 * 修改场地类型名称。
+	 * @param info 场地类型修改信息，包括场地类型标识符和新的名称和描述。
+	 * @return 返回场地类型。
+	 */
 	public SiteType renameSiteType(SiteTypeRenameInfo info) {
 		return patchEntity(siteTypeUrl + "/name", info, siteTypeType);
 	}
 	
+	/**
+	 *删除指定场地类型。
+	 * @param id 场地类型标识符
+	 */
 	public void deleteSiteType(String id) {
 		if(id != null && !id.isEmpty())
 			deleteEntity(siteTypeUrl + "/" + id, null, siteTypeType);
@@ -227,6 +364,11 @@ public class HttpClientSession extends HttpSession {
 	private Class<Site> siteType = Site.class;
 	private String siteUrl = "/" + IoTObject.site.getName();
 	
+	/**
+	 * 添加场地。
+	 * @param info 场地信息，包括场地名称，场地类型，所属父场地，属性值等。
+	 * @return 返回添加成功的场地。
+	 */
 	public Site addSite(SiteInfo<Object> info) {
 		SiteType st = getSitetypeByName(info.getSiteType());
 		
@@ -261,6 +403,11 @@ public class HttpClientSession extends HttpSession {
 		return attValue;
 	}
 	
+	/**
+	 * 获取指定场地的信息。
+	 * @param id 场地标识符。
+	 * @return 返回指定场地。
+	 */
 	public Site getSite(String id) {
 		if(id != null && !id.isEmpty()) {
 			return getEntity(siteUrl + "/" + id, null, siteType);
@@ -268,6 +415,10 @@ public class HttpClientSession extends HttpSession {
 			throw new ValueException("id can't be empty");
 	}
 	
+	/**
+	 *删除指定场地。
+	 * @param id 场地标识符
+	 */
 	public void deleteSite(String id) {
 		if(id != null && !id.isEmpty())
 			deleteEntity(siteUrl + "/" + id, null, siteType);
@@ -275,10 +426,20 @@ public class HttpClientSession extends HttpSession {
 			throw new ValueException("id can't be empty");
 	}
 	
+	/**
+	 * 修改场地名称。
+	 * @param info 场地修改信息，包括场地标识符和新的名称。
+	 * @return 返回场地。
+	 */
 	public Site renameSite(SiteRenameInfo info) {
 		return patchEntity(siteUrl + "/name", info, siteType);
 	}
 	
+	/**
+	 * 修改场地属性。
+	 * @param info 场地修改信息，包括场地标识符，场地属性信息。
+	 * @return 返回修改成功的场地。
+	 */
 	public Site updateSite(SiteUpdateInfo<Object> info) {
 		SiteType st = getSite(info.getId()).getSiteType();
 		
@@ -293,6 +454,11 @@ public class HttpClientSession extends HttpSession {
 		return patchEntity(siteUrl, siteValue, siteType);
 	}
 	
+	/**
+	 * 获取场地列表页。
+	 * @param info 指定页查询信息以及查询条件，包括父场地，场地类型，场地名称。
+	 * @return 返回指定页的场地。
+	 */
 	public Page<Site> getSitePage(SitePageInfo info) {
 		if(info == null)
 			info = new SitePageInfo();
@@ -309,6 +475,13 @@ public class HttpClientSession extends HttpSession {
 		return getEntity(siteUrl + "s", queryParams, new ParameterizedTypeReference<RestPage<Site>>() {});
 	}
 	
+	/**
+	 * 获取符合条件的场地数量。
+	 * @param parentId 父场地标识符。
+	 * @param siteName 场地名称。
+	 * @param siteTypeId 场地类型标识符。
+	 * @return 返回符合条件的场地数量。
+	 */
 	public long getSiteCount(String parentId, String siteName, String siteTypeId) {
 		Map<String, String> queryParams= new HashMap<String, String>();
 		if(parentId != null)
@@ -324,6 +497,11 @@ public class HttpClientSession extends HttpSession {
 	private Class<Device> deviceType = Device.class;
 	private String deviceUrl = "/" + IoTObject.device.getName();
 	
+	/**
+	 * 添加设备。
+	 * @param info 设备信息，包括设备名称，设备类型，设备标识符，设备所属场地信息，属性值等。
+	 * @return 返回添加成功的设备。
+	 */
 	public Device addDevice(DeviceInfo<Object> info) {
 		DeviceType dt = getDevicetypeByName(info.getType());
 		
@@ -341,6 +519,11 @@ public class HttpClientSession extends HttpSession {
 		return postEntity(deviceUrl, deviceValue, deviceType);
 	}
 	
+	/**
+	 * 添加设备。
+	 * @param info 设备信息，包括设备名称，设备类型，设备标识符，设备所属场地标识符，属性值等。
+	 * @return 返回添加成功的设备。
+	 */
 	public Device addDevice(DeviceInfo1<Object> info) {
 		DeviceType dt = getDevicetypeByName(info.getType());
 		
@@ -358,6 +541,11 @@ public class HttpClientSession extends HttpSession {
 		return postEntity(deviceUrl, deviceValue, deviceType);
 	}
 	
+	/**
+	 * 获取指定设备的信息。
+	 * @param id 设备标识符。
+	 * @return 返回指定设备。
+	 */
 	public Device getDevice(String id) {
 		if(id != null && !id.isEmpty()) {
 			return getEntity(deviceUrl + "/" + id, null, deviceType);
@@ -365,10 +553,20 @@ public class HttpClientSession extends HttpSession {
 			throw new ValueException("id can't be empty");
 	}
 	
+	/**
+	 * 修改设备名称。
+	 * @param info 设备修改信息，包括设备标识符和新的名称。
+	 * @return 返回设备。
+	 */
 	public Device renameDevice(DeviceRenameInfo info) {
 		return patchEntity(deviceUrl + "/name", info, deviceType);
 	}
 	
+	/**
+	 * 修改设备静态属性。
+	 * @param info 设备修改信息，包括设备标识符，设备静态属性信息。
+	 * @return 返回修改成功的设备。
+	 */
 	public Device updateDevice(DeviceUpdateInfo<Object> info) {
 		DeviceType st = getDevice(info.getId()).getDeviceType();
 		
@@ -383,10 +581,20 @@ public class HttpClientSession extends HttpSession {
 		return patchEntity(deviceUrl, deviceValue, deviceType);
 	}
 	
+	/**
+	 * 修改设备的场地。
+	 * @param info 设备修改信息，包括设备标识符，新场地标识符。
+	 * @return 返回修改成功的设备。
+	 */
 	public Device moveDevice(DeviceMoveInfo info) {
 		return patchEntity(deviceUrl + "/site", info, deviceType);
 	}
 	
+	/**
+	 * 获取设备列表页。
+	 * @param info 指定页查询信息以及查询条件，包括场地标识符，设备类型，设备名称。
+	 * @return 返回指定页的设备。
+	 */
 	public Page<Device> getDevicePage(DevicePageInfo info) {
 		if(info == null)
 			info = new DevicePageInfo();
@@ -403,6 +611,13 @@ public class HttpClientSession extends HttpSession {
 		return getEntity(deviceUrl + "s", queryParams, new ParameterizedTypeReference<RestPage<Device>>() {});
 	}
 	
+	/**
+	 * 获取符合条件的设备数量。
+	 * @param siteId 场地标识符。
+	 * @param deviceName 设备名称。
+	 * @param deviceType 设备类型标识符。
+	 * @return 返回符合条件的设备数量。
+	 */
 	public long getDeviceCount(String siteId, String deviceName, String deviceType) {
 		Map<String, String> queryParams= new HashMap<String, String>();
 		if(siteId != null)
@@ -418,6 +633,11 @@ public class HttpClientSession extends HttpSession {
 	private Class<Alarm> alarmType = Alarm.class;
 	private String alarmUrl = "/" + IoTObject.alarm.getName();
 	
+	/**
+	 * 获取指定告警信息。
+	 * @param id 告警标识符。
+	 * @return 返回指定告警。
+	 */
 	public Alarm getAlarm(String id) {
 		if(id != null && !id.isEmpty()) {
 			return getEntity(alarmUrl + "/" + id, null, alarmType);
@@ -425,6 +645,11 @@ public class HttpClientSession extends HttpSession {
 			throw new ValueException("id can't be empty");
 	}
 	
+	/**
+	 * 获取告警列表页。
+	 * @param info 指定页查询信息以及查询条件，包括告警接收时间，告警上报时间，告警类型，上报对象标识符。
+	 * @return 返回指定页的告警。
+	 */
 	public Page<Alarm> getAlarmPage(AlarmPageInfo info) {
 		SimpleDateFormat format = new SimpleDateFormat(NotificationPageInfo.FORMAT);
 		if(info == null)
@@ -451,6 +676,11 @@ public class HttpClientSession extends HttpSession {
 	private Class<Event> eventType = Event.class;
 	private String eventUrl = "/" + IoTObject.event.getName();
 	
+	/**
+	 * 获取指定事件信息。
+	 * @param id 事件标识符。
+	 * @return 返回指定事件。
+	 */
 	public Event getEvent(String id) {
 		if(id != null && !id.isEmpty()) {
 			return getEntity(eventUrl + "/" + id, null, eventType);
@@ -458,6 +688,11 @@ public class HttpClientSession extends HttpSession {
 			throw new ValueException("id can't be empty");
 	}
 	
+	/**
+	 * 获取事件列表页。
+	 * @param info 指定页查询信息以及查询条件，包括事件接收时间，事件上报时间，属性名称，设备标识符。
+	 * @return 返回指定页的事件。
+	 */
 	public Page<Event> getEventPage(EventPageInfo info) {
 		SimpleDateFormat format = new SimpleDateFormat(NotificationPageInfo.FORMAT);
 		if(info == null)

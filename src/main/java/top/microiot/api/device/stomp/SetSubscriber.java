@@ -12,14 +12,26 @@ import top.microiot.domain.attribute.DataType;
 import top.microiot.domain.attribute.DeviceAttributeType;
 import top.microiot.exception.NotFoundException;
 
+/**
+ * 设备端设置请求处理，设备收到设置请求后，将请求的属性值转换为用户定义的类型，供用户处理设置请求。
+ *
+ * @author 曹新宇
+ */
 @Component
 public abstract class SetSubscriber extends OperationSubscriber {
 	private Map<String, DeviceAttributeType> attDefinition;
 	
+	/**
+	 * 设备端设置请求处理构造函数。
+	 */
 	public SetSubscriber() {
 		super();
 	}
 
+	/**
+	 * 将设置请求中的属性值转变为用户的类型，调用设备的设置方法，返回操作响应。
+	 * @return 返回响应。
+	 */
 	@Override
 	public Response getResponse() {
 		this.attDefinition = this.getDevice().getDeviceType().getAttDefinition();
@@ -50,5 +62,10 @@ public abstract class SetSubscriber extends OperationSubscriber {
 		return types.get(req.getAttribute());
 	}
 
+	/**
+	 * 不同设备的具体设置的实现。
+	 * @param attribute 设置的属性名称。
+	 * @param value 设置的属性值。
+	 */
 	public abstract void setAttribute(String attribute, Object value);
 }

@@ -11,6 +11,11 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 
+/**
+ * 查询页信息类。
+ *
+ * @author 曹新宇
+ */
 public class RestPage<T> extends PageImpl<T> {
 	private static final long serialVersionUID = 6951386504142847046L;
 

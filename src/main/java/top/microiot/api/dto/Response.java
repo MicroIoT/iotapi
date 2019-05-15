@@ -2,6 +2,11 @@ package top.microiot.api.dto;
 
 import top.microiot.domain.attribute.DataValue;
 
+/**
+ * 响应类。
+ *
+ * @author 曹新宇
+ */
 public class Response{
 	private boolean success;
 	private String error;

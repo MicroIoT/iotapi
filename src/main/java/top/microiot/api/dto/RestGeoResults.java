@@ -5,6 +5,11 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * 地理位置查询结果列表类。
+ *
+ * @author 曹新宇
+ */
 public class RestGeoResults<T> {
 	private List<RestGeoResult<T>> content;
 	private RestDistance averageDistance;

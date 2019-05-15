@@ -8,6 +8,11 @@ import top.microiot.api.device.WebsocketDeviceSession;
 import top.microiot.api.dto.SetRequest;
 import top.microiot.api.stomp.OperationHandler;
 
+/**
+ * 设备端设置请求处理类。
+ *
+ * @author 曹新宇
+ */
 public class SubscribeSet extends OperationHandler {
 
 	public SubscribeSet(WebsocketDeviceSession wsSession, SetSubscriber subscriber) {

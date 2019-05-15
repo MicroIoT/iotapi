@@ -12,14 +12,28 @@ import top.microiot.domain.ActionType;
 import top.microiot.domain.attribute.DataType;
 import top.microiot.domain.attribute.DataValue;
 
+/**
+ * 设备端操作请求处理，设备收到操作请求后，将请求值转换为用户定义的类型，供用户处理操作请求，
+ * 返回响应值，将响应值转换为底层响应的格式。
+ *
+ * @author 曹新宇
+ */
 @Component
 public abstract class ActionSubscriber extends OperationSubscriber {
 	private Map<String, ActionType> actionTypes;
 	
+	/**
+	 * 设备端操作请求处理构造函数。
+	 */
 	public ActionSubscriber() {
 		super();
 	}
 
+	/**
+	 *  将操作请求中的请求值转变为用户的类型，调用设备的操作，
+	 *  将返回的响应值转换为协议要求的格式，返回操作响应。
+	 * @return 返回响应。
+	 */
 	@Override
 	public Response getResponse() {
 		this.actionTypes = this.getDevice().getDeviceType().getActionTypes();
@@ -55,5 +69,11 @@ public abstract class ActionSubscriber extends OperationSubscriber {
 		return types.get(req.getAction());
 	}
 
+	/**
+	 * 不同设备的具体操作的实现。
+	 * @param action 操作的名称。
+	 * @param request 操作的请求值。
+	 * @return 返回响应值。
+	 */
 	public abstract Object action(String action, Object request);
 }

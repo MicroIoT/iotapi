@@ -2,6 +2,11 @@ package top.microiot.api.dto;
 
 import top.microiot.domain.attribute.AttValueInfo;
 
+/**
+ * 设置请求类。
+ *
+ * @author 曹新宇
+ */
 public class SetRequest extends Request{
 	private String attribute;
 	private AttValueInfo value;

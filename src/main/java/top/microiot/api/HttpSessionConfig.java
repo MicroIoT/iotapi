@@ -30,6 +30,11 @@ import org.springframework.web.client.RestTemplate;
 import top.microiot.api.client.HttpClientSession;
 import top.microiot.api.device.HttpDeviceSession;
 
+/**
+ * http会话配置类
+ *
+ * @author 曹新宇
+ */
 @Configuration
 @EnableConfigurationProperties({HttpClientProperties.class, HttpSessionProperties.class})
 public class HttpSessionConfig {

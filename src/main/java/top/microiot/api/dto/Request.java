@@ -1,5 +1,11 @@
 package top.microiot.api.dto;
 
+/**
+ * 请求类。
+ *
+ * @author 曹新宇
+ */
+
 public class Request {
 	private String requestId;
 

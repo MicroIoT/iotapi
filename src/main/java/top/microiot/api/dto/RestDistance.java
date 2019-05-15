@@ -5,6 +5,11 @@ import org.springframework.data.geo.Metrics;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * 距离信息类。
+ *
+ * @author 曹新宇
+ */
 public class RestDistance {
 	private double value;
 	private Metrics metric;

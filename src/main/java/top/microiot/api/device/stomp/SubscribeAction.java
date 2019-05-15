@@ -8,6 +8,11 @@ import top.microiot.api.device.WebsocketDeviceSession;
 import top.microiot.api.dto.ActionRequest;
 import top.microiot.api.stomp.OperationHandler;
 
+/**
+ * 设备端操作请求处理类。
+ *
+ * @author 曹新宇
+ */
 public class SubscribeAction extends OperationHandler {
 
 	public SubscribeAction(WebsocketDeviceSession wsSession, ActionSubscriber subscriber) {

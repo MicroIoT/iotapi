@@ -4,6 +4,11 @@ import top.microiot.api.dto.ActionRequest;
 import top.microiot.api.stomp.PublishHandler;
 import top.microiot.domain.attribute.AttValueInfo;
 
+/**
+ * 客户端操作请求处理类。
+ *
+ * @author 曹新宇
+ */
 public class RequestAction extends PublishHandler {
 	private String action; 
 	private AttValueInfo value;

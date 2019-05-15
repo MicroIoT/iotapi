@@ -20,6 +20,11 @@ import top.microiot.api.client.WebsocketClientSession;
 import top.microiot.api.device.HttpDeviceSession;
 import top.microiot.api.device.WebsocketDeviceSession;
 
+/**
+ * websocket会话配置类
+ *
+ * @author 曹新宇
+ */
 @Configuration
 @EnableConfigurationProperties(WebsocketProperties.class)
 public class WebsocketSessionConfig {

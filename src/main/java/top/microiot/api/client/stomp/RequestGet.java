@@ -3,6 +3,11 @@ package top.microiot.api.client.stomp;
 import top.microiot.api.dto.GetRequest;
 import top.microiot.api.stomp.PublishHandler;
 
+/**
+ * 客户端获取请求处理类。
+ *
+ * @author 曹新宇
+ */
 public class RequestGet extends PublishHandler {
 	private String attribute;
 	
