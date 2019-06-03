@@ -5,15 +5,15 @@ package top.microiot.api.dto;
  *
  * @author 曹新宇
  */
-public class GetRequest extends Request{
+public class Get extends Request{
 	private String attribute;
 
-	public GetRequest() {
+	public Get() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
 
-	public GetRequest(String requestId, String attribute) {
+	public Get(String requestId, String attribute) {
 		super(requestId);
 		this.attribute = attribute;
 	}

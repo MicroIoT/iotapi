@@ -12,8 +12,8 @@ import top.microiot.domain.Alarm;
  *
  * @author 曹新宇
  */
-public class SubscribeAlarm extends SubscribeHandler {
-	public SubscribeAlarm(String deviceId, AlarmSubscriber subscriber) {
+public class AlarmSubscribeHandler extends SubscribeHandler {
+	public AlarmSubscribeHandler(String deviceId, AlarmSubscriber subscriber) {
 		super(deviceId, subscriber);
 	}
 

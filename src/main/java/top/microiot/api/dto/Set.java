@@ -7,16 +7,16 @@ import top.microiot.domain.attribute.AttValueInfo;
  *
  * @author 曹新宇
  */
-public class SetRequest extends Request{
+public class Set extends Request{
 	private String attribute;
 	private AttValueInfo value;
 	
-	public SetRequest() {
+	public Set() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
 
-	public SetRequest(String requestId, String attribute, AttValueInfo value) {
+	public Set(String requestId, String attribute, AttValueInfo value) {
 		super(requestId);
 		this.attribute = attribute;
 		this.value = value;

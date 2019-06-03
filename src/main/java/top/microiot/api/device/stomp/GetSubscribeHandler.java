@@ -5,23 +5,22 @@ import java.lang.reflect.Type;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 
 import top.microiot.api.device.WebsocketDeviceSession;
-import top.microiot.api.dto.GetRequest;
-import top.microiot.api.stomp.OperationHandler;
+import top.microiot.api.dto.Get;
 
 /**
- * 设备端获取请求处理类。
+ * 设备端获取请求处理类，接收获取指示，返回获取响应。
  *
  * @author 曹新宇
  */
-public class SubscribeGet extends OperationHandler {
+public class GetSubscribeHandler extends RequestSubscribeHandler {
 
-	public SubscribeGet(WebsocketDeviceSession wsSession, GetSubscriber subscriber) {
+	public GetSubscribeHandler(WebsocketDeviceSession wsSession, GetRequestSubscriber subscriber) {
 		super(wsSession, subscriber);
 	}
 
 	@Override
 	public Type getPayloadType(StompHeaders headers) {
-		return GetRequest.class;
+		return Get.class;
 	}
 
 	@Override

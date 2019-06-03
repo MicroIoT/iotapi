@@ -1,20 +1,21 @@
-package top.microiot.api.stomp;
+package top.microiot.api.device.stomp;
 
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
 
 import top.microiot.api.device.WebsocketDeviceSession;
 import top.microiot.api.dto.Response;
+import top.microiot.api.stomp.SubscribeHandler;
 
 /**
  * 设备端请求处理抽象类。
  *
  * @author 曹新宇
  */
-public abstract class OperationHandler extends SubscribeHandler {
+public abstract class RequestSubscribeHandler extends SubscribeHandler {
 	private StompSession session;
 	
-	public OperationHandler(WebsocketDeviceSession wsSession, OperationSubscriber subscriber) {
+	public RequestSubscribeHandler(WebsocketDeviceSession wsSession, RequestSubscriber subscriber) {
 		super(wsSession.getDevice().getId(), subscriber);
 		subscriber.setDevice(wsSession.getDevice());
 	}
@@ -28,8 +29,8 @@ public abstract class OperationHandler extends SubscribeHandler {
 	@Override
 	public void handleFrame(StompHeaders headers, Object payload) {
 		super.handleFrame(headers, payload);
-		Response response = ((OperationSubscriber)subscriber).getResponse();
-		String topic = "/topic/result." + getOperation() + "." + deviceId + "." + ((OperationSubscriber)subscriber).request.getRequestId();
+		Response response = ((RequestSubscriber)subscriber).getResponse();
+		String topic = "/topic/result." + getOperation() + "." + deviceId + "." + ((RequestSubscriber)subscriber).request.getRequestId();
 		synchronized(session) {
 			session.send(topic, response);
 		}

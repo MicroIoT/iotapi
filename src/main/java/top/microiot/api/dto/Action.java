@@ -7,16 +7,16 @@ import top.microiot.domain.attribute.AttValueInfo;
  *
  * @author 曹新宇
  */
-public class ActionRequest extends Request{
+public class Action extends Request{
 	private String action;
 	private AttValueInfo value;
 	
-	public ActionRequest() {
+	public Action() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
 
-	public ActionRequest(String requestId, String action, AttValueInfo value) {
+	public Action(String requestId, String action, AttValueInfo value) {
 		super(requestId);
 		this.action = action;
 		this.value = value;

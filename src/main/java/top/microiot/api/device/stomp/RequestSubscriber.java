@@ -1,4 +1,4 @@
-package top.microiot.api.stomp;
+package top.microiot.api.device.stomp;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -6,9 +6,10 @@ import org.slf4j.LoggerFactory;
 import top.microiot.api.device.WebsocketDeviceSession;
 import top.microiot.api.dto.Request;
 import top.microiot.api.dto.Response;
+import top.microiot.api.stomp.AbstractEventSubscriber;
 import top.microiot.domain.Device;
 
-public abstract class OperationSubscriber extends AbstractEventSubscriber {
+public abstract class RequestSubscriber extends AbstractEventSubscriber {
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	protected Request request;

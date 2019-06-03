@@ -5,24 +5,23 @@ import java.lang.reflect.Type;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 
 import top.microiot.api.device.WebsocketDeviceSession;
-import top.microiot.api.dto.ActionRequest;
-import top.microiot.api.stomp.OperationHandler;
+import top.microiot.api.dto.Action;
 
 /**
- * 设备端操作请求处理类。
+ * 设备端操作请求处理类，接收操作指示，返回操作响应。
  *
  * @author 曹新宇
  */
-public class SubscribeAction extends OperationHandler {
+public class ActionSubscribeHandler extends RequestSubscribeHandler {
 
-	public SubscribeAction(WebsocketDeviceSession wsSession, ActionSubscriber subscriber) {
+	public ActionSubscribeHandler(WebsocketDeviceSession wsSession, ActionRequestSubscriber subscriber) {
 		super(wsSession, subscriber);
 		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	public Type getPayloadType(StompHeaders headers) {
-		return ActionRequest.class;
+		return Action.class;
 	}
 
 	@Override

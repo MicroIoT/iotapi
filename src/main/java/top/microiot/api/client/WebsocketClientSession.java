@@ -1,6 +1,5 @@
 package top.microiot.api.client;
 
-import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -11,18 +10,24 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.integration.stomp.WebSocketStompSessionManager;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 
+import top.microiot.api.client.stomp.ActionAsyncHandler;
+import top.microiot.api.client.stomp.ActionRequestPublisher;
+import top.microiot.api.client.stomp.ActionResponseSubscriber;
+import top.microiot.api.client.stomp.AlarmSubscribeHandler;
 import top.microiot.api.client.stomp.AlarmSubscriber;
-import top.microiot.api.client.stomp.RequestAction;
-import top.microiot.api.client.stomp.RequestGet;
-import top.microiot.api.client.stomp.RequestSet;
-import top.microiot.api.client.stomp.SubscribeAlarm;
+import top.microiot.api.client.stomp.GetAsyncHandler;
+import top.microiot.api.client.stomp.GetRequestPublisher;
+import top.microiot.api.client.stomp.GetResponseSubscriber;
+import top.microiot.api.client.stomp.RequestPublishSyncHandler;
+import top.microiot.api.client.stomp.SetAsyncHandler;
+import top.microiot.api.client.stomp.SetRequestPublisher;
+import top.microiot.api.client.stomp.SetResponseSubscriber;
 import top.microiot.api.dto.Response;
 import top.microiot.domain.ActionType;
 import top.microiot.domain.Device;
 import top.microiot.domain.attribute.AttValueInfo;
 import top.microiot.domain.attribute.AttributeType;
 import top.microiot.domain.attribute.DataType;
-import top.microiot.domain.attribute.Location;
 import top.microiot.exception.NotFoundException;
 import top.microiot.exception.StatusException;
 import top.microiot.exception.ValueException;
@@ -59,93 +64,20 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 	 * @param subscriber 收到告警后的处理。
 	 * @return 返回告警处理。
 	 */
-	public SubscribeAlarm subscribe(String deviceId, AlarmSubscriber subscriber) {
+	public AlarmSubscribeHandler subscribe(String deviceId, AlarmSubscriber subscriber) {
+		Device device = session.getDevice(deviceId);
+		if(device == null)
+			throw new NotFoundException("device: " + deviceId);
+		
 		subscriber.init();
 		subscriber.setWebsocketClientSession(this);
-		SubscribeAlarm sessionHandler = new SubscribeAlarm(deviceId, subscriber);
+		AlarmSubscribeHandler sessionHandler = new AlarmSubscribeHandler(deviceId, subscriber);
         connect(sessionHandler);
         return sessionHandler;
 	}
 	
 	/**
-	 * 客户端获取设备属性值。属性值类型为整型。
-	 * @param deviceId 获取属性值的设备。
-	 * @param attribute 属性名称。
-	 * @return 返回整型属性值。
-	 */
-	public int getInt(String deviceId, String attribute) {
-		int value = get(deviceId, attribute, Integer.class);
-		return value;
-	}
-	
-	/**
-	 * 客户端获取设备属性值。属性值类型为double。
-	 * @param deviceId 获取属性值的设备。
-	 * @param attribute 属性名称。
-	 * @return 返回double属性值。
-	 */
-	public double getDouble(String deviceId, String attribute) {
-		double value = get(deviceId, attribute, Double.class);
-		return value;
-	}
-	
-	/**
-	 * 客户端获取设备属性值。属性值类型为字符串。
-	 * @param deviceId 获取属性值的设备。
-	 * @param attribute 属性名称。
-	 * @return 返回字符串属性值。
-	 */
-	public String getString(String deviceId, String attribute) {
-		String value = get(deviceId, attribute, String.class);
-		return value;
-	}
-	
-	/**
-	 * 客户端获取设备属性值。属性值类型为日期。
-	 * @param deviceId 获取属性值的设备。
-	 * @param attribute 属性名称。
-	 * @return 返回日期属性值。
-	 */
-	public Date getDate(String deviceId, String attribute) {
-		Date value = get(deviceId, attribute, Date.class);
-		return value;
-	}
-	
-	/**
-	 * 客户端获取设备属性值。属性值类型为枚举。
-	 * @param deviceId 获取属性值的设备。
-	 * @param attribute 属性名称。
-	 * @return 返回枚举属性值。
-	 */
-	public String getEnum(String deviceId, String attribute) {
-		String value = get(deviceId, attribute, String.class);
-		return value;
-	}
-	
-	/**
-	 * 客户端获取设备属性值。属性值类型为location。
-	 * @param deviceId 获取属性值的设备。
-	 * @param attribute 属性名称。
-	 * @return 返回location属性值。
-	 */
-	public Location getLocation(String deviceId, String attribute) {
-		Location value = get(deviceId, attribute, Location.class);
-		return value;
-	}
-	
-	/**
-	 * 客户端获取设备属性值。属性值类型为bool。
-	 * @param deviceId 获取属性值的设备。
-	 * @param attribute 属性名称。
-	 * @return 返回bool属性值。
-	 */
-	public boolean getBool(String deviceId, String attribute) {
-		Boolean value = get(deviceId, attribute, Boolean.class);
-		return value;
-	}
-	
-	/**
-	 * 客户端获取设备属性值。
+	 * 客户端同步获取设备属性值。
 	 * @param deviceId 获取属性值的设备。
 	 * @param attribute 属性名称。
 	 * @param <T> 返回属性值类。
@@ -153,12 +85,24 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 	 * @return 返回属性值。
 	 */
 	public <T> T get(String deviceId, String attribute, Class<T> responseType) {
-		GetHandler<T> g = new GetHandler<T>(session, deviceId, attribute, responseType);
-		return g.get();
+		GetHandler<T> handler = new GetHandler<T>(session, deviceId, attribute, responseType);
+		return handler.get();
 	}
 
 	/**
-	 * 客户端获取设备属性值。
+	 * 客户端异步获取设备属性值。
+	 * @param deviceId 获取属性值的设备。
+	 * @param attribute 属性名称。
+	 * @param <T> 返回属性值类。
+	 * @param responseType 返回属性值的类型。
+	 * @param subscriber 获取设备属性值处理方法。
+	 */
+	public <T> void getAsync(String deviceId, String attribute, Class<T> responseType, GetResponseSubscriber subscriber) {
+		GetHandler<T> handler = new GetHandler<T>(session, deviceId, attribute, responseType, subscriber);
+		handler.getAsync();
+	}
+	/**
+	 * 客户端同步获取设备属性值。
 	 * @param deviceId 获取属性值的设备。
 	 * @param attribute 属性名称。
 	 * @param <T> 返回属性值参数化类。
@@ -166,8 +110,20 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 	 * @return 返回属性值。
 	 */
 	public <T> T get(String deviceId, String attribute, ParameterizedTypeReference<T> responseType) {
-		GetHandler<T> a = new GetHandler<T>(session, deviceId, attribute, responseType);
-		return a.get();
+		GetHandler<T> handler = new GetHandler<T>(session, deviceId, attribute, responseType);
+		return handler.get();
+	}
+	/**
+	 * 客户端异步获取设备属性值。
+	 * @param deviceId 获取属性值的设备。
+	 * @param attribute 属性名称。
+	 * @param <T> 返回属性值类。
+	 * @param responseType 返回属性值的参数化类型。
+	 * @param subscriber 获取设备属性值处理方法。
+	 */
+	public <T> void getAsync(String deviceId, String attribute, ParameterizedTypeReference<T> responseType, GetResponseSubscriber subscriber) {
+		GetHandler<T> handler = new GetHandler<T>(session, deviceId, attribute, responseType, subscriber);
+		handler.getAsync();
 	}
 	
 	/**
@@ -177,117 +133,20 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 	 * @param value 属性值。
 	 */
 	public void set(String deviceId, String attribute, Object value) {
-		Device device = session.getDevice(deviceId);
-		if(device == null)
-			throw new NotFoundException("device: " + deviceId);
-		AttributeType attType = device.getDeviceType().getAttDefinition().get(attribute);
-		if(attType == null)
-			throw new NotFoundException("attribute: " + attribute);
-		try{
-			AttValueInfo attributeValue = attType.getAttValue(value);
-			Response response = set(deviceId, attribute, attributeValue);
-			if(!response.isSuccess())
-				throw new StatusException(response.getError());
-		} catch(Throwable e) {
-			logger.error("set attribute [" + attribute + "] error: ", e);
-			throw new ValueException("set attribute [" + attribute + "] error: " + e.getMessage());
-		}
-	}
-	
-	private Response set(String deviceId, String attribute, AttValueInfo value) {
-		RequestSet request = new RequestSet(deviceId, attribute, value);
-        
-        connect(request);
-		
-        try {
-			return request.get(timeout, TimeUnit.SECONDS);
-		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			throw new StatusException(e.getMessage());
-		}
+		SetHandler handler = new SetHandler(session, deviceId, attribute, value);
+		handler.set();
 	}
 	
 	/**
-	 * 客户端调用设备操作。操作响应类型为整形
-	 * @param deviceId 被调用的设备。
-	 * @param action 操作名称。
-	 * @param request 操作请求值。
-	 * @return 返回整形类型操作响应。
+	 * 客户端异步设置设备属性值。
+	 * @param deviceId 设置属性值的设备。
+	 * @param attribute 属性名称。
+	 * @param value 属性值。
+	 * @param subscriber 设置设备属性值处理方法。
 	 */
-	public int actionInt(String deviceId, String action, Object request) {
-		int value = action(deviceId, action, request, Integer.class);
-		return value;
-	}
-	
-	/**
-	 * 客户端调用设备操作。操作响应类型为double
-	 * @param deviceId 被调用的设备。
-	 * @param action 操作名称。
-	 * @param request 操作请求值。
-	 * @return 返回double类型操作响应。
-	 */
-	public double actionDouble(String deviceId, String action, Object request) {
-		double value = action(deviceId, action, request, Double.class);
-		return value;
-	}
-	
-	/**
-	 * 客户端调用设备操作。操作响应类型为字符串
-	 * @param deviceId 被调用的设备。
-	 * @param action 操作名称。
-	 * @param request 操作请求值。
-	 * @return 返回字符串类型操作响应。
-	 */
-	public String actionString(String deviceId, String action, Object request) {
-		String value = action(deviceId, action, request, String.class);
-		return value;
-	}
-	
-	/**
-	 * 客户端调用设备操作。操作响应类型为日期。
-	 * @param deviceId 被调用的设备。
-	 * @param action 操作名称。
-	 * @param request 操作请求值。
-	 * @return 返回日期类型操作响应。
-	 */
-	public Date actionDate(String deviceId, String action, Object request) {
-		Date value = action(deviceId, action, request, Date.class);
-		return value;
-	}
-	
-	/**
-	 * 客户端调用设备操作。操作响应类型为枚举。
-	 * @param deviceId 被调用的设备。
-	 * @param action 操作名称。
-	 * @param request 操作请求值。
-	 * @return 返回枚举类型操作响应。
-	 */
-	public String actionEnum(String deviceId, String action, Object request) {
-		String value = action(deviceId, action, request, String.class);
-		return value;
-	}
-	
-	/**
-	 * 客户端调用设备操作。操作响应类型为location。
-	 * @param deviceId 被调用的设备。
-	 * @param action 操作名称。
-	 * @param request 操作请求值。
-	 * @return 返回location类型操作响应。
-	 */
-	public Location actionLocation(String deviceId, String action, Object request) {
-		Location value =action(deviceId, action, request, Location.class);
-		return value;
-	}
-	
-	/**
-	 * 客户端调用设备操作。操作响应类型为bool。
-	 * @param deviceId 被调用的设备。
-	 * @param action 操作名称。
-	 * @param request 操作请求值。
-	 * @return 返回bool类型操作响应。
-	 */
-	public boolean actionBool(String deviceId, String action, Object request) {
-		Boolean value = action(deviceId, action, request, Boolean.class);
-		return value;
+	public void setAsync(String deviceId, String attribute, Object value, SetResponseSubscriber subscriber) {
+		SetHandler handler = new SetHandler(session, deviceId, attribute, value, subscriber);
+		handler.setAsync();
 	}
 	
 	/**
@@ -305,6 +164,20 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 	}
 	
 	/**
+	 * 客户端异步调用设备操作。
+	 * @param deviceId 被调用的设备。
+	 * @param action 操作名称。
+	 * @param request 操作请求值。
+	 * @param <T> 返回响应值类。
+	 * @param responseType 返回响应值的类型。
+	 * @param subscriber 操作设备处理方法。
+	 */
+	public <T> void actionAsync(String deviceId, String action, Object request, Class<T> responseType, ActionResponseSubscriber subscriber) {
+		ActionHandler<T> handler = new ActionHandler<T>(session, deviceId, action, request, responseType, subscriber);
+		handler.actionAsync();
+	}
+	
+	/**
 	 * 客户端调用设备action操作。
 	 * @param deviceId 被调用的设备。
 	 * @param action 操作名称。
@@ -319,6 +192,20 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 	}
 	
 	/**
+	 * 客户端异步调用设备action操作。
+	 * @param deviceId 被调用的设备。
+	 * @param action 操作名称。
+	 * @param request 操作请求值。
+	 * @param <T> 返回响应值参数化类。
+	 * @param responseType 返回响应值的参数化类型。
+	 * @param subscriber 操作设备处理方法。
+	 */
+	public <T> void actionAsync(String deviceId, String action, Object request, ParameterizedTypeReference<T> responseType, ActionResponseSubscriber subscriber) {
+		ActionHandler<T> handler = new ActionHandler<T>(session, deviceId, action, request, responseType, subscriber);
+		handler.actionAsync();
+	}
+	
+	/**
 	 * 客户端调用设备action操作。
 	 * @param deviceId 被调用的设备。
 	 * @param action 操作名称。
@@ -330,6 +217,18 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 		a.action();
 	}
 	
+	/**
+	 * 客户端异步调用设备action操作。
+	 * @param deviceId 被调用的设备。
+	 * @param action 操作名称。
+	 * @param request 操作请求值。
+	 * @param subscriber 操作设备处理方法。
+	 */
+	@SuppressWarnings("rawtypes")
+	public void actionAsync(String deviceId, String action, Object request, ActionResponseSubscriber subscriber) {
+		ActionHandler handler = new ActionHandler(session, deviceId, action, request, subscriber);
+		handler.actionAsync();
+	}
 	public void stop() {
 		destroy();
 		session.stop();
@@ -338,6 +237,7 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 	private class GetHandler<T> {
 		private HttpClientSession session;
 		private String deviceId;
+		private Device device;
 		private String attribute;
 		private Response response;
 		private DataType responseDataType;
@@ -345,12 +245,15 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 		private Class<T> responseTypeClass = null;
 		private ParameterizedTypeReference<T> responseType = null;
 		
+		private GetResponseSubscriber subscriber;
+		
 		public GetHandler(HttpClientSession session, String deviceId, String attribute, Class<T> responseTypeClass) {
 			super();
 			this.session = session;
 			this.deviceId = deviceId;
 			this.attribute = attribute;
 			this.responseTypeClass = responseTypeClass;
+			this.subscriber.setResponseTypeClass(responseTypeClass);
 		}
 		
 		public GetHandler(HttpClientSession session, String deviceId, String attribute, ParameterizedTypeReference<T> responseType) {
@@ -359,15 +262,31 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 			this.deviceId = deviceId;
 			this.attribute = attribute;
 			this.responseType = responseType;
+			this.subscriber.setResponseType(responseType);
+		}
+		
+		public GetHandler(HttpClientSession session, String deviceId, String attribute, Class<T> responseTypeClass, GetResponseSubscriber subscriber) {
+			super();
+			this.session = session;
+			this.deviceId = deviceId;
+			this.attribute = attribute;
+			this.responseTypeClass = responseTypeClass;
+			this.subscriber = subscriber;
+			this.subscriber.setResponseTypeClass(responseTypeClass);
+		}
+		
+		public GetHandler(HttpClientSession session, String deviceId, String attribute, ParameterizedTypeReference<T> responseType, GetResponseSubscriber subscriber) {
+			super();
+			this.session = session;
+			this.deviceId = deviceId;
+			this.attribute = attribute;
+			this.responseType = responseType;
+			this.subscriber = subscriber;
+			this.subscriber.setResponseType(responseType);
 		}
 		
 		public T get() {
-			Device device = session.getDevice(deviceId);
-			if(device == null)
-				throw new NotFoundException("device: " + deviceId);
-			responseDataType = device.getDeviceType().getAttDefinition().get(attribute).getDataType();
-			if(responseDataType == null)
-				throw new NotFoundException("attribute: " + attribute);
+			init();
 			try {
 				response = get(deviceId, attribute);
 				if(!response.isSuccess())
@@ -379,6 +298,25 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 				throw new ValueException("get attribute [" + attribute + "] error: " + e.getMessage());
 			}
 		}
+
+		public void getAsync() {
+			init();
+			GetRequestPublisher request = new GetRequestPublisher(attribute);
+			subscriber.setAttribute(attribute);
+			subscriber.setDevice(device);
+			subscriber.setResponseDataType(responseDataType);
+			GetAsyncHandler handler = new GetAsyncHandler(deviceId, request, subscriber);
+			connect(handler);
+		}
+		
+		private void init() {
+			device = session.getDevice(deviceId);
+			if(device == null)
+				throw new NotFoundException("device: " + deviceId);
+			responseDataType = device.getDeviceType().getAttDefinition().get(attribute).getDataType();
+			if(responseDataType == null)
+				throw new NotFoundException("attribute: " + attribute);
+		}
 		
 		@SuppressWarnings("unchecked")
 		private T getResponse() {
@@ -389,7 +327,7 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 		}
 		
 		private Response get(String deviceId, String attribute) {
-			RequestGet request = new RequestGet(deviceId, attribute);
+			RequestPublishSyncHandler request = new RequestPublishSyncHandler(deviceId, new GetRequestPublisher(attribute));
 	        
 	        connect(request);
 			
@@ -401,16 +339,97 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 		}
 	}
 	
+	private class SetHandler{
+		private HttpClientSession session;
+		private String deviceId;
+		private Device device;
+		private String attribute;
+		private Object value;
+		private AttValueInfo attributeValue;
+		
+		private SetResponseSubscriber subscriber;
+		
+		public SetHandler(HttpClientSession session, String deviceId, String attribute, Object value) {
+			super();
+			this.session = session;
+			this.deviceId = deviceId;
+			this.attribute = attribute;
+			this.value = value;
+		}
+		
+		public SetHandler(HttpClientSession session, String deviceId, String attribute, Object value, SetResponseSubscriber subscriber) {
+			super();
+			this.session = session;
+			this.deviceId = deviceId;
+			this.attribute = attribute;
+			this.value = value;
+			this.subscriber = subscriber;
+		}
+		
+		public void set() {
+			try{
+				init();
+				set(deviceId, attribute, attributeValue);
+			} catch(Throwable e) {
+				logger.error("set attribute [" + attribute + "] error: ", e);
+				throw new ValueException("set attribute [" + attribute + "] error: " + e.getMessage());
+			}
+		}
+
+		private void init() {
+			device = session.getDevice(deviceId);
+			if(device == null)
+				throw new NotFoundException("device: " + deviceId);
+			AttributeType attType = device.getDeviceType().getAttDefinition().get(attribute);
+			if(attType == null)
+				throw new NotFoundException("attribute: " + attribute);
+			attributeValue = attType.getAttValue(value);
+		}
+		
+		public void setAsync() {
+			try{
+				init();
+				SetRequestPublisher request = new SetRequestPublisher(attribute, attributeValue);
+				subscriber.setDevice(device);
+				subscriber.setAttribute(attribute);
+				subscriber.setValue(value);
+				SetAsyncHandler handler = new SetAsyncHandler(deviceId, request, subscriber);
+				connect(handler);
+			} catch(Throwable e) {
+				logger.error("set attribute [" + attribute + "] error: ", e);
+				throw new ValueException("set attribute [" + attribute + "] error: " + e.getMessage());
+			}
+		}
+		
+		private void set(String deviceId, String attribute, AttValueInfo value) {
+			RequestPublishSyncHandler request = new RequestPublishSyncHandler(deviceId, new SetRequestPublisher(attribute, value));
+	        
+	        connect(request);
+			
+	        try {
+	        	Response response = request.get(timeout, TimeUnit.SECONDS);
+	        	if(!response.isSuccess())
+					throw new StatusException(response.getError());
+			} catch (InterruptedException | ExecutionException | TimeoutException e) {
+				throw new StatusException(e.getMessage());
+			}
+		}
+	}
+	
 	private class ActionHandler<T> {
 		private HttpClientSession session;
 		private String deviceId;
+		private Device device;
 		private String action;
 		private Object request;
 		private Response response;
+		private ActionType actionType;
 		private DataType responseDataType;
 		
 		private Class<T> responseTypeClass = null;
 		private ParameterizedTypeReference<T> responseType = null;
+		
+		private ActionResponseSubscriber subscriber;
 		
 		public ActionHandler(HttpClientSession session, String deviceId, String action, Object request) {
 			super();
@@ -438,24 +457,38 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 			this.responseType = responseType;
 		}
 		
+		public ActionHandler(HttpClientSession session, String deviceId, String action, Object request, ActionResponseSubscriber subscriber) {
+			super();
+			this.session = session;
+			this.deviceId = deviceId;
+			this.action = action;
+			this.request = request;
+			this.subscriber = subscriber;
+		}
+		
+		public ActionHandler(HttpClientSession session, String deviceId, String action, Object request, Class<T> responseTypeClass, ActionResponseSubscriber subscriber) {
+			super();
+			this.session = session;
+			this.deviceId = deviceId;
+			this.action = action;
+			this.request = request;
+			this.responseTypeClass = responseTypeClass;
+			this.subscriber = subscriber;
+			this.subscriber.setResponseTypeClass(responseTypeClass);
+		}
+
+		public ActionHandler(HttpClientSession session, String deviceId, String action, Object request, ParameterizedTypeReference<T> responseType, ActionResponseSubscriber subscriber) {
+			super();
+			this.session = session;
+			this.deviceId = deviceId;
+			this.action = action;
+			this.request = request;
+			this.responseType = responseType;
+			this.subscriber = subscriber;
+			this.subscriber.setResponseType(responseType);
+		}
 		public T action() {
-			Device device = ((HttpClientSession) session).getDevice(deviceId);
-			if(device == null)
-				throw new NotFoundException("device: " + deviceId);
-			ActionType actionType = device.getDeviceType().getActionTypes().get(action);
-			if(actionType == null)
-				throw new NotFoundException("action: " + action);
-			AttValueInfo requestValue = null;
-			if(actionType.getRequest() != null) {
-				DataType requestType = actionType.getRequestAttributeType().getDataType();
-				
-				try{
-					requestValue = requestType.getAttValue(request);
-				} catch(Throwable e) {
-					logger.error("action [" + action + "] request error: ", e);
-					throw new ValueException("action [" + action + "] request error: " + e.getMessage());
-				}	
-			}
+			AttValueInfo requestValue = init();
 			
 			try {
 				response = action(deviceId, action, requestValue);
@@ -474,6 +507,38 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 				throw new ValueException("action [" + action + "] response error: " + e.getMessage());
 			}
 		}
+
+		public void actionAsync() {
+			AttValueInfo requestValue = init();
+			ActionRequestPublisher request = new ActionRequestPublisher(action, requestValue);
+			subscriber.setAction(action);
+			subscriber.setDevice(device);
+			subscriber.setResponseDataType(actionType.getResponseAttributeType().getDataType());
+			subscriber.setRequest(request);
+			ActionAsyncHandler handler = new ActionAsyncHandler(deviceId, request, subscriber);
+			connect(handler);
+		}
+		
+		private AttValueInfo init() {
+			device = ((HttpClientSession) session).getDevice(deviceId);
+			if(device == null)
+				throw new NotFoundException("device: " + deviceId);
+			actionType = device.getDeviceType().getActionTypes().get(action);
+			if(actionType == null)
+				throw new NotFoundException("action: " + action);
+			AttValueInfo requestValue = null;
+			if(actionType.getRequest() != null) {
+				DataType requestType = actionType.getRequestAttributeType().getDataType();
+				
+				try{
+					requestValue = requestType.getAttValue(request);
+				} catch(Throwable e) {
+					logger.error("action [" + action + "] request error: ", e);
+					throw new ValueException("action [" + action + "] request error: " + e.getMessage());
+				}	
+			}
+			return requestValue;
+		}
 		
 		@SuppressWarnings("unchecked")
 		protected T getResponse() {
@@ -486,7 +551,7 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 		}
 		
 		private Response action(String deviceId, String action, AttValueInfo value) {
-			RequestAction request = new RequestAction(deviceId, action, value);
+			RequestPublishSyncHandler request = new RequestPublishSyncHandler(deviceId, new ActionRequestPublisher(action, value));
 	        
 	        connect(request);
 			

@@ -3,12 +3,12 @@ package top.microiot.api.device;
 import org.springframework.integration.stomp.WebSocketStompSessionManager;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 
-import top.microiot.api.device.stomp.ActionSubscriber;
-import top.microiot.api.device.stomp.GetSubscriber;
-import top.microiot.api.device.stomp.SetSubscriber;
-import top.microiot.api.device.stomp.SubscribeAction;
-import top.microiot.api.device.stomp.SubscribeGet;
-import top.microiot.api.device.stomp.SubscribeSet;
+import top.microiot.api.device.stomp.ActionRequestSubscriber;
+import top.microiot.api.device.stomp.GetRequestSubscriber;
+import top.microiot.api.device.stomp.SetRequestSubscriber;
+import top.microiot.api.device.stomp.ActionSubscribeHandler;
+import top.microiot.api.device.stomp.GetSubscribeHandler;
+import top.microiot.api.device.stomp.SetSubscribeHandler;
 import top.microiot.domain.Device;
 
 /**
@@ -38,10 +38,10 @@ public class WebsocketDeviceSession extends WebSocketStompSessionManager {
 	 * @param subscriber 收到获取请求后的处理。
 	 * @return 返回获取请求处理。
 	 */
-	public SubscribeGet subscribe(GetSubscriber subscriber) {
+	public GetSubscribeHandler subscribe(GetRequestSubscriber subscriber) {
 		subscriber.init();
 		subscriber.setWebsocketDeviceSession(this);
-		SubscribeGet sessionHandler = new SubscribeGet(this, subscriber);
+		GetSubscribeHandler sessionHandler = new GetSubscribeHandler(this, subscriber);
         connect(sessionHandler);
         return sessionHandler;
 	}
@@ -51,10 +51,10 @@ public class WebsocketDeviceSession extends WebSocketStompSessionManager {
 	 * @param subscriber 收到设置请求后的处理。
 	 * @return 返回设置请求处理。
 	 */
-	public SubscribeSet subscribe(SetSubscriber subscriber) {
+	public SetSubscribeHandler subscribe(SetRequestSubscriber subscriber) {
 		subscriber.init();
 		subscriber.setWebsocketDeviceSession(this);
-		SubscribeSet sessionHandler = new SubscribeSet(this, subscriber);
+		SetSubscribeHandler sessionHandler = new SetSubscribeHandler(this, subscriber);
         connect(sessionHandler);
         return sessionHandler;
 	}
@@ -64,10 +64,10 @@ public class WebsocketDeviceSession extends WebSocketStompSessionManager {
 	 * @param subscriber 收到操作请求后的处理。
 	 * @return 返回操作请求处理。
 	 */
-	public SubscribeAction subscribe(ActionSubscriber subscriber) {
+	public ActionSubscribeHandler subscribe(ActionRequestSubscriber subscriber) {
 		subscriber.init();
 		subscriber.setWebsocketDeviceSession(this);
-		SubscribeAction sessionHandler = new SubscribeAction(this, subscriber);
+		ActionSubscribeHandler sessionHandler = new ActionSubscribeHandler(this, subscriber);
         connect(sessionHandler);
         return sessionHandler;
 	}

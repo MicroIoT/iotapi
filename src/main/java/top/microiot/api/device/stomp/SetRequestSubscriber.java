@@ -6,8 +6,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 
 import top.microiot.api.dto.Response;
-import top.microiot.api.dto.SetRequest;
-import top.microiot.api.stomp.OperationSubscriber;
+import top.microiot.api.dto.Set;
 import top.microiot.domain.attribute.DataType;
 import top.microiot.domain.attribute.DeviceAttributeType;
 import top.microiot.exception.NotFoundException;
@@ -18,13 +17,13 @@ import top.microiot.exception.NotFoundException;
  * @author 曹新宇
  */
 @Component
-public abstract class SetSubscriber extends OperationSubscriber {
+public abstract class SetRequestSubscriber extends RequestSubscriber {
 	private Map<String, DeviceAttributeType> attDefinition;
 	
 	/**
 	 * 设备端设置请求处理构造函数。
 	 */
-	public SetSubscriber() {
+	public SetRequestSubscriber() {
 		super();
 	}
 
@@ -35,7 +34,7 @@ public abstract class SetSubscriber extends OperationSubscriber {
 	@Override
 	public Response getResponse() {
 		this.attDefinition = this.getDevice().getDeviceType().getAttDefinition();
-		SetRequest req = (SetRequest) request;
+		Set req = (Set) request;
 		try {
 			DataType type = this.attDefinition.get(req.getAttribute()).getDataType();
 			Object attributeValue;
@@ -58,7 +57,7 @@ public abstract class SetSubscriber extends OperationSubscriber {
 		}
 	}
 
-	private Object getType(SetRequest req) {
+	private Object getType(Set req) {
 		return types.get(req.getAttribute());
 	}
 

@@ -5,9 +5,8 @@ import java.util.Map;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 
-import top.microiot.api.dto.ActionRequest;
+import top.microiot.api.dto.Action;
 import top.microiot.api.dto.Response;
-import top.microiot.api.stomp.OperationSubscriber;
 import top.microiot.domain.ActionType;
 import top.microiot.domain.attribute.DataType;
 import top.microiot.domain.attribute.DataValue;
@@ -19,13 +18,13 @@ import top.microiot.domain.attribute.DataValue;
  * @author 曹新宇
  */
 @Component
-public abstract class ActionSubscriber extends OperationSubscriber {
+public abstract class ActionRequestSubscriber extends RequestSubscriber {
 	private Map<String, ActionType> actionTypes;
 	
 	/**
 	 * 设备端操作请求处理构造函数。
 	 */
-	public ActionSubscriber() {
+	public ActionRequestSubscriber() {
 		super();
 	}
 
@@ -37,7 +36,7 @@ public abstract class ActionSubscriber extends OperationSubscriber {
 	@Override
 	public Response getResponse() {
 		this.actionTypes = this.getDevice().getDeviceType().getActionTypes();
-		ActionRequest req = (ActionRequest) request;
+		Action req = (Action) request;
 		try {
 			ActionType actType = this.actionTypes.get(req.getAction());
 			Object requestValue = null;
@@ -65,7 +64,7 @@ public abstract class ActionSubscriber extends OperationSubscriber {
 		}
 	}
 
-	private Object getType(ActionRequest req) {
+	private Object getType(Action req) {
 		return types.get(req.getAction());
 	}
 

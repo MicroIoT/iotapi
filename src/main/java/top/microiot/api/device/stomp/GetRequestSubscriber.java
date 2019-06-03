@@ -4,9 +4,8 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
-import top.microiot.api.dto.GetRequest;
+import top.microiot.api.dto.Get;
 import top.microiot.api.dto.Response;
-import top.microiot.api.stomp.OperationSubscriber;
 import top.microiot.domain.attribute.AttributeType;
 import top.microiot.domain.attribute.DataValue;
 import top.microiot.domain.attribute.DeviceAttributeType;
@@ -17,13 +16,13 @@ import top.microiot.domain.attribute.DeviceAttributeType;
  * @author 曹新宇
  */
 @Component
-public abstract class GetSubscriber extends OperationSubscriber {
+public abstract class GetRequestSubscriber extends RequestSubscriber {
 	private Map<String, DeviceAttributeType> attDefinition;
 	
 	/**
 	 * 设备端获取请求处理构造函数。
 	 */
-	public GetSubscriber() {
+	public GetRequestSubscriber() {
 		super();
 	}
 
@@ -34,7 +33,7 @@ public abstract class GetSubscriber extends OperationSubscriber {
 	@Override
 	public Response getResponse() {
 		this.attDefinition = this.getDevice().getDeviceType().getAttDefinition();
-		GetRequest req = (GetRequest) request;
+		Get req = (Get) request;
 		try {
 			Object res = getAttributeValue(req.getAttribute());
 			AttributeType type = this.attDefinition.get(req.getAttribute());
