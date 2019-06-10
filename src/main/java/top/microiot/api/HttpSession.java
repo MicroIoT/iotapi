@@ -104,7 +104,7 @@ public abstract class HttpSession {
 		if (logined) {
 			HttpHeaders header = getSessionHeader();
 			HttpEntity<String> request = new HttpEntity<String>(header);
-			restTemplate.getForObject(getRestUri() + "/logout", String.class, request);
+			restTemplate.postForEntity(getRestUri() + "/logout", request, String.class);
 			this.logined = false;
 		}
 	}

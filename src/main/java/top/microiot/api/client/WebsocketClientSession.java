@@ -7,7 +7,6 @@ import java.util.concurrent.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.integration.stomp.WebSocketStompSessionManager;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 
 import top.microiot.api.client.stomp.ActionAsyncHandler;
@@ -23,6 +22,7 @@ import top.microiot.api.client.stomp.SetAsyncHandler;
 import top.microiot.api.client.stomp.SetRequestPublisher;
 import top.microiot.api.client.stomp.SetResponseSubscriber;
 import top.microiot.api.dto.Response;
+import top.microiot.api.stomp.SessionManager;
 import top.microiot.domain.ActionType;
 import top.microiot.domain.Device;
 import top.microiot.domain.attribute.AttValueInfo;
@@ -37,7 +37,7 @@ import top.microiot.exception.ValueException;
  *
  * @author 曹新宇
  */
-public class WebsocketClientSession  extends WebSocketStompSessionManager {
+public class WebsocketClientSession  extends SessionManager {
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	private HttpClientSession session;
 	private long timeout;
@@ -73,6 +73,7 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 		subscriber.setWebsocketClientSession(this);
 		AlarmSubscribeHandler sessionHandler = new AlarmSubscribeHandler(deviceId, subscriber);
         connect(sessionHandler);
+        handlers.add(sessionHandler);
         return sessionHandler;
 	}
 	
@@ -230,8 +231,8 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 		handler.actionAsync();
 	}
 	public void stop() {
-		destroy();
 		session.stop();
+		super.stop();
 	}
 
 	private class GetHandler<T> {
@@ -253,7 +254,6 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 			this.deviceId = deviceId;
 			this.attribute = attribute;
 			this.responseTypeClass = responseTypeClass;
-			this.subscriber.setResponseTypeClass(responseTypeClass);
 		}
 		
 		public GetHandler(HttpClientSession session, String deviceId, String attribute, ParameterizedTypeReference<T> responseType) {
@@ -262,7 +262,6 @@ public class WebsocketClientSession  extends WebSocketStompSessionManager {
 			this.deviceId = deviceId;
 			this.attribute = attribute;
 			this.responseType = responseType;
-			this.subscriber.setResponseType(responseType);
 		}
 		
 		public GetHandler(HttpClientSession session, String deviceId, String attribute, Class<T> responseTypeClass, GetResponseSubscriber subscriber) {

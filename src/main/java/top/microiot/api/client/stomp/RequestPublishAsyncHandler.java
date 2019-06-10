@@ -15,5 +15,6 @@ public abstract class RequestPublishAsyncHandler extends RequestPublishHandler {
 	@Override
 	public void handleFrame(StompHeaders headers, Object payload) {
 		subscriber.onResponse((Response)payload);
+		subscription.unsubscribe();
 	}
 }

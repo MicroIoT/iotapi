@@ -1,14 +1,14 @@
 package top.microiot.api.device;
 
-import org.springframework.integration.stomp.WebSocketStompSessionManager;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 
 import top.microiot.api.device.stomp.ActionRequestSubscriber;
-import top.microiot.api.device.stomp.GetRequestSubscriber;
-import top.microiot.api.device.stomp.SetRequestSubscriber;
 import top.microiot.api.device.stomp.ActionSubscribeHandler;
+import top.microiot.api.device.stomp.GetRequestSubscriber;
 import top.microiot.api.device.stomp.GetSubscribeHandler;
+import top.microiot.api.device.stomp.SetRequestSubscriber;
 import top.microiot.api.device.stomp.SetSubscribeHandler;
+import top.microiot.api.stomp.SessionManager;
 import top.microiot.domain.Device;
 
 /**
@@ -16,7 +16,7 @@ import top.microiot.domain.Device;
  *
  * @author 曹新宇
  */
-public class WebsocketDeviceSession extends WebSocketStompSessionManager {
+public class WebsocketDeviceSession extends SessionManager {
 	private HttpDeviceSession session;
 	
 	public HttpDeviceSession getSession() {
@@ -43,6 +43,7 @@ public class WebsocketDeviceSession extends WebSocketStompSessionManager {
 		subscriber.setWebsocketDeviceSession(this);
 		GetSubscribeHandler sessionHandler = new GetSubscribeHandler(this, subscriber);
         connect(sessionHandler);
+        handlers.add(sessionHandler);
         return sessionHandler;
 	}
 	
@@ -56,6 +57,7 @@ public class WebsocketDeviceSession extends WebSocketStompSessionManager {
 		subscriber.setWebsocketDeviceSession(this);
 		SetSubscribeHandler sessionHandler = new SetSubscribeHandler(this, subscriber);
         connect(sessionHandler);
+        handlers.add(sessionHandler);
         return sessionHandler;
 	}
 	
@@ -69,6 +71,7 @@ public class WebsocketDeviceSession extends WebSocketStompSessionManager {
 		subscriber.setWebsocketDeviceSession(this);
 		ActionSubscribeHandler sessionHandler = new ActionSubscribeHandler(this, subscriber);
         connect(sessionHandler);
+        handlers.add(sessionHandler);
         return sessionHandler;
 	}
 	
@@ -77,8 +80,8 @@ public class WebsocketDeviceSession extends WebSocketStompSessionManager {
 	}
 	
 	public void stop() {
-		destroy();
 		session.stop();
+		super.stop();
 	}
 
 }
