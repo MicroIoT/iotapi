@@ -30,7 +30,6 @@ public class RequestPublishSyncHandler extends RequestPublishHandler implements 
 		Response response = (Response)payload;
 		
 		this.result = response;
-		subscription.unsubscribe();
         responsed.countDown();
 	}
 	
@@ -40,7 +39,6 @@ public class RequestPublishSyncHandler extends RequestPublishHandler implements 
             return false;
         } else {
             responsed.countDown();
-            subscription.unsubscribe();
             cancelled = true;
             return !isDone();
         }
@@ -49,14 +47,12 @@ public class RequestPublishSyncHandler extends RequestPublishHandler implements 
 	@Override
 	public Response get() throws InterruptedException, ExecutionException {
 		responsed.await();
-		subscription.unsubscribe();
 		return result;
 	}
 
 	@Override
 	public Response get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
 		boolean finished = responsed.await(timeout, unit);
-		subscription.unsubscribe();
 		if(finished)
 			return result;
 		else

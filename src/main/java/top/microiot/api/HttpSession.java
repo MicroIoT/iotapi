@@ -38,7 +38,7 @@ import top.microiot.exception.ValueException;
  */
 @Component
 public abstract class HttpSession {
-	private static final String REMEMBER_ME = "remember-me";
+	private static final String Cookie_Name = "JSESSIONID";
 	private static final String WS_IOT = "/ws_iot";
 	private static final String IOTP = "iotp";
 	private static final String IOTPS = "iotps";
@@ -81,14 +81,13 @@ public abstract class HttpSession {
 			MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
 			map.add("username", p.getUsername());
 			map.add("password", p.getPassword());
-			map.add(REMEMBER_ME, "1");
 	
 			HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(map, headers);
 	
 			ResponseEntity<String> response = restTemplate.postForEntity(getRestUri() + "/login", request, String.class);
 			List<String> cookie = response.getHeaders().get(HttpHeaders.SET_COOKIE);
 			for(String c : cookie) {
-				if(c.startsWith(REMEMBER_ME)) {
+				if(c.startsWith(Cookie_Name)) {
 					this.sessionId = c.split(";")[0];
 					break;
 				}

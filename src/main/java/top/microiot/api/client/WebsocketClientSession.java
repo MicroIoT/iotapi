@@ -7,6 +7,11 @@ import java.util.concurrent.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.integration.stomp.WebSocketStompSessionManager;
+import org.springframework.messaging.simp.stomp.StompSession;
+import org.springframework.messaging.simp.stomp.StompSessionHandler;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 
 import top.microiot.api.client.stomp.ActionAsyncHandler;
@@ -53,7 +58,7 @@ public class WebsocketClientSession  extends SessionManager {
 	 * @param timeout 客户端与物联网平台websocket响应超时时长，单位为秒。
 	 */
 	public WebsocketClientSession(HttpClientSession session, WebSocketStompClient webSocketStompClient, long timeout) {
-		super(webSocketStompClient, session.getWSUri());
+		super(session, webSocketStompClient, session.getWSUri());
 		this.session = session;
 		this.timeout = timeout;
 	}
@@ -73,7 +78,6 @@ public class WebsocketClientSession  extends SessionManager {
 		subscriber.setWebsocketClientSession(this);
 		AlarmSubscribeHandler sessionHandler = new AlarmSubscribeHandler(deviceId, subscriber);
         connect(sessionHandler);
-        handlers.add(sessionHandler);
         return sessionHandler;
 	}
 	
@@ -229,10 +233,6 @@ public class WebsocketClientSession  extends SessionManager {
 	public void actionAsync(String deviceId, String action, Object request, ActionResponseSubscriber subscriber) {
 		ActionHandler handler = new ActionHandler(session, deviceId, action, request, subscriber);
 		handler.actionAsync();
-	}
-	public void stop() {
-		session.stop();
-		super.stop();
 	}
 
 	private class GetHandler<T> {

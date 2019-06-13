@@ -1,5 +1,10 @@
 package top.microiot.api.device;
 
+import org.springframework.integration.stomp.WebSocketStompSessionManager;
+import org.springframework.messaging.simp.stomp.StompSession;
+import org.springframework.messaging.simp.stomp.StompSessionHandler;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 
 import top.microiot.api.device.stomp.ActionRequestSubscriber;
@@ -29,7 +34,7 @@ public class WebsocketDeviceSession extends SessionManager {
 	 * @param webSocketStompClient 设备端与物联网平台websocket底层连接。
 	 */
 	public WebsocketDeviceSession(HttpDeviceSession session, WebSocketStompClient webSocketStompClient) {
-		super(webSocketStompClient, session.getWSUri());
+		super(session, webSocketStompClient, session.getWSUri());
 		this.session = session;
 	}
 	
@@ -43,7 +48,6 @@ public class WebsocketDeviceSession extends SessionManager {
 		subscriber.setWebsocketDeviceSession(this);
 		GetSubscribeHandler sessionHandler = new GetSubscribeHandler(this, subscriber);
         connect(sessionHandler);
-        handlers.add(sessionHandler);
         return sessionHandler;
 	}
 	
@@ -57,7 +61,6 @@ public class WebsocketDeviceSession extends SessionManager {
 		subscriber.setWebsocketDeviceSession(this);
 		SetSubscribeHandler sessionHandler = new SetSubscribeHandler(this, subscriber);
         connect(sessionHandler);
-        handlers.add(sessionHandler);
         return sessionHandler;
 	}
 	
@@ -71,17 +74,10 @@ public class WebsocketDeviceSession extends SessionManager {
 		subscriber.setWebsocketDeviceSession(this);
 		ActionSubscribeHandler sessionHandler = new ActionSubscribeHandler(this, subscriber);
         connect(sessionHandler);
-        handlers.add(sessionHandler);
         return sessionHandler;
 	}
 	
 	public Device getDevice() {
 		return session.getDevice();
 	}
-	
-	public void stop() {
-		session.stop();
-		super.stop();
-	}
-
 }

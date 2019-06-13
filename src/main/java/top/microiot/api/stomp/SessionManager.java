@@ -1,25 +1,35 @@
 package top.microiot.api.stomp;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.integration.stomp.WebSocketStompSessionManager;
+import org.springframework.messaging.simp.stomp.StompSession;
+import org.springframework.messaging.simp.stomp.StompSessionHandler;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
+import top.microiot.api.HttpSession;
+import top.microiot.api.device.HttpDeviceSession;
 
 public class SessionManager extends WebSocketStompSessionManager {
-	protected List<SubscribeHandler> handlers = new ArrayList<SubscribeHandler>();
-	private WebSocketStompClient webSocketStompClient;
-	
-	public SessionManager(WebSocketStompClient webSocketStompClient, String url) {
-		super(webSocketStompClient, url);
-		this.webSocketStompClient = webSocketStompClient;
-	}
+    private HttpSession session;
+    public SessionManager(HttpSession session, WebSocketStompClient webSocketStompClient, String url) {
+        super(webSocketStompClient, url);
+        this.session = session;
+    }
 
-	public void stop() {
-		for(SubscribeHandler handler : handlers) {
-			disconnect(handler);
-		}
-		webSocketStompClient.stop();
-		super.stop();
-	}
+    @Override
+    protected ListenableFuture<StompSession> doConnect(StompSessionHandler handler) {
+        restart();
+        setHandshakeHeaders(new WebSocketHttpHeaders(session.getSessionHeader()));
+        return super.doConnect(handler);
+    }
+
+    public void restart(){
+        session.stop();
+        session.start();
+    }
+
+    public void stop() {
+        destroy();
+        session.stop();
+    }
 }

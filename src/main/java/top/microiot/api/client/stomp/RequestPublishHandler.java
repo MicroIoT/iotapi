@@ -8,18 +8,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
-import org.springframework.messaging.simp.stomp.StompSession.Subscription;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
 
 import top.microiot.api.dto.Response;
+import top.microiot.domain.Topic;
 
 public abstract class RequestPublishHandler extends StompSessionHandlerAdapter {
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	private String deviceId;
 	private RequestPublisher publisher;
-
-	protected Subscription subscription;
 	
 	public RequestPublishHandler(String deviceId, RequestPublisher publisher) {
 		super();
@@ -30,12 +28,11 @@ public abstract class RequestPublishHandler extends StompSessionHandlerAdapter {
 	@Override
 	public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
 		String requestId = UUID.randomUUID().toString();
-		String opTopic = "/topic/operation."+ this.publisher.getTopic() + "."  + deviceId;
-		String resultTopic = "/topic/result." + this.publisher.getTopic() + "." + deviceId + "." + requestId;
+		String opTopic = Topic.TOPIC_OPERATION + this.publisher.getTopic() + "."  + deviceId;
+		String resultTopic = Topic.TOPIC_RESULT + this.publisher.getTopic() + "." + deviceId + "." + requestId;
 		RequestPublisher publish = this.publisher;
 		synchronized(session) {
-			subscription = session.subscribe(resultTopic, this);
-			subscription.addReceiptTask(new Runnable() {
+			session.subscribe(resultTopic, this).addReceiptTask(new Runnable() {
 				@Override
 				public void run() {
 					session.send(opTopic, publish.getRequest(requestId));

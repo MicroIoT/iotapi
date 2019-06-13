@@ -38,7 +38,6 @@ public class WebsocketSessionConfig {
 	public WebsocketClientSession websocketClientSession() {
 		HttpClientSession httpClientSession = httpSessionConfig.httpClientSession();
 		WebsocketClientSession websocketClientSession = new WebsocketClientSession(httpClientSession, websocketStompClient(), p.getTimeout());
-		websocketClientSession.setHandshakeHeaders(new WebSocketHttpHeaders(httpClientSession.getSessionHeader()));
 		websocketClientSession.setAutoReceipt(true);
 		websocketClientSession.setAutoStartup(true);
 		
@@ -50,7 +49,6 @@ public class WebsocketSessionConfig {
 	public WebsocketDeviceSession websocketDeviceSession() {
 		HttpDeviceSession httpDeviceSession = httpSessionConfig.httpDeviceSession();
 		WebsocketDeviceSession websocketDeviceSession = new WebsocketDeviceSession(httpDeviceSession, websocketStompClient());
-		websocketDeviceSession.setHandshakeHeaders(new WebSocketHttpHeaders(httpDeviceSession.getSessionHeader()));
 		websocketDeviceSession.setAutoReceipt(true);
 		websocketDeviceSession.setAutoStartup(true);
 		
