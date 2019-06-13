@@ -6,8 +6,8 @@ import org.springframework.messaging.simp.stomp.StompSessionHandler;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
+
 import top.microiot.api.HttpSession;
-import top.microiot.api.device.HttpDeviceSession;
 
 public class SessionManager extends WebSocketStompSessionManager {
     private HttpSession session;
