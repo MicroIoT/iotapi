@@ -83,8 +83,12 @@ public abstract class HttpSession {
 			map.add("password", p.getPassword());
 	
 			HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(map, headers);
-	
-			ResponseEntity<String> response = restTemplate.postForEntity(getRestUri() + "/login", request, String.class);
+			ResponseEntity<String> response;
+			try{
+				response = restTemplate.postForEntity(getRestUri() + "/login", request, String.class);
+			} catch (HttpClientErrorException | HttpServerErrorException | UnknownHttpStatusCodeException e) {
+				throw new StatusException(e.getResponseBodyAsString());
+			}
 			List<String> cookie = response.getHeaders().get(HttpHeaders.SET_COOKIE);
 			for(String c : cookie) {
 				if(c.startsWith(Cookie_Name)) {
