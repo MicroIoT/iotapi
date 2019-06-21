@@ -299,7 +299,7 @@ public class WebsocketClientSession  extends SessionManager {
 			subscriber.setAttribute(attribute);
 			subscriber.setDevice(device);
 			subscriber.setResponseDataType(responseDataType);
-			GetAsyncHandler handler = new GetAsyncHandler(deviceId, request, subscriber);
+			GetAsyncHandler handler = new GetAsyncHandler(WebsocketClientSession.this, deviceId, request, subscriber);
 			connect(handler);
 		}
 		
@@ -326,7 +326,9 @@ public class WebsocketClientSession  extends SessionManager {
 	        connect(request);
 			
 	        try {
-				return request.get(timeout, TimeUnit.SECONDS);
+	        	Response response = request.get(timeout, TimeUnit.SECONDS);
+	        	disconnect(request);
+				return response;
 			} catch (InterruptedException | ExecutionException | TimeoutException e) {
 				throw new StatusException(e.getMessage());
 			}
@@ -387,7 +389,7 @@ public class WebsocketClientSession  extends SessionManager {
 				subscriber.setDevice(device);
 				subscriber.setAttribute(attribute);
 				subscriber.setValue(value);
-				SetAsyncHandler handler = new SetAsyncHandler(deviceId, request, subscriber);
+				SetAsyncHandler handler = new SetAsyncHandler(WebsocketClientSession.this, deviceId, request, subscriber);
 				connect(handler);
 			} catch(Throwable e) {
 				logger.error("set attribute [" + attribute + "] error: ", e);
@@ -402,6 +404,7 @@ public class WebsocketClientSession  extends SessionManager {
 			
 	        try {
 	        	Response response = request.get(timeout, TimeUnit.SECONDS);
+	        	disconnect(request);
 	        	if(!response.isSuccess())
 					throw new StatusException(response.getError());
 			} catch (InterruptedException | ExecutionException | TimeoutException e) {
@@ -509,7 +512,7 @@ public class WebsocketClientSession  extends SessionManager {
 			subscriber.setDevice(device);
 			subscriber.setResponseDataType(actionType.getResponseAttributeType().getDataType());
 			subscriber.setRequest(request);
-			ActionAsyncHandler handler = new ActionAsyncHandler(deviceId, request, subscriber);
+			ActionAsyncHandler handler = new ActionAsyncHandler(WebsocketClientSession.this, deviceId, request, subscriber);
 			connect(handler);
 		}
 		
@@ -550,7 +553,9 @@ public class WebsocketClientSession  extends SessionManager {
 	        connect(request);
 			
 	        try {
-				return request.get(timeout, TimeUnit.SECONDS);
+	        	Response response = request.get(timeout, TimeUnit.SECONDS);
+	        	disconnect(request);
+				return response;
 			} catch (InterruptedException | ExecutionException | TimeoutException e) {
 				throw new StatusException(e.getMessage());
 			}
