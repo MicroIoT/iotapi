@@ -1,4 +1,6 @@
 #配置自定义Starter的自动化配置
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+top.microiot.api.RestTemplateConfig,\
+top.microiot.api.WebsocketStompClientConfig,\
 top.microiot.api.HttpSessionConfig,\
 top.microiot.api.WebsocketSessionConfig

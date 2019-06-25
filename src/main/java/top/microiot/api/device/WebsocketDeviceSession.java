@@ -43,6 +43,7 @@ public class WebsocketDeviceSession extends SessionManager {
 		subscriber.setWebsocketDeviceSession(this);
 		GetSubscribeHandler sessionHandler = new GetSubscribeHandler(this, subscriber);
         connect(sessionHandler);
+        handlers.add(sessionHandler);
         return sessionHandler;
 	}
 	
@@ -56,6 +57,7 @@ public class WebsocketDeviceSession extends SessionManager {
 		subscriber.setWebsocketDeviceSession(this);
 		SetSubscribeHandler sessionHandler = new SetSubscribeHandler(this, subscriber);
         connect(sessionHandler);
+        handlers.add(sessionHandler);
         return sessionHandler;
 	}
 	
@@ -69,6 +71,7 @@ public class WebsocketDeviceSession extends SessionManager {
 		subscriber.setWebsocketDeviceSession(this);
 		ActionSubscribeHandler sessionHandler = new ActionSubscribeHandler(this, subscriber);
         connect(sessionHandler);
+        handlers.add(sessionHandler);
         return sessionHandler;
 	}
 	

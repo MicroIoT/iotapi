@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 import top.microiot.api.HttpSession;
+import top.microiot.api.HttpSessionProperties;
 import top.microiot.domain.Alarm;
 import top.microiot.domain.Device;
 import top.microiot.domain.attribute.AttValueInfo;
@@ -23,6 +24,10 @@ import top.microiot.exception.NotFoundException;
  */
 @Component
 public class HttpDeviceSession extends HttpSession {
+	public HttpDeviceSession(HttpSessionProperties httpSessionProperties) {
+		super(httpSessionProperties);
+	}
+
 	private Device device;
 	
 	public Device getDevice() {

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpEntity;
@@ -52,19 +53,13 @@ public abstract class HttpSession {
 	private String sessionId;
 	protected boolean logined = false;
 	
-    private HttpSessionProperties p;
+    private HttpSessionProperties httpSessionProperties;
 	
-	public void setHttpSessionProperties(HttpSessionProperties p) {
-		this.p = p;
-	}
-
-	private RestTemplate restTemplate;
+	@Autowired
+    private RestTemplate restTemplate;
 	
-	public void setRestTemplate(RestTemplate restTemplate) {
-		this.restTemplate = restTemplate;
-	}
-
-	public HttpSession() {
+	public HttpSession(HttpSessionProperties httpSessionProperties) {
+		this.httpSessionProperties = httpSessionProperties;
 	}
 	
 	/**
@@ -73,14 +68,14 @@ public abstract class HttpSession {
 	public void start() {
 		if(!logined) {
 			if (!getUri().matches(regex))
-				throw new ValueException(p.getUri());
+				throw new ValueException(httpSessionProperties.getUri());
 
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
 			MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
-			map.add("username", p.getUsername());
-			map.add("password", p.getPassword());
+			map.add("username", httpSessionProperties.getUsername());
+			map.add("password", httpSessionProperties.getPassword());
 	
 			HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(map, headers);
 			ResponseEntity<String> response;
@@ -151,7 +146,7 @@ public abstract class HttpSession {
 	}
 
 	private String getUri() {
-		return p.getUri();
+		return httpSessionProperties.getUri();
 	}
 	@SuppressWarnings("unchecked")
 	public <T> T getEntityById(IoTObject object, String id) {

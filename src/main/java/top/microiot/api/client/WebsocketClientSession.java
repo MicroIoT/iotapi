@@ -6,9 +6,11 @@ import java.util.concurrent.TimeoutException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 
+import top.microiot.api.WebsocketProperties;
 import top.microiot.api.client.stomp.ActionAsyncHandler;
 import top.microiot.api.client.stomp.ActionRequestPublisher;
 import top.microiot.api.client.stomp.ActionResponseSubscriber;
@@ -40,7 +42,8 @@ import top.microiot.exception.ValueException;
 public class WebsocketClientSession  extends SessionManager {
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	private HttpClientSession session;
-	private long timeout;
+	@Autowired
+	private WebsocketProperties websocketProperties;
 	
 	public HttpClientSession getSession() {
 		return session;
@@ -50,12 +53,10 @@ public class WebsocketClientSession  extends SessionManager {
 	 * 客户端与物联网平台websocket会话构造函数。
 	 * @param session 客户端http会话。
 	 * @param webSocketStompClient 客户端与物联网平台websocket底层连接。
-	 * @param timeout 客户端与物联网平台websocket响应超时时长，单位为秒。
 	 */
-	public WebsocketClientSession(HttpClientSession session, WebSocketStompClient webSocketStompClient, long timeout) {
+	public WebsocketClientSession(HttpClientSession session, WebSocketStompClient webSocketStompClient) {
 		super(session, webSocketStompClient, session.getWSUri());
 		this.session = session;
-		this.timeout = timeout;
 	}
 
 	/**
@@ -73,6 +74,7 @@ public class WebsocketClientSession  extends SessionManager {
 		subscriber.setWebsocketClientSession(this);
 		AlarmSubscribeHandler sessionHandler = new AlarmSubscribeHandler(deviceId, subscriber);
         connect(sessionHandler);
+        handlers.add(sessionHandler);
         return sessionHandler;
 	}
 	
@@ -326,7 +328,7 @@ public class WebsocketClientSession  extends SessionManager {
 	        connect(request);
 			
 	        try {
-	        	Response response = request.get(timeout, TimeUnit.SECONDS);
+	        	Response response = request.get(websocketProperties.getTimeout(), TimeUnit.SECONDS);
 	        	disconnect(request);
 				return response;
 			} catch (InterruptedException | ExecutionException | TimeoutException e) {
@@ -403,7 +405,7 @@ public class WebsocketClientSession  extends SessionManager {
 	        connect(request);
 			
 	        try {
-	        	Response response = request.get(timeout, TimeUnit.SECONDS);
+	        	Response response = request.get(websocketProperties.getTimeout(), TimeUnit.SECONDS);
 	        	disconnect(request);
 	        	if(!response.isSuccess())
 					throw new StatusException(response.getError());
@@ -553,7 +555,7 @@ public class WebsocketClientSession  extends SessionManager {
 	        connect(request);
 			
 	        try {
-	        	Response response = request.get(timeout, TimeUnit.SECONDS);
+	        	Response response = request.get(websocketProperties.getTimeout(), TimeUnit.SECONDS);
 	        	disconnect(request);
 				return response;
 			} catch (InterruptedException | ExecutionException | TimeoutException e) {

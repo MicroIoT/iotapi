@@ -1,5 +1,8 @@
 package top.microiot.api.stomp;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.integration.stomp.WebSocketStompSessionManager;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandler;
@@ -11,9 +14,13 @@ import top.microiot.api.HttpSession;
 
 public class SessionManager extends WebSocketStompSessionManager {
     private HttpSession session;
+    protected List<StompSessionHandler> handlers = new ArrayList<StompSessionHandler>();
+    
     public SessionManager(HttpSession session, WebSocketStompClient webSocketStompClient, String url) {
         super(webSocketStompClient, url);
         this.session = session;
+		this.setAutoReceipt(true);
+		this.setAutoStartup(true);
     }
 
     @Override
@@ -29,6 +36,9 @@ public class SessionManager extends WebSocketStompSessionManager {
     }
 
     public void stop() {
+    	for(StompSessionHandler handler : handlers) {
+    		this.disconnect(handler);
+    	}
         destroy();
         session.stop();
     }

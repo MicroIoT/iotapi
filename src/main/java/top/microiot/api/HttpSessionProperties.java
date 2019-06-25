@@ -1,13 +1,10 @@
 package top.microiot.api;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
 /**
  * http 会话配置属性类
  *
  * @author 曹新宇
  */
-@ConfigurationProperties(prefix = "microiot.connect")
 public class HttpSessionProperties {
 	private String username;
 	private String password;

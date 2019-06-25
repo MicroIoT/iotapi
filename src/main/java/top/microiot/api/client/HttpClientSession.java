@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import top.microiot.api.HttpSession;
+import top.microiot.api.HttpSessionProperties;
 import top.microiot.api.dto.RestPage;
 import top.microiot.domain.Alarm;
 import top.microiot.domain.Device;
@@ -55,6 +56,10 @@ import top.microiot.exception.ValueException;
  */
 @Component
 public class HttpClientSession extends HttpSession {
+	public HttpClientSession(HttpSessionProperties httpSessionProperties) {
+		super(httpSessionProperties);
+	}
+
 	/**
 	 * 查询符合条件的设备列表。
 	 * @param queryParams 查询条件。

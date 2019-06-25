@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import top.microiot.api.dto.Action;
 import top.microiot.api.dto.Response;
 import top.microiot.domain.ActionType;
+import top.microiot.domain.Device;
 import top.microiot.domain.attribute.DataType;
 import top.microiot.domain.attribute.DataValue;
 
@@ -52,7 +53,7 @@ public abstract class ActionRequestSubscriber extends RequestSubscriber {
 					requestValue = requestType.getValue(req.getValue(), t);
 				}
 			}
-			Object res = action(req.getAction(), requestValue);
+			Object res = action(this.getDevice(), req.getAction(), requestValue);
 			DataValue responseValue = null;
 			if(actType.getResponse() != null) {
 				DataType resType = actType.getResponseAttributeType().getDataType();
@@ -70,9 +71,10 @@ public abstract class ActionRequestSubscriber extends RequestSubscriber {
 
 	/**
 	 * 不同设备的具体操作的实现。
+	 * @param device 操作的设备。
 	 * @param action 操作的名称。
 	 * @param request 操作的请求值。
 	 * @return 返回响应值。
 	 */
-	public abstract Object action(String action, Object request);
+	public abstract Object action(Device device, String action, Object request);
 }
