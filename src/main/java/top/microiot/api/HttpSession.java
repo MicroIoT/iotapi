@@ -22,8 +22,10 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.UnknownHttpStatusCodeException;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import top.microiot.api.client.HttpClientSession;
 import top.microiot.api.dto.RestGeoResults;
 import top.microiot.api.dto.RestPage;
+import top.microiot.domain.Device;
 import top.microiot.domain.IoTObject;
 import top.microiot.dto.DistinctInfo;
 import top.microiot.dto.QueryInfo;
@@ -148,6 +150,20 @@ public abstract class HttpSession {
 	private String getUri() {
 		return httpSessionProperties.getUri();
 	}
+	
+	/**
+	 * 获取指定设备的信息。
+	 * @param id 设备标识符。
+	 * @return 返回指定设备。
+	 */
+	public Device getDevice(String id) {
+		if(id != null && !id.isEmpty()) {
+			return getEntity(HttpClientSession.deviceUrl + "/" + id, null, HttpClientSession.deviceType);
+		} else
+			throw new ValueException("id can't be empty");
+	}
+	
+	
 	@SuppressWarnings("unchecked")
 	public <T> T getEntityById(IoTObject object, String id) {
 		assert logined : "login first";

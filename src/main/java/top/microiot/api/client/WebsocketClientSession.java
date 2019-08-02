@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 
+import top.microiot.api.HttpSession;
 import top.microiot.api.WebsocketProperties;
 import top.microiot.api.client.stomp.ActionAsyncHandler;
 import top.microiot.api.client.stomp.ActionRequestPublisher;
@@ -41,11 +42,11 @@ import top.microiot.exception.ValueException;
  */
 public class WebsocketClientSession  extends SessionManager {
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
-	private HttpClientSession session;
+	private HttpSession session;
 	@Autowired
 	private WebsocketProperties websocketProperties;
 	
-	public HttpClientSession getSession() {
+	public HttpSession getSession() {
 		return session;
 	}
 
@@ -54,7 +55,7 @@ public class WebsocketClientSession  extends SessionManager {
 	 * @param session 客户端http会话。
 	 * @param webSocketStompClient 客户端与物联网平台websocket底层连接。
 	 */
-	public WebsocketClientSession(HttpClientSession session, WebSocketStompClient webSocketStompClient) {
+	public WebsocketClientSession(HttpSession session, WebSocketStompClient webSocketStompClient) {
 		super(session, webSocketStompClient, session.getWSUri());
 		this.session = session;
 	}
@@ -79,8 +80,8 @@ public class WebsocketClientSession  extends SessionManager {
 	}
 	
 	/**
-	 * 客户端同步获取设备属性值。
-	 * @param deviceId 获取属性值的设备。
+	 * 客户端同步读取设备属性值。
+	 * @param deviceId 读取属性值的设备。
 	 * @param attribute 属性名称。
 	 * @param <T> 返回属性值类。
 	 * @param responseType 返回属性值的类型。
@@ -92,20 +93,20 @@ public class WebsocketClientSession  extends SessionManager {
 	}
 
 	/**
-	 * 客户端异步获取设备属性值。
-	 * @param deviceId 获取属性值的设备。
+	 * 客户端异步读取设备属性值。
+	 * @param deviceId 读取属性值的设备。
 	 * @param attribute 属性名称。
 	 * @param <T> 返回属性值类。
 	 * @param responseType 返回属性值的类型。
-	 * @param subscriber 获取设备属性值处理方法。
+	 * @param subscriber 读取设备属性值处理方法。
 	 */
 	public <T> void getAsync(String deviceId, String attribute, Class<T> responseType, GetResponseSubscriber subscriber) {
 		GetHandler<T> handler = new GetHandler<T>(session, deviceId, attribute, responseType, subscriber);
 		handler.getAsync();
 	}
 	/**
-	 * 客户端同步获取设备属性值。
-	 * @param deviceId 获取属性值的设备。
+	 * 客户端同步读取设备属性值。
+	 * @param deviceId 读取属性值的设备。
 	 * @param attribute 属性名称。
 	 * @param <T> 返回属性值参数化类。
 	 * @param responseType 返回属性值的参数化类型。
@@ -116,12 +117,12 @@ public class WebsocketClientSession  extends SessionManager {
 		return handler.get();
 	}
 	/**
-	 * 客户端异步获取设备属性值。
-	 * @param deviceId 获取属性值的设备。
+	 * 客户端异步读取设备属性值。
+	 * @param deviceId 读取属性值的设备。
 	 * @param attribute 属性名称。
 	 * @param <T> 返回属性值类。
 	 * @param responseType 返回属性值的参数化类型。
-	 * @param subscriber 获取设备属性值处理方法。
+	 * @param subscriber 读取设备属性值处理方法。
 	 */
 	public <T> void getAsync(String deviceId, String attribute, ParameterizedTypeReference<T> responseType, GetResponseSubscriber subscriber) {
 		GetHandler<T> handler = new GetHandler<T>(session, deviceId, attribute, responseType, subscriber);
@@ -233,7 +234,7 @@ public class WebsocketClientSession  extends SessionManager {
 	}
 
 	private class GetHandler<T> {
-		private HttpClientSession session;
+		private HttpSession session;
 		private String deviceId;
 		private Device device;
 		private String attribute;
@@ -245,7 +246,7 @@ public class WebsocketClientSession  extends SessionManager {
 		
 		private GetResponseSubscriber subscriber;
 		
-		public GetHandler(HttpClientSession session, String deviceId, String attribute, Class<T> responseTypeClass) {
+		public GetHandler(HttpSession session, String deviceId, String attribute, Class<T> responseTypeClass) {
 			super();
 			this.session = session;
 			this.deviceId = deviceId;
@@ -253,7 +254,7 @@ public class WebsocketClientSession  extends SessionManager {
 			this.responseTypeClass = responseTypeClass;
 		}
 		
-		public GetHandler(HttpClientSession session, String deviceId, String attribute, ParameterizedTypeReference<T> responseType) {
+		public GetHandler(HttpSession session, String deviceId, String attribute, ParameterizedTypeReference<T> responseType) {
 			super();
 			this.session = session;
 			this.deviceId = deviceId;
@@ -261,7 +262,7 @@ public class WebsocketClientSession  extends SessionManager {
 			this.responseType = responseType;
 		}
 		
-		public GetHandler(HttpClientSession session, String deviceId, String attribute, Class<T> responseTypeClass, GetResponseSubscriber subscriber) {
+		public GetHandler(HttpSession session, String deviceId, String attribute, Class<T> responseTypeClass, GetResponseSubscriber subscriber) {
 			super();
 			this.session = session;
 			this.deviceId = deviceId;
@@ -271,7 +272,7 @@ public class WebsocketClientSession  extends SessionManager {
 			this.subscriber.setResponseTypeClass(responseTypeClass);
 		}
 		
-		public GetHandler(HttpClientSession session, String deviceId, String attribute, ParameterizedTypeReference<T> responseType, GetResponseSubscriber subscriber) {
+		public GetHandler(HttpSession session, String deviceId, String attribute, ParameterizedTypeReference<T> responseType, GetResponseSubscriber subscriber) {
 			super();
 			this.session = session;
 			this.deviceId = deviceId;
@@ -338,7 +339,7 @@ public class WebsocketClientSession  extends SessionManager {
 	}
 	
 	private class SetHandler{
-		private HttpClientSession session;
+		private HttpSession session;
 		private String deviceId;
 		private Device device;
 		private String attribute;
@@ -347,7 +348,7 @@ public class WebsocketClientSession  extends SessionManager {
 		
 		private SetResponseSubscriber subscriber;
 		
-		public SetHandler(HttpClientSession session, String deviceId, String attribute, Object value) {
+		public SetHandler(HttpSession session, String deviceId, String attribute, Object value) {
 			super();
 			this.session = session;
 			this.deviceId = deviceId;
@@ -355,7 +356,7 @@ public class WebsocketClientSession  extends SessionManager {
 			this.value = value;
 		}
 		
-		public SetHandler(HttpClientSession session, String deviceId, String attribute, Object value, SetResponseSubscriber subscriber) {
+		public SetHandler(HttpSession session, String deviceId, String attribute, Object value, SetResponseSubscriber subscriber) {
 			super();
 			this.session = session;
 			this.deviceId = deviceId;
@@ -416,7 +417,7 @@ public class WebsocketClientSession  extends SessionManager {
 	}
 	
 	private class ActionHandler<T> {
-		private HttpClientSession session;
+		private HttpSession session;
 		private String deviceId;
 		private Device device;
 		private String action;
@@ -430,7 +431,7 @@ public class WebsocketClientSession  extends SessionManager {
 		
 		private ActionResponseSubscriber subscriber;
 		
-		public ActionHandler(HttpClientSession session, String deviceId, String action, Object request) {
+		public ActionHandler(HttpSession session, String deviceId, String action, Object request) {
 			super();
 			this.session = session;
 			this.deviceId = deviceId;
@@ -438,7 +439,7 @@ public class WebsocketClientSession  extends SessionManager {
 			this.request = request;
 		}
 		
-		public ActionHandler(HttpClientSession session, String deviceId, String action, Object request, Class<T> responseTypeClass) {
+		public ActionHandler(HttpSession session, String deviceId, String action, Object request, Class<T> responseTypeClass) {
 			super();
 			this.session = session;
 			this.deviceId = deviceId;
@@ -447,7 +448,7 @@ public class WebsocketClientSession  extends SessionManager {
 			this.responseTypeClass = responseTypeClass;
 		}
 
-		public ActionHandler(HttpClientSession session, String deviceId, String action, Object request, ParameterizedTypeReference<T> responseType) {
+		public ActionHandler(HttpSession session, String deviceId, String action, Object request, ParameterizedTypeReference<T> responseType) {
 			super();
 			this.session = session;
 			this.deviceId = deviceId;
@@ -456,7 +457,7 @@ public class WebsocketClientSession  extends SessionManager {
 			this.responseType = responseType;
 		}
 		
-		public ActionHandler(HttpClientSession session, String deviceId, String action, Object request, ActionResponseSubscriber subscriber) {
+		public ActionHandler(HttpSession session, String deviceId, String action, Object request, ActionResponseSubscriber subscriber) {
 			super();
 			this.session = session;
 			this.deviceId = deviceId;
@@ -465,7 +466,7 @@ public class WebsocketClientSession  extends SessionManager {
 			this.subscriber = subscriber;
 		}
 		
-		public ActionHandler(HttpClientSession session, String deviceId, String action, Object request, Class<T> responseTypeClass, ActionResponseSubscriber subscriber) {
+		public ActionHandler(HttpSession session, String deviceId, String action, Object request, Class<T> responseTypeClass, ActionResponseSubscriber subscriber) {
 			super();
 			this.session = session;
 			this.deviceId = deviceId;
@@ -476,7 +477,7 @@ public class WebsocketClientSession  extends SessionManager {
 			this.subscriber.setResponseTypeClass(responseTypeClass);
 		}
 
-		public ActionHandler(HttpClientSession session, String deviceId, String action, Object request, ParameterizedTypeReference<T> responseType, ActionResponseSubscriber subscriber) {
+		public ActionHandler(HttpSession session, String deviceId, String action, Object request, ParameterizedTypeReference<T> responseType, ActionResponseSubscriber subscriber) {
 			super();
 			this.session = session;
 			this.deviceId = deviceId;
@@ -519,7 +520,7 @@ public class WebsocketClientSession  extends SessionManager {
 		}
 		
 		private AttValueInfo init() {
-			device = ((HttpClientSession) session).getDevice(deviceId);
+			device = session.getDevice(deviceId);
 			if(device == null)
 				throw new NotFoundException("device: " + deviceId);
 			actionType = device.getDeviceType().getActionTypes().get(action);

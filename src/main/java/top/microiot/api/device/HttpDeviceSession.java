@@ -2,8 +2,10 @@ package top.microiot.api.device;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 
 import top.microiot.api.HttpSession;
@@ -92,5 +94,21 @@ public class HttpDeviceSession extends HttpSession {
 		info.setAlarmInfo(values);
 		info.setReportTime(new Date());
 		postEntity("/alarm", info, Alarm.class);
+	}
+	
+	/**
+	 * 获取设备的同级设备信息
+	 * @return 返回同级设备列表
+	 */
+	public List<Device> getMySibling(){
+		return getEntity("/devices/mysibling", null, new ParameterizedTypeReference<List<Device>>() {});
+	}
+	
+	/**
+	 * 获取设备的子设备信息
+	 * @return 返回子设备列表
+	 */
+	public List<Device> getMyChildren(){
+		return getEntity("/devices/mychildren", null, new ParameterizedTypeReference<List<Device>>() {});
 	}
 }

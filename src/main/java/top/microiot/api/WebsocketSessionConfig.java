@@ -25,8 +25,7 @@ public class WebsocketSessionConfig {
 		return new WebsocketClientSession(httpClientSession, websocketStompClient);
 	}
 	
-	@Bean
-	@Primary
+	@Bean("websocketDeviceSession")
 	@Scope("prototype")
 	public WebsocketDeviceSession websocketDeviceSession(HttpDeviceSession httpDeviceSession, WebSocketStompClient websocketStompClient) {
 		return new WebsocketDeviceSession(httpDeviceSession, websocketStompClient);

@@ -1,14 +1,24 @@
 package top.microiot.api.client.stomp;
 
+import top.microiot.api.client.WebsocketClientSession;
 import top.microiot.api.dto.Response;
 import top.microiot.domain.Device;
 import top.microiot.domain.attribute.DataValue;
 
 public abstract class ResponseSubscriber {
+	private WebsocketClientSession websocketClientSession;
 	protected Device device;
 	
 	public void setDevice(Device device) {
 		this.device = device;
+	}
+
+	public WebsocketClientSession getWebsocketClientSession() {
+		return websocketClientSession;
+	}
+
+	public void setWebsocketClientSession(WebsocketClientSession websocketClientSession) {
+		this.websocketClientSession = websocketClientSession;
 	}
 
 	public void onResponse(Response response) {

@@ -13,6 +13,7 @@ public abstract class RequestPublishAsyncHandler extends RequestPublishHandler {
 		super(deviceId, publisher);
 		this.session = session;
 		this.subscriber = subscriber;
+		subscriber.setWebsocketClientSession(session);
 	}
 
 	@Override

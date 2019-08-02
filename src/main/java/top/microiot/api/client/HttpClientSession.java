@@ -27,6 +27,7 @@ import top.microiot.domain.attribute.ClassTypeInfo;
 import top.microiot.domain.attribute.IDeviceAttTypeInfo;
 import top.microiot.dto.ActionTypeInfo;
 import top.microiot.dto.AlarmPageInfo;
+import top.microiot.dto.DeviceAddGroupInfo;
 import top.microiot.dto.DeviceInfo;
 import top.microiot.dto.DeviceInfo1;
 import top.microiot.dto.DeviceMoveInfo;
@@ -69,8 +70,8 @@ public class HttpClientSession extends HttpSession {
 		return getEntity("/devices/list", queryParams, new ParameterizedTypeReference<List<Device>>() {});
 	}
 	
-	private Class<User> userType = User.class;
-	private String userUrl = "/user";
+	public static Class<User> userType = User.class;
+	public static String userUrl = "/user";
 	
 	/**
 	 * 添加平台用户。
@@ -136,12 +137,12 @@ public class HttpClientSession extends HttpSession {
 		return patchEntity(userUrl, info, userType);
 	}
 	
-	private Class<DeviceType> deviceTypeType = DeviceType.class;
-	private String deviceTypeUrl = "/" + IoTObject.devicetype.getName();
+	public static Class<DeviceType> deviceTypeType = DeviceType.class;
+	public static String deviceTypeUrl = "/" + IoTObject.devicetype.getName();
 	
 	/**
 	 * 添加设备类型。
-	 * @param info 设备类型信息，包括动态属性信息，静态属性信息，告警类型信息，操作类型信息。
+	 * @param info 设备类型信息，包括动态属性信息，静态属性信息，告警类型信息，操作类型信息，是否是设备组。
 	 * @return 返回添加成功的设备类型。
 	 */
 	public DeviceType addDevicetype(DeviceTypeInfo info) {
@@ -284,8 +285,8 @@ public class HttpClientSession extends HttpSession {
 			throw new ValueException("id and alarmtype can't be empty");
 	}
 	
-	private Class<SiteType> siteTypeType = SiteType.class;
-	private String siteTypeUrl = "/" + IoTObject.sitetype.getName();
+	public static Class<SiteType> siteTypeType = SiteType.class;
+	public static String siteTypeUrl = "/" + IoTObject.sitetype.getName();
 	
 	/**
 	 * 添加场地类型。
@@ -366,8 +367,8 @@ public class HttpClientSession extends HttpSession {
 			throw new ValueException("id can't be empty");
 	}
 	
-	private Class<Site> siteType = Site.class;
-	private String siteUrl = "/" + IoTObject.site.getName();
+	public static Class<Site> siteType = Site.class;
+	public static String siteUrl = "/" + IoTObject.site.getName();
 	
 	/**
 	 * 添加场地。
@@ -499,8 +500,8 @@ public class HttpClientSession extends HttpSession {
 		return getEntity(siteUrl + "s/count", queryParams, Long.class);
 	}
 	
-	private Class<Device> deviceType = Device.class;
-	private String deviceUrl = "/" + IoTObject.device.getName();
+	public static Class<Device> deviceType = Device.class;
+	public static String deviceUrl = "/" + IoTObject.device.getName();
 	
 	/**
 	 * 添加设备。
@@ -635,8 +636,43 @@ public class HttpClientSession extends HttpSession {
 		return getEntity(deviceUrl + "s/count", queryParams, Long.class);
 	}
 	
-	private Class<Alarm> alarmType = Alarm.class;
-	private String alarmUrl = "/" + IoTObject.alarm.getName();
+	/**
+	 * 添加设备到设备组中。
+	 * @param info 添加到设备组信息，包括被添加的设备id和设备组id。
+	 * @return 返回添加成功的设备信息。
+	 */
+	public Device addGroup(DeviceAddGroupInfo info) {
+		return postEntity(deviceUrl + "/group", info, deviceType);
+	}
+	
+	/**
+	 * 从设备组中移除设备。
+	 * @param deviceId 被移除的设备id。
+	 * @return 返回移除成功的设备信息。
+	 */
+	public Device removeGroup(String deviceId) {
+		return deleteEntity(deviceUrl + "/group/" + deviceId, null, deviceType);
+	}
+	
+	/**
+	 * 获取指定设备的同级设备信息。
+	 * @param deviceId 指定的设备id。
+	 * @return 返回同级设备列表
+	 */
+	public List<Device> getSibling(String deviceId){
+		return getEntity("/devices/sibling/" + deviceId, null, new ParameterizedTypeReference<List<Device>>() {});
+	}
+	
+	/**
+	 * 获取指定设备的子设备信息
+	 * @param deviceId 指定的设备id。
+	 * @return 返回子设备列表
+	 */
+	public List<Device> getChildren(String deviceId){
+		return getEntity("/devices/children/" + deviceId, null, new ParameterizedTypeReference<List<Device>>() {});
+	}
+	public static Class<Alarm> alarmType = Alarm.class;
+	public static String alarmUrl = "/" + IoTObject.alarm.getName();
 	
 	/**
 	 * 获取指定告警信息。
@@ -678,8 +714,8 @@ public class HttpClientSession extends HttpSession {
 		return getEntity(alarmUrl + "s", queryParams, new ParameterizedTypeReference<RestPage<Alarm>>() {});
 	}
 	
-	private Class<Event> eventType = Event.class;
-	private String eventUrl = "/" + IoTObject.event.getName();
+	public static Class<Event> eventType = Event.class;
+	public static String eventUrl = "/" + IoTObject.event.getName();
 	
 	/**
 	 * 获取指定事件信息。

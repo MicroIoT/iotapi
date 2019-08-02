@@ -2,13 +2,13 @@ package top.microiot.api.device;
 
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 
+import top.microiot.api.client.WebsocketClientSession;
 import top.microiot.api.device.stomp.ActionRequestSubscriber;
 import top.microiot.api.device.stomp.ActionSubscribeHandler;
 import top.microiot.api.device.stomp.GetRequestSubscriber;
 import top.microiot.api.device.stomp.GetSubscribeHandler;
 import top.microiot.api.device.stomp.SetRequestSubscriber;
 import top.microiot.api.device.stomp.SetSubscribeHandler;
-import top.microiot.api.stomp.SessionManager;
 import top.microiot.domain.Device;
 
 /**
@@ -16,7 +16,7 @@ import top.microiot.domain.Device;
  *
  * @author 曹新宇
  */
-public class WebsocketDeviceSession extends SessionManager {
+public class WebsocketDeviceSession extends WebsocketClientSession {
 	private HttpDeviceSession session;
 	
 	public HttpDeviceSession getSession() {
@@ -29,7 +29,7 @@ public class WebsocketDeviceSession extends SessionManager {
 	 * @param webSocketStompClient 设备端与物联网平台websocket底层连接。
 	 */
 	public WebsocketDeviceSession(HttpDeviceSession session, WebSocketStompClient webSocketStompClient) {
-		super(session, webSocketStompClient, session.getWSUri());
+		super(session, webSocketStompClient);
 		this.session = session;
 	}
 	
