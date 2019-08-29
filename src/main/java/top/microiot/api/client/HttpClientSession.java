@@ -23,13 +23,11 @@ import top.microiot.domain.User;
 import top.microiot.domain.attribute.AttTypeInfo;
 import top.microiot.domain.attribute.AttValueInfo;
 import top.microiot.domain.attribute.AttributeType;
-import top.microiot.domain.attribute.ClassTypeInfo;
 import top.microiot.domain.attribute.IDeviceAttTypeInfo;
 import top.microiot.dto.ActionTypeInfo;
 import top.microiot.dto.AlarmPageInfo;
 import top.microiot.dto.DeviceAddGroupInfo;
 import top.microiot.dto.DeviceInfo;
-import top.microiot.dto.DeviceInfo1;
 import top.microiot.dto.DeviceMoveInfo;
 import top.microiot.dto.DevicePageInfo;
 import top.microiot.dto.DeviceRenameInfo;
@@ -43,6 +41,7 @@ import top.microiot.dto.QueryInfo;
 import top.microiot.dto.SiteInfo;
 import top.microiot.dto.SitePageInfo;
 import top.microiot.dto.SiteRenameInfo;
+import top.microiot.dto.SiteTypeInfo;
 import top.microiot.dto.SiteTypeRenameInfo;
 import top.microiot.dto.SiteUpdateInfo;
 import top.microiot.dto.UserInfo;
@@ -293,7 +292,7 @@ public class HttpClientSession extends HttpSession {
 	 * @param info 场地类型信息，包括属性信息等。
 	 * @return 返回添加成功的场地类型。
 	 */
-	public SiteType addSitetype(ClassTypeInfo info) {
+	public SiteType addSitetype(SiteTypeInfo info) {
 		return postEntity(siteTypeUrl, info, siteTypeType);
 	}
 	
@@ -372,7 +371,7 @@ public class HttpClientSession extends HttpSession {
 	
 	/**
 	 * 添加场地。
-	 * @param info 场地信息，包括场地名称，场地类型，所属父场地，属性值等。
+	 * @param info 场地信息，包括场地名称，场地类型，所属场地，属性值等。
 	 * @return 返回添加成功的场地。
 	 */
 	public Site addSite(SiteInfo<Object> info) {
@@ -380,7 +379,7 @@ public class HttpClientSession extends HttpSession {
 		
 		SiteInfo<AttValueInfo> siteValue = new SiteInfo<AttValueInfo>();
 		siteValue.setName(info.getName());
-		siteValue.setParentId(info.getParentId());
+		siteValue.setLocationId(info.getLocationId());
 		siteValue.setSiteType(info.getSiteType());
 		Map<String, Object> attInfos = info.getAttInfos();
 		Map<String, AttributeType> attDefinition = st.getAttDefinition();
@@ -471,12 +470,14 @@ public class HttpClientSession extends HttpSession {
 		Map<String, String> queryParams= new HashMap<String, String>();
 		queryParams.put("currentPage", Integer.toString(info.getCurrentPage()));
 		queryParams.put("numPerPage", Integer.toString(info.getNumPerPage()));
-		if(info.getParentId() != null)
-			queryParams.put("parentId", info.getParentId());
-		if(info.getSiteName() != null)
-			queryParams.put("siteName", info.getSiteName());
+		if(info.getLocationId() != null)
+			queryParams.put("locationId", info.getLocationId());
+		if(info.getName() != null)
+			queryParams.put("name", info.getName());
 		if(info.getSiteTypeId() != null)
 			queryParams.put("siteTypeId", info.getSiteTypeId());
+		if(info.getDomainId() != null)
+			queryParams.put("domainId", info.getDomainId());
 		
 		return getEntity(siteUrl + "s", queryParams, new ParameterizedTypeReference<RestPage<Site>>() {});
 	}
@@ -505,39 +506,16 @@ public class HttpClientSession extends HttpSession {
 	
 	/**
 	 * 添加设备。
-	 * @param info 设备信息，包括设备名称，设备类型，设备标识符，设备所属场地信息，属性值等。
-	 * @return 返回添加成功的设备。
-	 */
-	public Device addDevice(DeviceInfo<Object> info) {
-		DeviceType dt = getDevicetypeByName(info.getType());
-		
-		DeviceInfo<AttValueInfo> deviceValue = new DeviceInfo<AttValueInfo>();
-		deviceValue.setSimNo(info.getSimNo());
-		deviceValue.setType(info.getType());
-		deviceValue.setDeviceName(info.getDeviceName());
-		deviceValue.setSites(info.getSites());
-		Map<String, Object> attInfos = info.getAttInfos();
-		Map<String, AttributeType> attDefinition = dt.getStaticAttDefinition();
-		
-		Map<String, AttValueInfo> attValues = getAttInfos(attInfos, attDefinition);
-		deviceValue.setAttInfos(attValues);
-		
-		return postEntity(deviceUrl, deviceValue, deviceType);
-	}
-	
-	/**
-	 * 添加设备。
 	 * @param info 设备信息，包括设备名称，设备类型，设备标识符，设备所属场地标识符，属性值等。
 	 * @return 返回添加成功的设备。
 	 */
-	public Device addDevice(DeviceInfo1<Object> info) {
-		DeviceType dt = getDevicetypeByName(info.getType());
+	public Device addDevice(DeviceInfo<Object> info) {
+		DeviceType dt = getDevicetypeByName(info.getDeviceType());
 		
-		DeviceInfo1<AttValueInfo> deviceValue = new DeviceInfo1<AttValueInfo>();
-		deviceValue.setSimNo(info.getSimNo());
-		deviceValue.setType(info.getType());
-		deviceValue.setDeviceName(info.getDeviceName());
-		deviceValue.setSiteId(info.getSiteId());
+		DeviceInfo<AttValueInfo> deviceValue = new DeviceInfo<AttValueInfo>();
+		deviceValue.setDeviceType(info.getDeviceType());
+		deviceValue.setName(info.getName());
+		deviceValue.setLocationId(info.getLocationId());
 		Map<String, Object> attInfos = info.getAttInfos();
 		Map<String, AttributeType> attDefinition = dt.getStaticAttDefinition();
 		
@@ -607,12 +585,12 @@ public class HttpClientSession extends HttpSession {
 		Map<String, String> queryParams= new HashMap<String, String>();
 		queryParams.put("currentPage", Integer.toString(info.getCurrentPage()));
 		queryParams.put("numPerPage", Integer.toString(info.getNumPerPage()));
-		if(info.getSiteId() != null)
-			queryParams.put("siteId", info.getSiteId());
-		if(info.getDeviceName() != null)
-			queryParams.put("deviceName", info.getDeviceName());
-		if(info.getDeviceType() != null)
-			queryParams.put("deviceType", info.getDeviceType());
+		if(info.getLocationId() != null)
+			queryParams.put("siteId", info.getLocationId());
+		if(info.getName() != null)
+			queryParams.put("deviceName", info.getName());
+		if(info.getDeviceTypeId() != null)
+			queryParams.put("deviceType", info.getDeviceTypeId());
 		
 		return getEntity(deviceUrl + "s", queryParams, new ParameterizedTypeReference<RestPage<Device>>() {});
 	}

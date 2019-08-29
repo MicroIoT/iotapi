@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import top.microiot.api.client.WebsocketClientSession;
 import top.microiot.api.stomp.AbstractEventSubscriber;
 import top.microiot.domain.Alarm;
-import top.microiot.domain.NotifyObject;
+import top.microiot.domain.ManagedObject;
 import top.microiot.domain.attribute.DataType;
 import top.microiot.exception.NotFoundException;
 
@@ -48,7 +48,7 @@ public abstract class AlarmSubscriber extends AbstractEventSubscriber{
 	 * @param reportTime 告警上报时间。
 	 * @param receiveTime 告警在平台上接收到的时间。
 	 */
-	public abstract void onAlarm(NotifyObject notifyObject, String alarmType, Object alarmInfo, Date reportTime, Date receiveTime);
+	public abstract void onAlarm(ManagedObject notifyObject, String alarmType, Object alarmInfo, Date reportTime, Date receiveTime);
 
 	/**
 	 * 将告警信息转变为用户的类型，调用设备的告警处理。

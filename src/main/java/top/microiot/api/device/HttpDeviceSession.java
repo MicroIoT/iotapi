@@ -52,7 +52,10 @@ public class HttpDeviceSession extends HttpSession {
 	 * 获取设备本身信息。
 	 */
 	private Device getDeviceInfo() {
-		return getEntity("/device/me", null, Device.class);
+		if(device == null)
+			return getEntity("/device/me", null, Device.class);
+		else
+			return device;
 	}
 	
 	/**
