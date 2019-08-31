@@ -23,6 +23,7 @@ import top.microiot.domain.User;
 import top.microiot.domain.attribute.AttTypeInfo;
 import top.microiot.domain.attribute.AttValueInfo;
 import top.microiot.domain.attribute.AttributeType;
+import top.microiot.domain.attribute.ClassTypeInfo;
 import top.microiot.domain.attribute.IDeviceAttTypeInfo;
 import top.microiot.dto.ActionTypeInfo;
 import top.microiot.dto.AlarmPageInfo;
@@ -41,7 +42,6 @@ import top.microiot.dto.QueryInfo;
 import top.microiot.dto.SiteInfo;
 import top.microiot.dto.SitePageInfo;
 import top.microiot.dto.SiteRenameInfo;
-import top.microiot.dto.SiteTypeInfo;
 import top.microiot.dto.SiteTypeRenameInfo;
 import top.microiot.dto.SiteUpdateInfo;
 import top.microiot.dto.UserInfo;
@@ -70,7 +70,7 @@ public class HttpClientSession extends HttpSession {
 	}
 	
 	public static Class<User> userType = User.class;
-	public static String userUrl = "/user";
+	public static String userUrl = "/users";
 	
 	/**
 	 * 添加平台用户。
@@ -124,7 +124,7 @@ public class HttpClientSession extends HttpSession {
 		queryParams.put("currentPage", Integer.toString(info.getCurrentPage()));
 		queryParams.put("numPerPage", Integer.toString(info.getNumPerPage()));
 		
-		return getEntity(userUrl + "s", queryParams, new ParameterizedTypeReference<RestPage<User>>() {});
+		return getEntity(userUrl , queryParams, new ParameterizedTypeReference<RestPage<User>>() {});
 	}
 	
 	/**
@@ -187,7 +187,7 @@ public class HttpClientSession extends HttpSession {
 		queryParams.put("currentPage", Integer.toString(info.getCurrentPage()));
 		queryParams.put("numPerPage", Integer.toString(info.getNumPerPage()));
 		
-		return getEntity(deviceTypeUrl + "s/page", queryParams, new ParameterizedTypeReference<RestPage<DeviceType>>() {});
+		return getEntity(deviceTypeUrl + "/page", queryParams, new ParameterizedTypeReference<RestPage<DeviceType>>() {});
 	}
 	
 	/**
@@ -195,7 +195,7 @@ public class HttpClientSession extends HttpSession {
 	 * @return 返回设备类型列表。
 	 */
 	public List<DeviceType> getDeviceTypeList() {
-		return getEntity(deviceTypeUrl + "s/list", null, new ParameterizedTypeReference<List<DeviceType>>() {});
+		return getEntity(deviceTypeUrl + "/list", null, new ParameterizedTypeReference<List<DeviceType>>() {});
 	}
 	
 	/**
@@ -292,7 +292,7 @@ public class HttpClientSession extends HttpSession {
 	 * @param info 场地类型信息，包括属性信息等。
 	 * @return 返回添加成功的场地类型。
 	 */
-	public SiteType addSitetype(SiteTypeInfo info) {
+	public SiteType addSitetype(ClassTypeInfo info) {
 		return postEntity(siteTypeUrl, info, siteTypeType);
 	}
 	
@@ -335,7 +335,7 @@ public class HttpClientSession extends HttpSession {
 		queryParams.put("currentPage", Integer.toString(info.getCurrentPage()));
 		queryParams.put("numPerPage", Integer.toString(info.getNumPerPage()));
 		
-		return getEntity(siteTypeUrl + "s/page", queryParams, new ParameterizedTypeReference<RestPage<SiteType>>() {});
+		return getEntity(siteTypeUrl + "/page", queryParams, new ParameterizedTypeReference<RestPage<SiteType>>() {});
 	}
 	
 	/**
@@ -343,7 +343,7 @@ public class HttpClientSession extends HttpSession {
 	 * @return 返回场地类型列表。
 	 */
 	public List<SiteType> getSiteTypeList() {
-		return getEntity(siteTypeUrl + "s/list", null, new ParameterizedTypeReference<List<SiteType>>() {});
+		return getEntity(siteTypeUrl + "/list", null, new ParameterizedTypeReference<List<SiteType>>() {});
 	}
 	
 	/**
@@ -476,10 +476,8 @@ public class HttpClientSession extends HttpSession {
 			queryParams.put("name", info.getName());
 		if(info.getSiteTypeId() != null)
 			queryParams.put("siteTypeId", info.getSiteTypeId());
-		if(info.getDomainId() != null)
-			queryParams.put("domainId", info.getDomainId());
 		
-		return getEntity(siteUrl + "s", queryParams, new ParameterizedTypeReference<RestPage<Site>>() {});
+		return getEntity(siteUrl , queryParams, new ParameterizedTypeReference<RestPage<Site>>() {});
 	}
 	
 	/**
@@ -498,7 +496,7 @@ public class HttpClientSession extends HttpSession {
 		if(siteTypeId != null)
 			queryParams.put("siteTypeId", siteTypeId);
 		
-		return getEntity(siteUrl + "s/count", queryParams, Long.class);
+		return getEntity(siteUrl + "/count", queryParams, Long.class);
 	}
 	
 	public static Class<Device> deviceType = Device.class;
@@ -586,32 +584,32 @@ public class HttpClientSession extends HttpSession {
 		queryParams.put("currentPage", Integer.toString(info.getCurrentPage()));
 		queryParams.put("numPerPage", Integer.toString(info.getNumPerPage()));
 		if(info.getLocationId() != null)
-			queryParams.put("siteId", info.getLocationId());
+			queryParams.put("locationId", info.getLocationId());
 		if(info.getName() != null)
-			queryParams.put("deviceName", info.getName());
+			queryParams.put("name", info.getName());
 		if(info.getDeviceTypeId() != null)
-			queryParams.put("deviceType", info.getDeviceTypeId());
+			queryParams.put("deviceTypeId", info.getDeviceTypeId());
 		
-		return getEntity(deviceUrl + "s", queryParams, new ParameterizedTypeReference<RestPage<Device>>() {});
+		return getEntity(deviceUrl , queryParams, new ParameterizedTypeReference<RestPage<Device>>() {});
 	}
 	
 	/**
 	 * 获取符合条件的设备数量。
-	 * @param siteId 场地标识符。
-	 * @param deviceName 设备名称。
-	 * @param deviceType 设备类型标识符。
+	 * @param locationId 场地标识符。
+	 * @param name 设备名称。
+	 * @param deviceTypeId 设备类型标识符。
 	 * @return 返回符合条件的设备数量。
 	 */
-	public long getDeviceCount(String siteId, String deviceName, String deviceType) {
+	public long getDeviceCount(String locationId, String name, String deviceTypeId) {
 		Map<String, String> queryParams= new HashMap<String, String>();
-		if(siteId != null)
-			queryParams.put("siteId", siteId);
-		if(deviceName != null)
-			queryParams.put("deviceName", deviceName);
-		if(deviceType != null)
-			queryParams.put("deviceType", deviceType);
+		if(locationId != null)
+			queryParams.put("locationId", locationId);
+		if(name != null)
+			queryParams.put("name", name);
+		if(deviceTypeId != null)
+			queryParams.put("deviceTypeId", deviceTypeId);
 		
-		return getEntity(deviceUrl + "s/count", queryParams, Long.class);
+		return getEntity(deviceUrl + "/count", queryParams, Long.class);
 	}
 	
 	/**
@@ -638,7 +636,7 @@ public class HttpClientSession extends HttpSession {
 	 * @return 返回同级设备列表
 	 */
 	public List<Device> getSibling(String deviceId){
-		return getEntity("/devices/sibling/" + deviceId, null, new ParameterizedTypeReference<List<Device>>() {});
+		return getEntity(deviceUrl + "/sibling/" + deviceId, null, new ParameterizedTypeReference<List<Device>>() {});
 	}
 	
 	/**
@@ -647,7 +645,7 @@ public class HttpClientSession extends HttpSession {
 	 * @return 返回子设备列表
 	 */
 	public List<Device> getChildren(String deviceId){
-		return getEntity("/devices/children/" + deviceId, null, new ParameterizedTypeReference<List<Device>>() {});
+		return getEntity(deviceUrl + "/children/" + deviceId, null, new ParameterizedTypeReference<List<Device>>() {});
 	}
 	public static Class<Alarm> alarmType = Alarm.class;
 	public static String alarmUrl = "/" + IoTObject.alarm.getName();
@@ -689,7 +687,7 @@ public class HttpClientSession extends HttpSession {
 		if(info.getAlarmType() != null)
 			queryParams.put("alarmType", info.getAlarmType());
 		
-		return getEntity(alarmUrl + "s", queryParams, new ParameterizedTypeReference<RestPage<Alarm>>() {});
+		return getEntity(alarmUrl, queryParams, new ParameterizedTypeReference<RestPage<Alarm>>() {});
 	}
 	
 	public static Class<Event> eventType = Event.class;
@@ -732,6 +730,6 @@ public class HttpClientSession extends HttpSession {
 		if(info.getReceiveTo() != null)
 			queryParams.put("receiveTo", format.format(info.getReceiveTo()));
 		
-		return getEntity(eventUrl + "s", queryParams, new ParameterizedTypeReference<RestPage<Event>>() {});
+		return getEntity(eventUrl , queryParams, new ParameterizedTypeReference<RestPage<Event>>() {});
 	}
 }

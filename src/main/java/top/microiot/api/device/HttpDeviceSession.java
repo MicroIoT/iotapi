@@ -53,7 +53,7 @@ public class HttpDeviceSession extends HttpSession {
 	 */
 	private Device getDeviceInfo() {
 		if(device == null)
-			return getEntity("/device/me", null, Device.class);
+			return getEntity("/devices/me", null, Device.class);
 		else
 			return device;
 	}
@@ -76,7 +76,7 @@ public class HttpDeviceSession extends HttpSession {
 		EventInfo info = new EventInfo();
 		info.setValues(values);
 		info.setReportTime(new Date());
-		postEntity("/event", info, null);
+		postEntity("/events", info, null);
 	}
 	
 	/**
@@ -96,7 +96,7 @@ public class HttpDeviceSession extends HttpSession {
 		info.setAlarmType(alarmType);
 		info.setAlarmInfo(values);
 		info.setReportTime(new Date());
-		postEntity("/alarm", info, Alarm.class);
+		postEntity("/alarms", info, Alarm.class);
 	}
 	
 	/**
