@@ -26,7 +26,7 @@ import top.microiot.api.client.HttpClientSession;
 import top.microiot.api.dto.RestGeoResults;
 import top.microiot.api.dto.RestPage;
 import top.microiot.domain.Device;
-import top.microiot.domain.IoTObject;
+import top.microiot.domain.IoTQueryObject;
 import top.microiot.dto.DistinctInfo;
 import top.microiot.dto.QueryInfo;
 import top.microiot.dto.QueryNearPageInfo;
@@ -55,7 +55,7 @@ public abstract class HttpSession {
 	private String sessionId;
 	protected boolean logined = false;
 	
-    private HttpSessionProperties httpSessionProperties;
+    protected HttpSessionProperties httpSessionProperties;
 	
 	@Autowired
     private RestTemplate restTemplate;
@@ -76,8 +76,7 @@ public abstract class HttpSession {
 			headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
 			MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
-			map.add("username", httpSessionProperties.getUsername());
-			map.add("password", httpSessionProperties.getPassword());
+			setLoginInfo(map);
 	
 			HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(map, headers);
 			ResponseEntity<String> response;
@@ -95,6 +94,11 @@ public abstract class HttpSession {
 			}
 			this.logined = true;
 		}
+	}
+
+	protected void setLoginInfo(MultiValueMap<String, String> map) {
+		map.add("username", httpSessionProperties.getUsername());
+		map.add("password", httpSessionProperties.getPassword());
 	}
 	
 	/**
@@ -165,21 +169,21 @@ public abstract class HttpSession {
 	
 	
 	@SuppressWarnings("unchecked")
-	public <T> T getEntityById(IoTObject object, String id) {
+	public <T> T getEntityById(IoTQueryObject object, String id) {
 		assert logined : "login first";
 		String url = "/" + object.getName() + "s/query/id/" + id;
 		return (T) getEntity(url, null, object.getIoT());
 	}
 	
 	@SuppressWarnings("unchecked")
-	public <T> T getOneEntity(IoTObject object, QueryInfo info) {
+	public <T> T getOneEntity(IoTQueryObject object, QueryInfo info) {
 		String url = "/" + object.getName() + "s/query/one";
 		Map<String, String> queryParams = buildQueryParams(info);
 		
 		return (T) getEntity(url, queryParams, object.getIoT());
 	}
 	
-	public <T> List<T> getEntityList(IoTObject object, QueryInfo info, ParameterizedTypeReference<List<T>> responseType) {
+	public <T> List<T> getEntityList(IoTQueryObject object, QueryInfo info, ParameterizedTypeReference<List<T>> responseType) {
 		assert logined : "login first";
 		String url = "/" + object.getName() + "s/query/list";
 		Map<String, String> queryParams = buildQueryParams(info);
@@ -187,7 +191,7 @@ public abstract class HttpSession {
 		return getEntity(url, queryParams, responseType);
 	}
 	
-	public <T> Page<T> getEntityPage(IoTObject object, QueryPageInfo info, ParameterizedTypeReference<RestPage<T>> responseType) {
+	public <T> Page<T> getEntityPage(IoTQueryObject object, QueryPageInfo info, ParameterizedTypeReference<RestPage<T>> responseType) {
 		assert logined : "login first";
 		String url = "/" + object.getName() + "s/query/page";
 		Map<String, String> queryParams = buildQueryPageParams(info);
@@ -195,7 +199,7 @@ public abstract class HttpSession {
 		return getEntity(url, queryParams, responseType);
 	}
 	
-	public <T> RestGeoResults<T> getEntityGeo(IoTObject object, QueryNearPageInfo info, ParameterizedTypeReference<RestGeoResults<T>> responseType) {
+	public <T> RestGeoResults<T> getEntityGeo(IoTQueryObject object, QueryNearPageInfo info, ParameterizedTypeReference<RestGeoResults<T>> responseType) {
 		assert logined : "login first";
 		String url = "/" + object.getName() + "s/query/geo";
 		Map<String, String> queryParams = buildQueryNearParams(info);
@@ -203,7 +207,7 @@ public abstract class HttpSession {
 		return getEntity(url, queryParams, responseType);
 	}
 	
-	public <T> List<T> getEntityAggregate(IoTObject object, QueryInfo info, ParameterizedTypeReference<List<T>> responseType) {
+	public <T> List<T> getEntityAggregate(IoTQueryObject object, QueryInfo info, ParameterizedTypeReference<List<T>> responseType) {
 		assert logined : "login first";
 		String url = "/" + object.getName() + "s/query/aggregate";
 		Map<String, String> queryParams = buildQueryParams(info);
@@ -211,7 +215,7 @@ public abstract class HttpSession {
 		return getEntity(url, queryParams, responseType);
 	}
 	
-	public <T> List<T> getEntityDistinct(IoTObject object, DistinctInfo info, ParameterizedTypeReference<List<T>> responseType) {
+	public <T> List<T> getEntityDistinct(IoTQueryObject object, DistinctInfo info, ParameterizedTypeReference<List<T>> responseType) {
 		assert logined : "login first";
 		String url = "/" + object.getName() + "s/query/distinct";
 		Map<String, String> queryParams = buildQueryDistinctParams(info);
@@ -219,7 +223,7 @@ public abstract class HttpSession {
 		return getEntity(url, queryParams, responseType);
 	}
 	
-	public int count(IoTObject object, QueryInfo info) {
+	public int count(IoTQueryObject object, QueryInfo info) {
 		assert logined : "login first";
 		String url = "/" + object.getName() + "s/query/count";
 		Map<String, String> queryParams = buildQueryParams(info);
@@ -227,7 +231,7 @@ public abstract class HttpSession {
 		return getEntity(url, queryParams, Integer.class);
 	}
 	
-	public boolean exist(IoTObject object, QueryInfo info) {
+	public boolean exist(IoTQueryObject object, QueryInfo info) {
 		assert logined : "login first";
 		String url = "/" + object.getName() + "s/query/exist";
 		Map<String, String> queryParams = buildQueryParams(info);

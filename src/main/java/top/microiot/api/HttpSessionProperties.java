@@ -9,6 +9,7 @@ public class HttpSessionProperties {
 	private String username;
 	private String password;
 	private String uri;
+	private String domain;
 	
 	public String getUsername() {
 		return username;
@@ -27,5 +28,11 @@ public class HttpSessionProperties {
 	}
 	public void setUri(String uri) {
 		this.uri = uri;
+	}
+	public String getDomain() {
+		return domain;
+	}
+	public void setDomain(String domain) {
+		this.domain = domain;
 	}
 }
