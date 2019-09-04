@@ -17,7 +17,6 @@ import top.microiot.domain.Alarm;
 import top.microiot.domain.Device;
 import top.microiot.domain.DeviceType;
 import top.microiot.domain.Event;
-import top.microiot.domain.IoTQueryObject;
 import top.microiot.domain.Site;
 import top.microiot.domain.SiteType;
 import top.microiot.domain.User;
@@ -146,7 +145,7 @@ public class HttpClientSession extends HttpSession {
 	}
 	
 	public static Class<DeviceType> deviceTypeType = DeviceType.class;
-	public static String deviceTypeUrl = "/" + IoTQueryObject.devicetype.getName();
+	public static String deviceTypeUrl = "/" +getIoTObjectName(DeviceType.class);
 	
 	/**
 	 * 添加设备类型。
@@ -178,7 +177,7 @@ public class HttpClientSession extends HttpSession {
 		QueryInfo q = new QueryInfo();
 		String filter = String.format("{\"name\": \"%s\"}", name);
 		q.setFilter(filter);
-		DeviceType dt = this.getOneEntity(IoTQueryObject.devicetype, q);
+		DeviceType dt = this.getOneEntity(DeviceType.class, q);
 		if(dt == null)
 			throw new NotFoundException("device type");
 		return dt;
@@ -294,7 +293,7 @@ public class HttpClientSession extends HttpSession {
 	}
 	
 	public static Class<SiteType> siteTypeType = SiteType.class;
-	public static String siteTypeUrl = "/" + IoTQueryObject.sitetype.getName();
+	public static String siteTypeUrl = "/" + getIoTObjectName(SiteType.class);
 	
 	/**
 	 * 添加场地类型。
@@ -326,7 +325,7 @@ public class HttpClientSession extends HttpSession {
 		QueryInfo q = new QueryInfo();
 		String filter = String.format("{\"name\": \"%s\"}", name);
 		q.setFilter(filter);
-		SiteType st = this.getOneEntity(IoTQueryObject.sitetype, q);
+		SiteType st = this.getOneEntity(SiteType.class, q);
 		if(st == null)
 			throw new NotFoundException("site type");
 		return st;
@@ -376,7 +375,7 @@ public class HttpClientSession extends HttpSession {
 	}
 	
 	public static Class<Site> siteType = Site.class;
-	public static String siteUrl = "/" + IoTQueryObject.site.getName();
+	public static String siteUrl = "/" + getIoTObjectName(Site.class);
 	
 	/**
 	 * 添加场地。
@@ -509,7 +508,7 @@ public class HttpClientSession extends HttpSession {
 	}
 	
 	public static Class<Device> deviceType = Device.class;
-	public static String deviceUrl = "/" + IoTQueryObject.device.getName();
+	public static String deviceUrl = "/" + getIoTObjectName(Device.class);
 	
 	/**
 	 * 添加设备。
@@ -657,7 +656,7 @@ public class HttpClientSession extends HttpSession {
 		return getEntity(deviceUrl + "/children/" + deviceId, null, new ParameterizedTypeReference<List<Device>>() {});
 	}
 	public static Class<Alarm> alarmType = Alarm.class;
-	public static String alarmUrl = "/" + IoTQueryObject.alarm.getName();
+	public static String alarmUrl = "/" + getIoTObjectName(Alarm.class);
 	
 	/**
 	 * 获取指定告警信息。
@@ -700,7 +699,7 @@ public class HttpClientSession extends HttpSession {
 	}
 	
 	public static Class<Event> eventType = Event.class;
-	public static String eventUrl = "/" + IoTQueryObject.event.getName();
+	public static String eventUrl = "/" + getIoTObjectName(Event.class);
 	
 	/**
 	 * 获取指定事件信息。

@@ -26,7 +26,7 @@ import top.microiot.api.client.HttpClientSession;
 import top.microiot.api.dto.RestGeoResults;
 import top.microiot.api.dto.RestPage;
 import top.microiot.domain.Device;
-import top.microiot.domain.IoTQueryObject;
+import top.microiot.domain.IoTObject;
 import top.microiot.dto.DistinctInfo;
 import top.microiot.dto.QueryInfo;
 import top.microiot.dto.QueryNearPageInfo;
@@ -169,74 +169,78 @@ public abstract class HttpSession {
 	
 	
 	@SuppressWarnings("unchecked")
-	public <T> T getEntityById(IoTQueryObject object, String id) {
+	public <T> T getEntityById(Class<? extends IoTObject> object, String id) {
 		assert logined : "login first";
-		String url = "/" + object.getName() + "s/query/id/" + id;
-		return (T) getEntity(url, null, object.getIoT());
+		String url = "/" + getIoTObjectName(object) + "/query/id/" + id;
+		return (T) getEntity(url, null, object);
 	}
-	
+
 	@SuppressWarnings("unchecked")
-	public <T> T getOneEntity(IoTQueryObject object, QueryInfo info) {
-		String url = "/" + object.getName() + "s/query/one";
+	public <T> T getOneEntity(Class<? extends IoTObject> object, QueryInfo info) {
+		String url = "/" + getIoTObjectName(object) + "/query/one";
 		Map<String, String> queryParams = buildQueryParams(info);
 		
-		return (T) getEntity(url, queryParams, object.getIoT());
+		return (T) getEntity(url, queryParams, object);
 	}
 	
-	public <T> List<T> getEntityList(IoTQueryObject object, QueryInfo info, ParameterizedTypeReference<List<T>> responseType) {
+	public <T> List<T> getEntityList(Class<? extends IoTObject> object, QueryInfo info, ParameterizedTypeReference<List<T>> responseType) {
 		assert logined : "login first";
-		String url = "/" + object.getName() + "s/query/list";
+		String url = "/" + getIoTObjectName(object) + "/query/list";
 		Map<String, String> queryParams = buildQueryParams(info);
 	
 		return getEntity(url, queryParams, responseType);
 	}
 	
-	public <T> Page<T> getEntityPage(IoTQueryObject object, QueryPageInfo info, ParameterizedTypeReference<RestPage<T>> responseType) {
+	public <T> Page<T> getEntityPage(Class<? extends IoTObject> object, QueryPageInfo info, ParameterizedTypeReference<RestPage<T>> responseType) {
 		assert logined : "login first";
-		String url = "/" + object.getName() + "s/query/page";
+		String url = "/" + getIoTObjectName(object) + "/query/page";
 		Map<String, String> queryParams = buildQueryPageParams(info);
 	
 		return getEntity(url, queryParams, responseType);
 	}
 	
-	public <T> RestGeoResults<T> getEntityGeo(IoTQueryObject object, QueryNearPageInfo info, ParameterizedTypeReference<RestGeoResults<T>> responseType) {
+	public <T> RestGeoResults<T> getEntityGeo(Class<? extends IoTObject> object, QueryNearPageInfo info, ParameterizedTypeReference<RestGeoResults<T>> responseType) {
 		assert logined : "login first";
-		String url = "/" + object.getName() + "s/query/geo";
+		String url = "/" + getIoTObjectName(object) + "/query/geo";
 		Map<String, String> queryParams = buildQueryNearParams(info);
 	
 		return getEntity(url, queryParams, responseType);
 	}
 	
-	public <T> List<T> getEntityAggregate(IoTQueryObject object, QueryInfo info, ParameterizedTypeReference<List<T>> responseType) {
+	public <T> List<T> getEntityAggregate(Class<? extends IoTObject> object, QueryInfo info, ParameterizedTypeReference<List<T>> responseType) {
 		assert logined : "login first";
-		String url = "/" + object.getName() + "s/query/aggregate";
+		String url = "/" + getIoTObjectName(object) + "/query/aggregate";
 		Map<String, String> queryParams = buildQueryParams(info);
 	
 		return getEntity(url, queryParams, responseType);
 	}
 	
-	public <T> List<T> getEntityDistinct(IoTQueryObject object, DistinctInfo info, ParameterizedTypeReference<List<T>> responseType) {
+	public <T> List<T> getEntityDistinct(Class<? extends IoTObject> object, DistinctInfo info, ParameterizedTypeReference<List<T>> responseType) {
 		assert logined : "login first";
-		String url = "/" + object.getName() + "s/query/distinct";
+		String url = "/" + getIoTObjectName(object) + "/query/distinct";
 		Map<String, String> queryParams = buildQueryDistinctParams(info);
 	
 		return getEntity(url, queryParams, responseType);
 	}
 	
-	public int count(IoTQueryObject object, QueryInfo info) {
+	public int count(Class<? extends IoTObject> object, QueryInfo info) {
 		assert logined : "login first";
-		String url = "/" + object.getName() + "s/query/count";
+		String url = "/" + getIoTObjectName(object) + "/query/count";
 		Map<String, String> queryParams = buildQueryParams(info);
 	
 		return getEntity(url, queryParams, Integer.class);
 	}
 	
-	public boolean exist(IoTQueryObject object, QueryInfo info) {
+	public boolean exist(Class<? extends IoTObject> object, QueryInfo info) {
 		assert logined : "login first";
-		String url = "/" + object.getName() + "s/query/exist";
+		String url = "/" + getIoTObjectName(object) + "/query/exist";
 		Map<String, String> queryParams = buildQueryParams(info);
 	
 		return getEntity(url, queryParams, Boolean.class);
+	}
+	
+	protected static String getIoTObjectName(Class<? extends IoTObject> object) {
+		return object.getSimpleName().toLowerCase() + "s";
 	}
 	
 	protected <T> T getEntity(String getUri, Map<String, String> queryParams, Class<T> responseType) {
