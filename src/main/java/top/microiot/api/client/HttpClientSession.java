@@ -16,6 +16,7 @@ import top.microiot.api.dto.RestPage;
 import top.microiot.domain.Alarm;
 import top.microiot.domain.Device;
 import top.microiot.domain.DeviceType;
+import top.microiot.domain.Domain;
 import top.microiot.domain.Event;
 import top.microiot.domain.Site;
 import top.microiot.domain.SiteType;
@@ -35,6 +36,8 @@ import top.microiot.dto.DeviceRenameInfo;
 import top.microiot.dto.DeviceTypeInfo;
 import top.microiot.dto.DeviceTypeRenameInfo;
 import top.microiot.dto.DeviceUpdateInfo;
+import top.microiot.dto.DomainInfo;
+import top.microiot.dto.DomainRenameInfo;
 import top.microiot.dto.EventPageInfo;
 import top.microiot.dto.NotificationPageInfo;
 import top.microiot.dto.PageInfo;
@@ -77,8 +80,80 @@ public class HttpClientSession extends HttpSession {
 		return getEntity("/devices/list", queryParams, new ParameterizedTypeReference<List<Device>>() {});
 	}
 	
+	public static Class<Domain> domainType = Domain.class;
+	public static String domainUrl = "/domains";
+	
+	/**
+	 * 添加领域。
+	 * @param info 被添加的领域信息。
+	 * @return 返回添加成功的领域。
+	 */
+	public Domain addDomain(DomainInfo info) {
+		return postEntity(domainUrl, info, domainType);
+	}
+	
+	/**
+	 * 获取当前登录的领域的信息。
+	 * @return 返回当前登录的领域信息。
+	 */
+	public Domain getCurrentDomain() {
+		return getEntity(domainUrl, null, domainType);
+	}
+	
+	/**
+	 * 删除指定领域。
+	 * @param id 指定领域的标识符
+	 */
+	public void deleteDomain(String id) {
+		if(id != null && !id.isEmpty())
+			deleteEntity(domainUrl + "/" + id, null, domainType);
+		else
+			throw new ValueException("domain id can't be empty");
+	}
+	
+	/**
+	 * 获取指定领域的信息。
+	 * @param id 指定领域的标识符
+	 * @return 返回指定领域信息。
+	 */
+	public Domain getDomainById(String id) {
+		if(id != null && !id.isEmpty()) {
+			return getEntity(domainUrl + "/id/" + id, null, domainType);
+		} else
+			throw new ValueException("domain id can't be empty");
+	}
+	
+	/**
+	 * 获取指定领域的信息。
+	 * @param name 指定领域的名称
+	 * @return 返回指定领域信息。
+	 */
+	public Domain getDomainByName(String name) {
+		if(name != null && !name.isEmpty()) {
+			return getEntity(domainUrl + "/name/" + name, null, domainType);
+		} else
+			throw new ValueException("domain name can't be empty");
+	}
+	
+	/**
+	 * 修改领域名称。
+	 * @param info 修改领域的名称，包括领域标识符和新名称。
+	 * @return 返回领域信息。
+	 */
+	public Domain renameDomain(DomainRenameInfo info) {
+		return patchEntity(domainUrl, info, domainType);
+	}
+	
+	/**
+	 * 获取当前用户可以访问的领域列表。
+	 * @return 返回可以访问的领域列表。
+	 */
+	public List<Domain> getMyDomains() {
+		return getEntity(domainUrl  +"/me", null, new ParameterizedTypeReference<List<Domain>>() {});
+	}
 	public static Class<User> userType = User.class;
 	public static String userUrl = "/users";
+	
 	
 	/**
 	 * 添加平台用户。
