@@ -504,6 +504,14 @@ public class HttpClientSession extends HttpSession {
 	}
 	
 	/**
+	 * 获取当前登录用户（区域管理员）负责的所有场地的信息。
+	 * @return 返回场地列表。
+	 */
+	public List<Site> getMySites() {
+		return getEntity(siteUrl + "/me", null, new ParameterizedTypeReference<List<Site>>() {});
+	}
+	
+	/**
 	 *删除指定场地。
 	 * @param id 场地标识符
 	 */
@@ -616,6 +624,14 @@ public class HttpClientSession extends HttpSession {
 			return getEntity(deviceUrl + "/" + id, null, deviceType);
 		} else
 			throw new ValueException("id can't be empty");
+	}
+	
+	/**
+	 * 获取当前登录用户（区域管理员）负责的所有设备的信息。
+	 * @return 返回设备列表。
+	 */
+	public List<Device> getMyDevices() {
+		return getEntity(deviceUrl + "/area", null, new ParameterizedTypeReference<List<Device>>() {});
 	}
 	
 	/**
