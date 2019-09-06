@@ -672,6 +672,17 @@ public class HttpClientSession extends HttpSession {
 	}
 	
 	/**
+	 *删除指定设备。
+	 * @param id 设备标识符
+	 */
+	public void deleteDevice(String id) {
+		if(id != null && !id.isEmpty())
+			deleteEntity(deviceUrl + "/" + id, null, deviceType);
+		else
+			throw new ValueException("id can't be empty");
+	}
+	
+	/**
 	 * 获取设备列表页。
 	 * @param info 指定页查询信息以及查询条件，包括场地标识符，设备类型，设备名称。
 	 * @return 返回指定页的设备。
