@@ -26,6 +26,7 @@ import top.microiot.api.client.HttpClientSession;
 import top.microiot.api.dto.RestGeoResults;
 import top.microiot.api.dto.RestPage;
 import top.microiot.domain.Device;
+import top.microiot.domain.DeviceGroup;
 import top.microiot.domain.IoTObject;
 import top.microiot.dto.DistinctInfo;
 import top.microiot.dto.QueryInfo;
@@ -167,6 +168,17 @@ public abstract class HttpSession {
 			throw new ValueException("id can't be empty");
 	}
 	
+	/**
+	 * 获取指定设备组的信息。
+	 * @param id 指定设备组的标识符
+	 * @return 返回指定设备组信息。
+	 */
+	public DeviceGroup getDeviceGroup(String id) {
+		if(id != null && !id.isEmpty()) {
+			return getEntity(HttpClientSession.deviceGroupUrl + "/" + id, null, HttpClientSession.deviceGroupType);
+		} else
+			throw new ValueException("device group id can't be empty");
+	}
 	
 	@SuppressWarnings("unchecked")
 	public <T> T getEntityById(Class<? extends IoTObject> object, String id) {

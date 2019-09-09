@@ -15,6 +15,7 @@ import top.microiot.api.HttpSessionProperties;
 import top.microiot.api.dto.RestPage;
 import top.microiot.domain.Alarm;
 import top.microiot.domain.Device;
+import top.microiot.domain.DeviceGroup;
 import top.microiot.domain.DeviceType;
 import top.microiot.domain.Domain;
 import top.microiot.domain.Event;
@@ -28,7 +29,8 @@ import top.microiot.domain.attribute.ClassTypeInfo;
 import top.microiot.domain.attribute.IDeviceAttTypeInfo;
 import top.microiot.dto.ActionTypeInfo;
 import top.microiot.dto.AlarmPageInfo;
-import top.microiot.dto.DeviceAddGroupInfo;
+import top.microiot.dto.DeviceGroupInfo;
+import top.microiot.dto.DeviceGroupRenameInfo;
 import top.microiot.dto.DeviceInfo;
 import top.microiot.dto.DeviceMoveInfo;
 import top.microiot.dto.DevicePageInfo;
@@ -106,7 +108,7 @@ public class HttpClientSession extends HttpSession {
 	 */
 	public void deleteDomain(String id) {
 		if(id != null && !id.isEmpty())
-			deleteEntity(domainUrl + "/" + id, null, domainType);
+			deleteEntity(domainUrl + "/" + id, null, null);
 		else
 			throw new ValueException("domain id can't be empty");
 	}
@@ -190,7 +192,7 @@ public class HttpClientSession extends HttpSession {
 	 */
 	public void deleteUser(String userId) {
 		if(userId != null && !userId.isEmpty())
-			deleteEntity(userUrl + "/" + userId, null, userType);
+			deleteEntity(userUrl + "/" + userId, null, null);
 		else
 			throw new ValueException("userid can't be empty");
 	}
@@ -220,7 +222,7 @@ public class HttpClientSession extends HttpSession {
 	}
 	
 	public static Class<DeviceType> deviceTypeType = DeviceType.class;
-	public static String deviceTypeUrl = "/" +getIoTObjectName(DeviceType.class);
+	public static String deviceTypeUrl = "/" +getIoTObjectName(deviceTypeType);
 	
 	/**
 	 * 添加设备类型。
@@ -296,7 +298,7 @@ public class HttpClientSession extends HttpSession {
 	 */
 	public void deleteDeviceType(String id) {
 		if(id != null && !id.isEmpty())
-			deleteEntity(deviceTypeUrl + "/" + id, null, deviceTypeType);
+			deleteEntity(deviceTypeUrl + "/" + id, null, null);
 		else
 			throw new ValueException("id can't be empty");
 	}
@@ -340,7 +342,7 @@ public class HttpClientSession extends HttpSession {
 	 */
 	public void deleteDeviceTypeActiontype(String id, String actiontype) {
 		if(id != null && !id.isEmpty() && actiontype != null && !actiontype.isEmpty())
-			deleteEntity(deviceTypeUrl + "/" + id + "/actiontype/" + actiontype, null, deviceTypeType);
+			deleteEntity(deviceTypeUrl + "/" + id + "/actiontype/" + actiontype, null, null);
 		else
 			throw new ValueException("id and actiontype can't be empty");
 	}
@@ -362,13 +364,13 @@ public class HttpClientSession extends HttpSession {
 	 */
 	public void deleteDeviceTypeAlarmtype(String id, String alarmtype) {
 		if(id != null && !id.isEmpty() && alarmtype != null && !alarmtype.isEmpty())
-			deleteEntity(deviceTypeUrl + "/" + id + "/alarmtype/" + alarmtype, null, deviceTypeType);
+			deleteEntity(deviceTypeUrl + "/" + id + "/alarmtype/" + alarmtype, null, null);
 		else
 			throw new ValueException("id and alarmtype can't be empty");
 	}
 	
 	public static Class<SiteType> siteTypeType = SiteType.class;
-	public static String siteTypeUrl = "/" + getIoTObjectName(SiteType.class);
+	public static String siteTypeUrl = "/" + getIoTObjectName(siteTypeType);
 	
 	/**
 	 * 添加场地类型。
@@ -444,13 +446,13 @@ public class HttpClientSession extends HttpSession {
 	 */
 	public void deleteSiteType(String id) {
 		if(id != null && !id.isEmpty())
-			deleteEntity(siteTypeUrl + "/" + id, null, siteTypeType);
+			deleteEntity(siteTypeUrl + "/" + id, null, null);
 		else
 			throw new ValueException("id can't be empty");
 	}
 	
 	public static Class<Site> siteType = Site.class;
-	public static String siteUrl = "/" + getIoTObjectName(Site.class);
+	public static String siteUrl = "/" + getIoTObjectName(siteType);
 	
 	/**
 	 * 添加场地。
@@ -517,7 +519,7 @@ public class HttpClientSession extends HttpSession {
 	 */
 	public void deleteSite(String id) {
 		if(id != null && !id.isEmpty())
-			deleteEntity(siteUrl + "/" + id, null, siteType);
+			deleteEntity(siteUrl + "/" + id, null, null);
 		else
 			throw new ValueException("id can't be empty");
 	}
@@ -591,7 +593,7 @@ public class HttpClientSession extends HttpSession {
 	}
 	
 	public static Class<Device> deviceType = Device.class;
-	public static String deviceUrl = "/" + getIoTObjectName(Device.class);
+	public static String deviceUrl = "/" + getIoTObjectName(deviceType);
 	
 	/**
 	 * 添加设备。
@@ -677,7 +679,7 @@ public class HttpClientSession extends HttpSession {
 	 */
 	public void deleteDevice(String id) {
 		if(id != null && !id.isEmpty())
-			deleteEntity(deviceUrl + "/" + id, null, deviceType);
+			deleteEntity(deviceUrl + "/" + id, null, null);
 		else
 			throw new ValueException("id can't be empty");
 	}
@@ -722,43 +724,86 @@ public class HttpClientSession extends HttpSession {
 		return getEntity(deviceUrl + "/count", queryParams, Long.class);
 	}
 	
+	public static Class<DeviceGroup> deviceGroupType = DeviceGroup.class;
+	public static String deviceGroupUrl = "/" + getIoTObjectName(deviceGroupType);
+	
 	/**
-	 * 添加设备到设备组中。
-	 * @param info 添加到设备组信息，包括被添加的设备id和设备组id。
-	 * @return 返回添加成功的设备信息。
+	 * 添加设备组。
+	 * @param info 被添加的设备组信息。
+	 * @return 返回添加成功的设备组。
 	 */
-	public Device addGroup(DeviceAddGroupInfo info) {
-		return postEntity(deviceUrl + "/group", info, deviceType);
+	public DeviceGroup addDeviceGroup(DeviceGroupInfo info) {
+		return postEntity(deviceGroupUrl, info, deviceGroupType);
+	}
+	
+	/**
+	 * 获取设备组列表页。
+	 * @param info 指定页查询信息
+	 * @return 返回指定页的设备组。
+	 */
+	public Page<DeviceGroup> getDeviceGroupPage(PageInfo info) {
+		if(info == null)
+			info = new PageInfo();
+		Map<String, String> queryParams= new HashMap<String, String>();
+		queryParams.put("currentPage", Integer.toString(info.getCurrentPage()));
+		queryParams.put("numPerPage", Integer.toString(info.getNumPerPage()));
+		
+		return getEntity(deviceGroupUrl + "/page", queryParams, new ParameterizedTypeReference<RestPage<DeviceGroup>>() {});
+	}
+	
+	/**
+	 * 获取设备组列表。
+	 * @return 返回设备组列表。
+	 */
+	public List<DeviceGroup> getDeviceGroupList() {
+		return getEntity(deviceGroupUrl + "/list", null, new ParameterizedTypeReference<List<DeviceGroup>>() {});
+	}
+	
+	/**
+	 * 修改设备组名称。
+	 * @param info 设备组修改信息，包括设备组标识符和新的名称。
+	 * @return 返回设备组。
+	 */
+	public DeviceGroup renameDeviceGroup(DeviceGroupRenameInfo info) {
+		return patchEntity(deviceGroupUrl + "/name", info, deviceGroupType);
+	}
+	
+	/**
+	 *删除指定设备组。
+	 * @param id 设备组标识符
+	 */
+	public void deleteDeviceGroup(String groupId) {
+		if(groupId != null && !groupId.isEmpty())
+			deleteEntity(deviceGroupUrl + groupId, null, null);
+		else
+			throw new ValueException("group id can't be empty");
+	}
+	
+	/**
+	 *添加设备到设备组中。
+	 * @param groupId 设备组标识符
+	 * @param deviceId 设备标识符
+	 * @return 返回添加成功的设备组信息。
+	 */
+	public void addGroup(String groupId, String deviceId) {
+		if(groupId != null && !groupId.isEmpty() && deviceId != null && !deviceId.isEmpty())
+			postEntity(deviceGroupUrl + "/group/" + groupId + "/device/" + deviceId, null, deviceGroupType);
+		else
+			throw new ValueException("group id and device id can't be empty");
 	}
 	
 	/**
 	 * 从设备组中移除设备。
-	 * @param deviceId 被移除的设备id。
-	 * @return 返回移除成功的设备信息。
+	 * @param groupId 设备组标识符
+	 * @param deviceId 设备标识符
+	 * @return 返回移除成功的设备组信息。
 	 */
-	public Device removeGroup(String deviceId) {
-		return deleteEntity(deviceUrl + "/group/" + deviceId, null, deviceType);
+	public DeviceGroup removeGroup(String groupId, String deviceId) {
+		return deleteEntity(deviceGroupUrl + "/group/" + groupId + "/device/" + deviceId, null, deviceGroupType);
 	}
 	
-	/**
-	 * 获取指定设备的同级设备信息。
-	 * @param deviceId 指定的设备id。
-	 * @return 返回同级设备列表
-	 */
-	public List<Device> getSibling(String deviceId){
-		return getEntity(deviceUrl + "/sibling/" + deviceId, null, new ParameterizedTypeReference<List<Device>>() {});
-	}
-	
-	/**
-	 * 获取指定设备的子设备信息
-	 * @param deviceId 指定的设备id。
-	 * @return 返回子设备列表
-	 */
-	public List<Device> getChildren(String deviceId){
-		return getEntity(deviceUrl + "/children/" + deviceId, null, new ParameterizedTypeReference<List<Device>>() {});
-	}
 	public static Class<Alarm> alarmType = Alarm.class;
-	public static String alarmUrl = "/" + getIoTObjectName(Alarm.class);
+	public static String alarmUrl = "/" + getIoTObjectName(alarmType);
 	
 	/**
 	 * 获取指定告警信息。
@@ -801,7 +846,7 @@ public class HttpClientSession extends HttpSession {
 	}
 	
 	public static Class<Event> eventType = Event.class;
-	public static String eventUrl = "/" + getIoTObjectName(Event.class);
+	public static String eventUrl = "/" + getIoTObjectName(eventType);
 	
 	/**
 	 * 获取指定事件信息。
