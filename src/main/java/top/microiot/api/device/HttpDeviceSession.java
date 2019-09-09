@@ -12,6 +12,7 @@ import top.microiot.api.HttpSession;
 import top.microiot.api.HttpSessionProperties;
 import top.microiot.domain.Alarm;
 import top.microiot.domain.Device;
+import top.microiot.domain.DeviceGroup;
 import top.microiot.domain.attribute.AttValueInfo;
 import top.microiot.domain.attribute.AttributeType;
 import top.microiot.domain.attribute.DeviceAttributeType;
@@ -100,18 +101,10 @@ public class HttpDeviceSession extends HttpSession {
 	}
 	
 	/**
-	 * 获取设备的同级设备信息
-	 * @return 返回同级设备列表
+	 * 获取设备相关的设备组信息
+	 * @return 返回设备组列表
 	 */
-	public List<Device> getMySibling(){
-		return getEntity("/devices/mysibling", null, new ParameterizedTypeReference<List<Device>>() {});
-	}
-	
-	/**
-	 * 获取设备的子设备信息
-	 * @return 返回子设备列表
-	 */
-	public List<Device> getMyChildren(){
-		return getEntity("/devices/mychildren", null, new ParameterizedTypeReference<List<Device>>() {});
+	public List<DeviceGroup> getMyDeviceGroup(){
+		return getEntity("/devicegroups/me", null, new ParameterizedTypeReference<List<DeviceGroup>>() {});
 	}
 }
