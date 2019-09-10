@@ -774,7 +774,7 @@ public class HttpClientSession extends HttpSession {
 	 */
 	public void deleteDeviceGroup(String groupId) {
 		if(groupId != null && !groupId.isEmpty())
-			deleteEntity(deviceGroupUrl + groupId, null, null);
+			deleteEntity(deviceGroupUrl + "/" + groupId, null, null);
 		else
 			throw new ValueException("group id can't be empty");
 	}
@@ -785,9 +785,9 @@ public class HttpClientSession extends HttpSession {
 	 * @param deviceId 设备标识符
 	 * @return 返回添加成功的设备组信息。
 	 */
-	public void addGroup(String groupId, String deviceId) {
+	public DeviceGroup addGroup(String groupId, String deviceId) {
 		if(groupId != null && !groupId.isEmpty() && deviceId != null && !deviceId.isEmpty())
-			postEntity(deviceGroupUrl + "/group/" + groupId + "/device/" + deviceId, null, deviceGroupType);
+			return postEntity(deviceGroupUrl + "/group/" + groupId + "/device/" + deviceId, null, deviceGroupType);
 		else
 			throw new ValueException("group id and device id can't be empty");
 	}
