@@ -1,5 +1,7 @@
 package top.microiot.api.dto;
 
+import top.microiot.domain.User;
+
 /**
  * 请求类。
  *
@@ -7,6 +9,7 @@ package top.microiot.api.dto;
  */
 
 public class Request {
+	private User requester;
 	private String requestId;
 
 	public Request() {
@@ -14,8 +17,9 @@ public class Request {
 		// TODO Auto-generated constructor stub
 	}
 
-	public Request(String requestId) {
+	public Request(User requester, String requestId) {
 		super();
+		this.requester = requester;
 		this.requestId = requestId;
 	}
 
@@ -25,6 +29,14 @@ public class Request {
 
 	public void setRequestId(String requestId) {
 		this.requestId = requestId;
+	}
+
+	public User getRequester() {
+		return requester;
+	}
+
+	public void setRequester(User requester) {
+		this.requester = requester;
 	}
 
 	@Override

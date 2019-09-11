@@ -9,6 +9,7 @@ import top.microiot.api.dto.Action;
 import top.microiot.api.dto.Response;
 import top.microiot.domain.ActionType;
 import top.microiot.domain.Device;
+import top.microiot.domain.User;
 import top.microiot.domain.attribute.DataType;
 import top.microiot.domain.attribute.DataValue;
 
@@ -53,7 +54,7 @@ public abstract class ActionRequestSubscriber extends RequestSubscriber {
 					requestValue = requestType.getValue(req.getValue(), t);
 				}
 			}
-			Object res = action(this.getDevice(), req.getAction(), requestValue);
+			Object res = action(req.getRequester(), this.getDevice(), req.getAction(), requestValue);
 			DataValue responseValue = null;
 			if(actType.getResponse() != null) {
 				DataType resType = actType.getResponseAttributeType().getDataType();
@@ -76,5 +77,5 @@ public abstract class ActionRequestSubscriber extends RequestSubscriber {
 	 * @param request 操作的请求值。
 	 * @return 返回响应值。
 	 */
-	public abstract Object action(Device device, String action, Object request);
+	public abstract Object action(User requester, Device device, String action, Object request);
 }

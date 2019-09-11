@@ -1,5 +1,7 @@
 package top.microiot.api.dto;
 
+import top.microiot.domain.User;
+
 /**
  * 获取请求类。
  *
@@ -13,8 +15,8 @@ public class Get extends Request{
 		// TODO Auto-generated constructor stub
 	}
 
-	public Get(String requestId, String attribute) {
-		super(requestId);
+	public Get(User requester, String requestId, String attribute) {
+		super(requester, requestId);
 		this.attribute = attribute;
 	}
 	

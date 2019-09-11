@@ -28,6 +28,7 @@ import top.microiot.api.dto.RestPage;
 import top.microiot.domain.Device;
 import top.microiot.domain.DeviceGroup;
 import top.microiot.domain.IoTObject;
+import top.microiot.domain.User;
 import top.microiot.dto.DistinctInfo;
 import top.microiot.dto.QueryInfo;
 import top.microiot.dto.QueryNearPageInfo;
@@ -60,6 +61,8 @@ public abstract class HttpSession {
 	
 	@Autowired
     private RestTemplate restTemplate;
+	
+	public abstract User getCurrentUser();
 	
 	public HttpSession(HttpSessionProperties httpSessionProperties) {
 		this.httpSessionProperties = httpSessionProperties;

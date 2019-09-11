@@ -1,5 +1,6 @@
 package top.microiot.api.dto;
 
+import top.microiot.domain.User;
 import top.microiot.domain.attribute.AttValueInfo;
 
 /**
@@ -16,8 +17,8 @@ public class Action extends Request{
 		// TODO Auto-generated constructor stub
 	}
 
-	public Action(String requestId, String action, AttValueInfo value) {
-		super(requestId);
+	public Action(User requester, String requestId, String action, AttValueInfo value) {
+		super(requester, requestId);
 		this.action = action;
 		this.value = value;
 	}

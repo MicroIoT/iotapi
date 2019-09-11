@@ -13,6 +13,7 @@ import top.microiot.api.HttpSessionProperties;
 import top.microiot.api.client.HttpClientSession;
 import top.microiot.domain.Device;
 import top.microiot.domain.DeviceGroup;
+import top.microiot.domain.User;
 import top.microiot.domain.attribute.AttValueInfo;
 import top.microiot.domain.attribute.AttributeType;
 import top.microiot.domain.attribute.DeviceAttributeType;
@@ -106,5 +107,9 @@ public class HttpDeviceSession extends HttpSession {
 	 */
 	public List<DeviceGroup> getMyDeviceGroup(){
 		return getEntity(HttpClientSession.deviceGroupUrl + "/me", null, new ParameterizedTypeReference<List<DeviceGroup>>() {});
+	}
+	@Override
+	public User getCurrentUser() {
+		return getDeviceInfo().getDeviceAccount();
 	}
 }

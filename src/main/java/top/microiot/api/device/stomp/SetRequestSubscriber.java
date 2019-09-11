@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import top.microiot.api.dto.Response;
 import top.microiot.api.dto.Set;
 import top.microiot.domain.Device;
+import top.microiot.domain.User;
 import top.microiot.domain.attribute.DataType;
 import top.microiot.domain.attribute.DeviceAttributeType;
 import top.microiot.exception.NotFoundException;
@@ -51,7 +52,7 @@ public abstract class SetRequestSubscriber extends RequestSubscriber {
 			else
 				throw new NotFoundException(req.getAttribute() + " converter");
 			
-			setAttribute(this.getDevice(), req.getAttribute(), attributeValue);
+			setAttribute(req.getRequester(), this.getDevice(), req.getAttribute(), attributeValue);
 			return new Response(true, null, null);
 		} catch(Throwable e) {
 			return new Response(false, e.getMessage(), null);
@@ -68,5 +69,5 @@ public abstract class SetRequestSubscriber extends RequestSubscriber {
 	 * @param attribute 设置的属性名称。
 	 * @param value 设置的属性值。
 	 */
-	public abstract void setAttribute(Device device, String attribute, Object value);
+	public abstract void setAttribute(User requester, Device device, String attribute, Object value);
 }

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import top.microiot.api.dto.Get;
 import top.microiot.api.dto.Response;
 import top.microiot.domain.Device;
+import top.microiot.domain.User;
 import top.microiot.domain.attribute.AttributeType;
 import top.microiot.domain.attribute.DataValue;
 import top.microiot.domain.attribute.DeviceAttributeType;
@@ -36,7 +37,7 @@ public abstract class GetRequestSubscriber extends RequestSubscriber {
 		this.attDefinition = this.getDevice().getDeviceType().getAttDefinition();
 		Get req = (Get) request;
 		try {
-			Object res = getAttributeValue(this.getDevice(), req.getAttribute());
+			Object res = getAttributeValue(req.getRequester(), this.getDevice(), req.getAttribute());
 			AttributeType type = this.attDefinition.get(req.getAttribute());
 			DataValue responseValue = type.getAttData(res);
 			return new Response(true, null, responseValue);
@@ -52,5 +53,5 @@ public abstract class GetRequestSubscriber extends RequestSubscriber {
 	 * @param attribute 获取的属性名称。
 	 * @return 返回属性值。
 	 */
-	public abstract Object getAttributeValue(Device device, String attribute);
+	public abstract Object getAttributeValue(User requester, Device device, String attribute);
 }
