@@ -12,9 +12,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.stereotype.Component;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
@@ -28,8 +27,10 @@ import top.microiot.api.dto.RestPage;
 import top.microiot.domain.Device;
 import top.microiot.domain.DeviceGroup;
 import top.microiot.domain.IoTObject;
+import top.microiot.domain.Token;
 import top.microiot.domain.User;
 import top.microiot.dto.DistinctInfo;
+import top.microiot.dto.LoginInfo;
 import top.microiot.dto.QueryInfo;
 import top.microiot.dto.QueryNearPageInfo;
 import top.microiot.dto.QueryPageInfo;
@@ -43,7 +44,7 @@ import top.microiot.exception.ValueException;
  */
 @Component
 public abstract class HttpSession {
-	private static final String Cookie_Name = "JSESSIONID";
+	private static final String Token = "Authorization";
 	private static final String WS_IOT = "/ws_iot";
 	private static final String IOTP = "iotp";
 	private static final String IOTPS = "iotps";
@@ -54,7 +55,7 @@ public abstract class HttpSession {
 	private static final String regex = "^(" + IOTP + "|" + IOTPS
 			+ ")://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
 
-	private String sessionId;
+	protected String token;
 	protected boolean logined = false;
 	
     protected HttpSessionProperties httpSessionProperties;
@@ -76,56 +77,49 @@ public abstract class HttpSession {
 			if (!getUri().matches(regex))
 				throw new ValueException(httpSessionProperties.getUri());
 
-			HttpHeaders headers = new HttpHeaders();
-			headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
-			MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
-			setLoginInfo(map);
-	
-			HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(map, headers);
-			ResponseEntity<String> response;
+			Token response;
 			try{
-				response = restTemplate.postForEntity(getRestUri() + "/login", request, String.class);
+				response = manageEntity("/login", HttpMethod.POST, Token.class, getRequest(getLoginInfo()));
 			} catch (HttpClientErrorException | HttpServerErrorException | UnknownHttpStatusCodeException e) {
 				throw new StatusException(e.getResponseBodyAsString());
 			}
-			List<String> cookie = response.getHeaders().get(HttpHeaders.SET_COOKIE);
-			for(String c : cookie) {
-				if(c.startsWith(Cookie_Name)) {
-					this.sessionId = c.split(";")[0];
-					break;
-				}
-			}
+			this.token = response.getToken();
 			this.logined = true;
 		}
 	}
 
-	protected void setLoginInfo(MultiValueMap<String, String> map) {
-		map.add("username", httpSessionProperties.getUsername());
-		map.add("password", httpSessionProperties.getPassword());
-	}
-	
 	/**
 	 * 停止http会话。
 	 */
 	public void stop() {
-		if (logined) {
-			HttpHeaders header = getSessionHeader();
-			HttpEntity<String> request = new HttpEntity<String>(header);
-			restTemplate.postForEntity(getRestUri() + "/logout", request, String.class);
+		if(logined){
 			this.logined = false;
+			this.token = null;
 		}
+	}
+	protected LoginInfo getLoginInfo() {
+		LoginInfo info = new LoginInfo();
+		info.setUsername(httpSessionProperties.getUsername());
+		info.setPassword(httpSessionProperties.getPassword());
+		return info;
 	}
 	
 	/**
-	 * 获得http会话认证cookie信息。
+	 * 获得认证token信息。
 	 * @return 返回http头。
 	 */
-	public HttpHeaders getSessionHeader() {
+	public HttpHeaders getHttpHeader() {
 		assert logined : "login first";
 		HttpHeaders requestHeaders = new HttpHeaders();
-		requestHeaders.set(HttpHeaders.COOKIE, this.sessionId);
+		requestHeaders.set(Token, "Bearer "+token);
 		return requestHeaders;
+	}
+	
+	public StompHeaders getStompHeader() {
+		assert logined : "login first";
+		StompHeaders header = new StompHeaders();
+		header.set(Token, "Bearer "+token);
+		return header;
 	}
 
 	/**
@@ -260,7 +254,7 @@ public abstract class HttpSession {
 	
 	protected <T> T getEntity(String getUri, Map<String, String> queryParams, Class<T> responseType) {
 		assert logined : "login first";
-		HttpHeaders header = getSessionHeader();
+		HttpHeaders header = getHttpHeader();
 		
 		HttpEntity<HttpHeaders> requestEntity = new HttpEntity<HttpHeaders>(null, header);
 		UriComponentsBuilder builder = getUrl(getUri, queryParams);
@@ -318,7 +312,7 @@ public abstract class HttpSession {
 	
 	protected <T> T getEntity(String getUri, Map<String, String> queryParams, ParameterizedTypeReference<T> responseType) {
 		assert logined : "login first";
-		HttpHeaders header = getSessionHeader();
+		HttpHeaders header = getHttpHeader();
 		
 		HttpEntity<HttpHeaders> requestEntity = new HttpEntity<HttpHeaders>(null, header);
 		UriComponentsBuilder builder = getUrl(getUri, queryParams);
@@ -353,10 +347,11 @@ public abstract class HttpSession {
 		return manageEntity(deleteUri, method, request, responseType);
 	}
 	private <T> T manageEntity(String uri, HttpMethod method, Object request, Class<T> responseType) {
-		HttpHeaders header = getSessionHeader();
-		header.setContentType(MediaType.APPLICATION_JSON_UTF8);
+		HttpEntity<?> requestEntity = getRequestWithHeader(request);
+		return manageEntity(uri, method, responseType, requestEntity);
+	}
 
-		HttpEntity<?> requestEntity = new HttpEntity<>(request, header);
+	private <T> T manageEntity(String uri, HttpMethod method, Class<T> responseType, HttpEntity<?> requestEntity) {
 		try {
 			ResponseEntity<T> rssResponse = restTemplate.exchange(getRestUri() + uri, method,
 					requestEntity, responseType);
@@ -366,6 +361,21 @@ public abstract class HttpSession {
 		} catch (HttpClientErrorException | HttpServerErrorException | UnknownHttpStatusCodeException e) {
 			throw new StatusException(e.getResponseBodyAsString());
 		}
+	}
+
+	private HttpEntity<?> getRequestWithHeader(Object request) {
+		HttpHeaders header = getHttpHeader();
+		header.setContentType(MediaType.APPLICATION_JSON_UTF8);
+
+		HttpEntity<?> requestEntity = new HttpEntity<>(request, header);
+		return requestEntity;
+	}
+	
+	private HttpEntity<?> getRequest(Object request) {
+		HttpHeaders header = new HttpHeaders();
+		header.setContentType(MediaType.APPLICATION_JSON_UTF8);
+		HttpEntity<?> requestEntity = new HttpEntity<>(request);
+		return requestEntity;
 	}
 	
 	private UriComponentsBuilder getUrl(String getUri, Map<String, String> queryParams) {

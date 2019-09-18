@@ -8,7 +8,6 @@ import java.util.Map;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
-import org.springframework.util.MultiValueMap;
 
 import top.microiot.api.HttpSession;
 import top.microiot.api.HttpSessionProperties;
@@ -22,6 +21,7 @@ import top.microiot.domain.Event;
 import top.microiot.domain.Site;
 import top.microiot.domain.SiteType;
 import top.microiot.domain.User;
+import top.microiot.domain.Token;
 import top.microiot.domain.attribute.AttTypeInfo;
 import top.microiot.domain.attribute.AttValueInfo;
 import top.microiot.domain.attribute.AttributeType;
@@ -41,6 +41,7 @@ import top.microiot.dto.DeviceUpdateInfo;
 import top.microiot.dto.DomainInfo;
 import top.microiot.dto.DomainRenameInfo;
 import top.microiot.dto.EventPageInfo;
+import top.microiot.dto.LoginInfo;
 import top.microiot.dto.NotificationPageInfo;
 import top.microiot.dto.PageInfo;
 import top.microiot.dto.QueryInfo;
@@ -66,11 +67,12 @@ public class HttpClientSession extends HttpSession {
 	}
 
 	@Override
-	protected void setLoginInfo(MultiValueMap<String, String> map) {
-		super.setLoginInfo(map);
-		String domain = httpSessionProperties.getDomain();
-		if(domain != null && domain.length() > 0)
-			map.add("domain", httpSessionProperties.getDomain());
+	protected LoginInfo getLoginInfo() {
+		LoginInfo info = new LoginInfo();
+		info.setUsername(httpSessionProperties.getUsername());
+		info.setPassword(httpSessionProperties.getPassword());
+		info.setDomain(httpSessionProperties.getDomain());
+		return info;
 	}
 
 	/**
@@ -153,6 +155,16 @@ public class HttpClientSession extends HttpSession {
 	public List<Domain> getMyDomains() {
 		return getEntity(domainUrl  +"/me", null, new ParameterizedTypeReference<List<Domain>>() {});
 	}
+	
+	/**
+	 * 重新选择当前登录的领域。
+	 * @return 返回token信息。
+	 */
+	public void chooseDomains(String domain) {
+		Token token = patchEntity(domainUrl  +"/" + domain, null, Token.class);
+		this.token = token.getToken();
+	}
+	
 	public static Class<User> userType = User.class;
 	public static String userUrl = "/users";
 	
