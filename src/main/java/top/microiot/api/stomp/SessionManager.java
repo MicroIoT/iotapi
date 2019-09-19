@@ -24,9 +24,7 @@ public class SessionManager extends WebSocketStompSessionManager {
 
 	@Override
 	protected ListenableFuture<StompSession> doConnect(StompSessionHandler handler) {
-		session.stop();
-		session.start();
-		setConnectHeaders(session.getStompHeader());
+		setConnectHeaders(session.getStompAuth());
 		return super.doConnect(handler);
 	}
 

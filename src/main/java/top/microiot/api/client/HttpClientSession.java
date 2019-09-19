@@ -161,8 +161,7 @@ public class HttpClientSession extends HttpSession {
 	 * @return 返回token信息。
 	 */
 	public void chooseDomains(String domain) {
-		Token token = patchEntity(domainUrl  +"/" + domain, null, Token.class);
-		this.token = token.getToken();
+		this.token = patchEntity(domainUrl  +"/" + domain, null, Token.class);
 	}
 	
 	public static Class<User> userType = User.class;

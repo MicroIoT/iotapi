@@ -1,5 +1,6 @@
 package top.microiot.api;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.stomp.StompHeaders;
@@ -55,35 +57,40 @@ public abstract class HttpSession {
 	private static final String regex = "^(" + IOTP + "|" + IOTPS
 			+ ")://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
 
-	protected String token;
+	protected Token token;
 	protected boolean logined = false;
-	
-    protected HttpSessionProperties httpSessionProperties;
-	
+
+	protected HttpSessionProperties httpSessionProperties;
+
 	@Autowired
-    private RestTemplate restTemplate;
-	
+	private RestTemplate restTemplate;
+
 	public abstract User getCurrentUser();
-	
+
 	public HttpSession(HttpSessionProperties httpSessionProperties) {
 		this.httpSessionProperties = httpSessionProperties;
 	}
-	
+
 	/**
 	 * 建立http会话。
 	 */
 	public void start() {
-		if(!logined) {
+		if (!logined) {
 			if (!getUri().matches(regex))
 				throw new ValueException(httpSessionProperties.getUri());
 
-			Token response;
-			try{
-				response = manageEntity("/login", HttpMethod.POST, Token.class, getRequest(getLoginInfo()));
+			try {
+				HttpEntity<?> requestEntity = getRequest(getLoginInfo());
+				String url = getRestUri() + "/login";
+
+				ResponseEntity<Token> rssResponse = restTemplate.exchange(url, HttpMethod.POST, requestEntity, Token.class);
+				token = rssResponse.getBody();
+			} catch (ResourceAccessException e) {
+				throw new StatusException(e.getMessage());
 			} catch (HttpClientErrorException | HttpServerErrorException | UnknownHttpStatusCodeException e) {
 				throw new StatusException(e.getResponseBodyAsString());
 			}
-			this.token = response.getToken();
+
 			this.logined = true;
 		}
 	}
@@ -92,38 +99,61 @@ public abstract class HttpSession {
 	 * 停止http会话。
 	 */
 	public void stop() {
-		if(logined){
+		if (logined) {
 			this.logined = false;
 			this.token = null;
 		}
 	}
+
+	public void refreshToken() {
+		HttpHeaders requestHeaders = new HttpHeaders();
+		requestHeaders.set(Token, "Bearer " + token.getRefreshToken());
+
+		HttpEntity<HttpHeaders> requestEntity = new HttpEntity<HttpHeaders>(null, requestHeaders);
+		UriComponentsBuilder builder = getUrl("/token", null);
+		URI uri = builder.build().encode().toUri();
+
+		ResponseEntity<Token> rssResponse = null;
+
+		try {
+			rssResponse = restTemplate.exchange(uri, HttpMethod.GET, requestEntity, Token.class);
+			token = rssResponse.getBody();
+		} catch (ResourceAccessException e) {
+			throw new StatusException(e.getMessage());
+		} catch (HttpClientErrorException | HttpServerErrorException | UnknownHttpStatusCodeException e) {
+			throw new StatusException(e.getResponseBodyAsString());
+		}
+	}
+
 	protected LoginInfo getLoginInfo() {
 		LoginInfo info = new LoginInfo();
 		info.setUsername(httpSessionProperties.getUsername());
 		info.setPassword(httpSessionProperties.getPassword());
 		return info;
 	}
-	
+
 	/**
 	 * 获得认证token信息。
+	 * 
 	 * @return 返回http头。
 	 */
-	public HttpHeaders getHttpHeader() {
+	public HttpHeaders getHttpAuth() {
 		assert logined : "login first";
 		HttpHeaders requestHeaders = new HttpHeaders();
-		requestHeaders.set(Token, "Bearer "+token);
+		requestHeaders.set(Token, "Bearer " + token.getToken());
 		return requestHeaders;
 	}
-	
-	public StompHeaders getStompHeader() {
+
+	public StompHeaders getStompAuth() {
 		assert logined : "login first";
 		StompHeaders header = new StompHeaders();
-		header.set(Token, "Bearer "+token);
+		header.set(Token, "Bearer " + token.getToken());
 		return header;
 	}
 
 	/**
 	 * 获得http会话调用REST的uri。
+	 * 
 	 * @return 返回调用REST的uri。
 	 */
 	public String getRestUri() {
@@ -137,6 +167,7 @@ public abstract class HttpSession {
 
 	/**
 	 * 获得http会话调用websocket的uri。
+	 * 
 	 * @return 返回调用websocket的uri。
 	 */
 	public String getWSUri() {
@@ -152,31 +183,35 @@ public abstract class HttpSession {
 	private String getUri() {
 		return httpSessionProperties.getUri();
 	}
-	
+
 	/**
 	 * 获取指定设备的信息。
-	 * @param id 设备标识符。
+	 * 
+	 * @param id
+	 *            设备标识符。
 	 * @return 返回指定设备。
 	 */
 	public Device getDevice(String id) {
-		if(id != null && !id.isEmpty()) {
+		if (id != null && !id.isEmpty()) {
 			return getEntity(HttpClientSession.deviceUrl + "/" + id, null, HttpClientSession.deviceType);
 		} else
 			throw new ValueException("id can't be empty");
 	}
-	
+
 	/**
 	 * 获取指定设备组的信息。
-	 * @param id 指定设备组的标识符
+	 * 
+	 * @param id
+	 *            指定设备组的标识符
 	 * @return 返回指定设备组信息。
 	 */
 	public DeviceGroup getDeviceGroup(String id) {
-		if(id != null && !id.isEmpty()) {
+		if (id != null && !id.isEmpty()) {
 			return getEntity(HttpClientSession.deviceGroupUrl + "/" + id, null, HttpClientSession.deviceGroupType);
 		} else
 			throw new ValueException("device group id can't be empty");
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public <T> T getEntityById(Class<? extends IoTObject> object, String id) {
 		assert logined : "login first";
@@ -188,143 +223,133 @@ public abstract class HttpSession {
 	public <T> T getOneEntity(Class<? extends IoTObject> object, QueryInfo info) {
 		String url = "/" + getIoTObjectName(object) + "/query/one";
 		Map<String, String> queryParams = buildQueryParams(info);
-		
+
 		return (T) getEntity(url, queryParams, object);
 	}
-	
-	public <T> List<T> getEntityList(Class<? extends IoTObject> object, QueryInfo info, ParameterizedTypeReference<List<T>> responseType) {
+
+	public <T> List<T> getEntityList(Class<? extends IoTObject> object, QueryInfo info,
+			ParameterizedTypeReference<List<T>> responseType) {
 		assert logined : "login first";
 		String url = "/" + getIoTObjectName(object) + "/query/list";
 		Map<String, String> queryParams = buildQueryParams(info);
-	
+
 		return getEntity(url, queryParams, responseType);
 	}
-	
-	public <T> Page<T> getEntityPage(Class<? extends IoTObject> object, QueryPageInfo info, ParameterizedTypeReference<RestPage<T>> responseType) {
+
+	public <T> Page<T> getEntityPage(Class<? extends IoTObject> object, QueryPageInfo info,
+			ParameterizedTypeReference<RestPage<T>> responseType) {
 		assert logined : "login first";
 		String url = "/" + getIoTObjectName(object) + "/query/page";
 		Map<String, String> queryParams = buildQueryPageParams(info);
-	
+
 		return getEntity(url, queryParams, responseType);
 	}
-	
-	public <T> RestGeoResults<T> getEntityGeo(Class<? extends IoTObject> object, QueryNearPageInfo info, ParameterizedTypeReference<RestGeoResults<T>> responseType) {
+
+	public <T> RestGeoResults<T> getEntityGeo(Class<? extends IoTObject> object, QueryNearPageInfo info,
+			ParameterizedTypeReference<RestGeoResults<T>> responseType) {
 		assert logined : "login first";
 		String url = "/" + getIoTObjectName(object) + "/query/geo";
 		Map<String, String> queryParams = buildQueryNearParams(info);
-	
+
 		return getEntity(url, queryParams, responseType);
 	}
-	
-	public <T> List<T> getEntityAggregate(Class<? extends IoTObject> object, QueryInfo info, ParameterizedTypeReference<List<T>> responseType) {
+
+	public <T> List<T> getEntityAggregate(Class<? extends IoTObject> object, QueryInfo info,
+			ParameterizedTypeReference<List<T>> responseType) {
 		assert logined : "login first";
 		String url = "/" + getIoTObjectName(object) + "/query/aggregate";
 		Map<String, String> queryParams = buildQueryParams(info);
-	
+
 		return getEntity(url, queryParams, responseType);
 	}
-	
-	public <T> List<T> getEntityDistinct(Class<? extends IoTObject> object, DistinctInfo info, ParameterizedTypeReference<List<T>> responseType) {
+
+	public <T> List<T> getEntityDistinct(Class<? extends IoTObject> object, DistinctInfo info,
+			ParameterizedTypeReference<List<T>> responseType) {
 		assert logined : "login first";
 		String url = "/" + getIoTObjectName(object) + "/query/distinct";
 		Map<String, String> queryParams = buildQueryDistinctParams(info);
-	
+
 		return getEntity(url, queryParams, responseType);
 	}
-	
+
 	public int count(Class<? extends IoTObject> object, QueryInfo info) {
 		assert logined : "login first";
 		String url = "/" + getIoTObjectName(object) + "/query/count";
 		Map<String, String> queryParams = buildQueryParams(info);
-	
+
 		return getEntity(url, queryParams, Integer.class);
 	}
-	
+
 	public boolean exist(Class<? extends IoTObject> object, QueryInfo info) {
 		assert logined : "login first";
 		String url = "/" + getIoTObjectName(object) + "/query/exist";
 		Map<String, String> queryParams = buildQueryParams(info);
-	
+
 		return getEntity(url, queryParams, Boolean.class);
 	}
-	
+
 	protected static String getIoTObjectName(Class<? extends IoTObject> object) {
 		return object.getSimpleName().toLowerCase() + "s";
 	}
-	
+
 	protected <T> T getEntity(String getUri, Map<String, String> queryParams, Class<T> responseType) {
 		assert logined : "login first";
-		HttpHeaders header = getHttpHeader();
-		
-		HttpEntity<HttpHeaders> requestEntity = new HttpEntity<HttpHeaders>(null, header);
-		UriComponentsBuilder builder = getUrl(getUri, queryParams);
-		
-		try {
-			ResponseEntity<T> rssResponse = restTemplate.exchange(builder.build().encode().toUri(), HttpMethod.GET, requestEntity,
-					responseType);
-			return rssResponse.getBody();
-		} catch (ResourceAccessException e) {
-			throw new StatusException(e.getMessage());
-		} catch (HttpClientErrorException | HttpServerErrorException | UnknownHttpStatusCodeException e) {
-			throw new StatusException(e.getResponseBodyAsString());
+		int count = 0;
+		ResponseEntity<T> rssResponse = null;
+		while (true) {
+			HttpHeaders header = getHttpAuth();
+
+			HttpEntity<HttpHeaders> requestEntity = new HttpEntity<HttpHeaders>(null, header);
+			UriComponentsBuilder builder = getUrl(getUri, queryParams);
+			URI uri = builder.build().encode().toUri();
+
+			try {
+				rssResponse = restTemplate.exchange(uri, HttpMethod.GET, requestEntity, responseType);
+				return rssResponse.getBody();
+			} catch (ResourceAccessException e) {
+				throw new StatusException(e.getMessage());
+			} catch (UnknownHttpStatusCodeException e) {
+				throw new StatusException(e.getResponseBodyAsString());
+			} catch (HttpClientErrorException | HttpServerErrorException e) {
+				if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
+					if (count++ == 1)
+						throw new StatusException(e.getResponseBodyAsString());
+					else
+						refreshToken();
+				} else
+					throw new StatusException(e.getResponseBodyAsString());
+			}
 		}
+	}
 
-	}
-	
-	private Map<String, String> buildQueryParams(QueryInfo info) {
-		Map<String, String> queryParams = new HashMap<String, String>();
-		if(info != null) {
-			if(info.getFilter() != null)
-				queryParams.put("filter", info.getFilter());
-			if(info.getSort() != null)
-				queryParams.put("sort", info.getSort());
-			if(info.getCollation() != null)
-				queryParams.put("collation", info.getCollation());
-		}
-		return queryParams;
-	}
-	
-	private Map<String, String> buildQueryPageParams(QueryPageInfo info) {
-		Map<String, String> queryParams = buildQueryParams(info);
-		queryParams.put("pageNumber", String.valueOf(info.getPageNumber()));
-		queryParams.put("pageSize", String.valueOf(info.getPageSize()));
-
-		return queryParams;
-	}
-	
-	private Map<String, String> buildQueryNearParams(QueryNearPageInfo info) {
-		Map<String, String> queryParams = buildQueryPageParams(info);
-		queryParams.put("x", String.valueOf(info.getX()));
-		queryParams.put("y", String.valueOf(info.getY()));
-		queryParams.put("maxDistance", String.valueOf(info.getMaxDistance()));
-		queryParams.put("metrics", info.getMetrics().toString());
-
-		return queryParams;
-	}
-	
-	private Map<String, String> buildQueryDistinctParams(DistinctInfo info) {
-		Map<String, String> queryParams = buildQueryPageParams(info);
-		queryParams.put("field", info.getField());
-		queryParams.put("returnClass", info.getReturnClass().toString());
-
-		return queryParams;
-	}
-	
 	protected <T> T getEntity(String getUri, Map<String, String> queryParams, ParameterizedTypeReference<T> responseType) {
 		assert logined : "login first";
-		HttpHeaders header = getHttpHeader();
-		
-		HttpEntity<HttpHeaders> requestEntity = new HttpEntity<HttpHeaders>(null, header);
-		UriComponentsBuilder builder = getUrl(getUri, queryParams);
-		
-		try {
-			ResponseEntity<T> rssResponse = restTemplate.exchange(builder.build().encode().toUri(), HttpMethod.GET, requestEntity,
-					responseType);
-			return rssResponse.getBody();
-		} catch (ResourceAccessException e) {
-			throw new StatusException(e.getMessage());
-		} catch (HttpClientErrorException | HttpServerErrorException | UnknownHttpStatusCodeException e) {
-			throw new StatusException(e.getResponseBodyAsString());
+
+		int count = 0;
+		ResponseEntity<T> rssResponse = null;
+		while (true) {
+			HttpHeaders header = getHttpAuth();
+
+			HttpEntity<HttpHeaders> requestEntity = new HttpEntity<HttpHeaders>(null, header);
+			UriComponentsBuilder builder = getUrl(getUri, queryParams);
+			URI uri = builder.build().encode().toUri();
+
+			try {
+				rssResponse = restTemplate.exchange(uri, HttpMethod.GET, requestEntity, responseType);
+				return rssResponse.getBody();
+			} catch (ResourceAccessException e) {
+				throw new StatusException(e.getMessage());
+			} catch (UnknownHttpStatusCodeException e) {
+				throw new StatusException(e.getResponseBodyAsString());
+			} catch (HttpClientErrorException | HttpServerErrorException e) {
+				if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
+					if (count++ == 1)
+						throw new StatusException(e.getResponseBodyAsString());
+					else
+						refreshToken();
+				} else
+					throw new StatusException(e.getResponseBodyAsString());
+			}
 		}
 
 	}
@@ -334,7 +359,7 @@ public abstract class HttpSession {
 		HttpMethod method = HttpMethod.POST;
 		return manageEntity(postUri, method, request, responseType);
 	}
-	
+
 	protected <T> T patchEntity(String patchUri, Object request, Class<T> responseType) {
 		assert logined : "login first";
 		HttpMethod method = HttpMethod.PATCH;
@@ -346,46 +371,95 @@ public abstract class HttpSession {
 		HttpMethod method = HttpMethod.DELETE;
 		return manageEntity(deleteUri, method, request, responseType);
 	}
-	private <T> T manageEntity(String uri, HttpMethod method, Object request, Class<T> responseType) {
-		HttpEntity<?> requestEntity = getRequestWithHeader(request);
-		return manageEntity(uri, method, responseType, requestEntity);
-	}
 
-	private <T> T manageEntity(String uri, HttpMethod method, Class<T> responseType, HttpEntity<?> requestEntity) {
-		try {
-			ResponseEntity<T> rssResponse = restTemplate.exchange(getRestUri() + uri, method,
-					requestEntity, responseType);
-			return rssResponse.getBody();
-		} catch (ResourceAccessException e) {
-			throw new StatusException(e.getMessage());
-		} catch (HttpClientErrorException | HttpServerErrorException | UnknownHttpStatusCodeException e) {
-			throw new StatusException(e.getResponseBodyAsString());
+	private <T> T manageEntity(String uri, HttpMethod method, Object request, Class<T> responseType) {
+		int count = 0;
+		ResponseEntity<T> rssResponse = null;
+		while (true) {
+			try {
+				HttpEntity<?> requestEntity = getRequestWithAuth(request);
+				String url = getRestUri() + uri;
+
+				rssResponse = restTemplate.exchange(url, method, requestEntity, responseType);
+				return rssResponse.getBody();
+			} catch (ResourceAccessException e) {
+				throw new StatusException(e.getMessage());
+			} catch (UnknownHttpStatusCodeException e) {
+				throw new StatusException(e.getResponseBodyAsString());
+			} catch (HttpClientErrorException | HttpServerErrorException e) {
+				if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
+					if (count++ == 1)
+						throw new StatusException(e.getResponseBodyAsString());
+					else
+						refreshToken();
+				} else
+					throw new StatusException(e.getResponseBodyAsString());
+			}
 		}
 	}
 
-	private HttpEntity<?> getRequestWithHeader(Object request) {
-		HttpHeaders header = getHttpHeader();
+	private HttpEntity<?> getRequestWithAuth(Object request) {
+		HttpHeaders header = getHttpAuth();
 		header.setContentType(MediaType.APPLICATION_JSON_UTF8);
 
 		HttpEntity<?> requestEntity = new HttpEntity<>(request, header);
 		return requestEntity;
 	}
-	
+
 	private HttpEntity<?> getRequest(Object request) {
 		HttpHeaders header = new HttpHeaders();
 		header.setContentType(MediaType.APPLICATION_JSON_UTF8);
 		HttpEntity<?> requestEntity = new HttpEntity<>(request);
 		return requestEntity;
 	}
-	
+
+	private Map<String, String> buildQueryParams(QueryInfo info) {
+		Map<String, String> queryParams = new HashMap<String, String>();
+		if (info != null) {
+			if (info.getFilter() != null)
+				queryParams.put("filter", info.getFilter());
+			if (info.getSort() != null)
+				queryParams.put("sort", info.getSort());
+			if (info.getCollation() != null)
+				queryParams.put("collation", info.getCollation());
+		}
+		return queryParams;
+	}
+
+	private Map<String, String> buildQueryPageParams(QueryPageInfo info) {
+		Map<String, String> queryParams = buildQueryParams(info);
+		queryParams.put("pageNumber", String.valueOf(info.getPageNumber()));
+		queryParams.put("pageSize", String.valueOf(info.getPageSize()));
+
+		return queryParams;
+	}
+
+	private Map<String, String> buildQueryNearParams(QueryNearPageInfo info) {
+		Map<String, String> queryParams = buildQueryPageParams(info);
+		queryParams.put("x", String.valueOf(info.getX()));
+		queryParams.put("y", String.valueOf(info.getY()));
+		queryParams.put("maxDistance", String.valueOf(info.getMaxDistance()));
+		queryParams.put("metrics", info.getMetrics().toString());
+
+		return queryParams;
+	}
+
+	private Map<String, String> buildQueryDistinctParams(DistinctInfo info) {
+		Map<String, String> queryParams = buildQueryPageParams(info);
+		queryParams.put("field", info.getField());
+		queryParams.put("returnClass", info.getReturnClass().toString());
+
+		return queryParams;
+	}
+
 	private UriComponentsBuilder getUrl(String getUri, Map<String, String> queryParams) {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(getRestUri() + getUri);
-		if(queryParams != null) {
-			for(Map.Entry<String, String> queryParam : queryParams.entrySet()) {
-			    String key = queryParam.getKey();
-			    String value = queryParam.getValue();
+		if (queryParams != null) {
+			for (Map.Entry<String, String> queryParam : queryParams.entrySet()) {
+				String key = queryParam.getKey();
+				String value = queryParam.getValue();
 
-			    builder.queryParam(key, value);
+				builder.queryParam(key, value);
 			}
 		}
 		return builder;
