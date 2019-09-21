@@ -158,7 +158,7 @@ public class HttpClientSession extends HttpSession {
 	
 	/**
 	 * 重新选择当前登录的领域。
-	 * @return 返回token信息。
+	 * @param domain 领域的名称
 	 */
 	public void chooseDomains(String domain) {
 		this.token = patchEntity(domainUrl  +"/" + domain, null, Token.class);
@@ -781,7 +781,7 @@ public class HttpClientSession extends HttpSession {
 	
 	/**
 	 *删除指定设备组。
-	 * @param id 设备组标识符
+	 * @param groupId 设备组标识符
 	 */
 	public void deleteDeviceGroup(String groupId) {
 		if(groupId != null && !groupId.isEmpty())

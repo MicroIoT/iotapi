@@ -5,7 +5,8 @@ import java.lang.reflect.Type;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 
 import top.microiot.api.device.WebsocketDeviceSession;
-import top.microiot.api.dto.Action;
+import top.microiot.domain.Action;
+import top.microiot.domain.Topic;
 
 /**
  * 设备端操作请求处理类，接收操作指示，返回操作响应。
@@ -26,7 +27,7 @@ public class ActionSubscribeHandler extends RequestSubscribeHandler {
 
 	@Override
 	public String getOperation() {
-		return "action";
+		return Topic.TOPIC_ACTION;
 	}
 
 }

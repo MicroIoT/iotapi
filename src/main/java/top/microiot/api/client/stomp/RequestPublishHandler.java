@@ -10,7 +10,7 @@ import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
 
-import top.microiot.api.dto.Response;
+import top.microiot.domain.Response;
 import top.microiot.domain.Topic;
 
 public abstract class RequestPublishHandler extends StompSessionHandlerAdapter {

@@ -3,7 +3,7 @@ package top.microiot.api.client.stomp;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 
 import top.microiot.api.client.WebsocketClientSession;
-import top.microiot.api.dto.Response;
+import top.microiot.domain.Response;
 
 public abstract class RequestPublishAsyncHandler extends RequestPublishHandler {
 	private ResponseSubscriber subscriber;

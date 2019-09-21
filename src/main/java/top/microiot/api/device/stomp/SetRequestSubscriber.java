@@ -5,8 +5,8 @@ import java.util.Map;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 
-import top.microiot.api.dto.Response;
-import top.microiot.api.dto.Set;
+import top.microiot.domain.Response;
+import top.microiot.domain.Set;
 import top.microiot.domain.Device;
 import top.microiot.domain.User;
 import top.microiot.domain.attribute.DataType;
@@ -65,6 +65,7 @@ public abstract class SetRequestSubscriber extends RequestSubscriber {
 
 	/**
 	 * 不同设备的具体设置的实现。
+	 * @param requester 设置的请求者。
 	 * @param device 设置的设备。
 	 * @param attribute 设置的属性名称。
 	 * @param value 设置的属性值。

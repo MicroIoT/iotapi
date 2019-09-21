@@ -4,8 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import top.microiot.api.device.WebsocketDeviceSession;
-import top.microiot.api.dto.Request;
-import top.microiot.api.dto.Response;
+import top.microiot.domain.Request;
+import top.microiot.domain.Response;
 import top.microiot.api.stomp.AbstractEventSubscriber;
 import top.microiot.domain.Device;
 

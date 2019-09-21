@@ -1,6 +1,6 @@
 package top.microiot.api.client.stomp;
 
-import top.microiot.api.dto.Request;
+import top.microiot.domain.Request;
 
 public interface RequestPublisher {
 	public String getTopic();

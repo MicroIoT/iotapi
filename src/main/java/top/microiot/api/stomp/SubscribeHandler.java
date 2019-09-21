@@ -26,7 +26,7 @@ public abstract class SubscribeHandler extends StompSessionHandlerAdapter {
 
 	@Override
 	public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
-		String topic = "/topic/" + getTopic() + "."+ deviceId;
+		String topic = getTopic() + deviceId;
 		synchronized(session) {
 			session.subscribe(topic, this);
 		}

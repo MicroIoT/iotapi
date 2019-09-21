@@ -4,7 +4,8 @@ import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
 
 import top.microiot.api.device.WebsocketDeviceSession;
-import top.microiot.api.dto.Response;
+import top.microiot.domain.Response;
+import top.microiot.domain.Topic;
 import top.microiot.api.stomp.SubscribeHandler;
 
 /**
@@ -30,7 +31,7 @@ public abstract class RequestSubscribeHandler extends SubscribeHandler {
 	public void handleFrame(StompHeaders headers, Object payload) {
 		super.handleFrame(headers, payload);
 		Response response = ((RequestSubscriber)subscriber).getResponse();
-		String topic = "/topic/result." + getOperation() + "." + deviceId + "." + ((RequestSubscriber)subscriber).request.getRequestId();
+		String topic = Topic.TOPIC_RESULT + getOperation() + "." + deviceId + "." + ((RequestSubscriber)subscriber).request.getRequestId();
 		synchronized(session) {
 			session.send(topic, response);
 		}
@@ -38,7 +39,7 @@ public abstract class RequestSubscribeHandler extends SubscribeHandler {
 
 	@Override
 	public String getTopic() {
-		return "operation." + getOperation();
+		return Topic.TOPIC_OPERATION + getOperation();
 	}
 
 	public abstract String getOperation();

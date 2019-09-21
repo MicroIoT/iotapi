@@ -4,8 +4,8 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
-import top.microiot.api.dto.Get;
-import top.microiot.api.dto.Response;
+import top.microiot.domain.Get;
+import top.microiot.domain.Response;
 import top.microiot.domain.Device;
 import top.microiot.domain.User;
 import top.microiot.domain.attribute.AttributeType;
@@ -49,6 +49,7 @@ public abstract class GetRequestSubscriber extends RequestSubscriber {
 
 	/**
 	 * 不同设备的具体获取的实现。
+	 * @param requester 获取的请求者。
 	 * @param device 获取的设备。
 	 * @param attribute 获取的属性名称。
 	 * @return 返回属性值。

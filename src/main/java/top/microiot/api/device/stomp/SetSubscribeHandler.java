@@ -5,7 +5,8 @@ import java.lang.reflect.Type;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 
 import top.microiot.api.device.WebsocketDeviceSession;
-import top.microiot.api.dto.Set;
+import top.microiot.domain.Set;
+import top.microiot.domain.Topic;
 
 /**
  * 设备端设置请求处理类，接收设置指示，返回设置响应。
@@ -21,7 +22,7 @@ public class SetSubscribeHandler extends RequestSubscribeHandler {
 
 	@Override
 	public String getOperation() {
-		return "set";
+		return Topic.TOPIC_SET;
 	}
 
 	@Override

@@ -24,7 +24,7 @@ import top.microiot.api.client.stomp.RequestPublishSyncHandler;
 import top.microiot.api.client.stomp.SetAsyncHandler;
 import top.microiot.api.client.stomp.SetRequestPublisher;
 import top.microiot.api.client.stomp.SetResponseSubscriber;
-import top.microiot.api.dto.Response;
+import top.microiot.domain.Response;
 import top.microiot.api.stomp.SessionManager;
 import top.microiot.domain.ActionType;
 import top.microiot.domain.Device;
@@ -298,7 +298,7 @@ public class WebsocketClientSession  extends SessionManager {
 
 		public void getAsync() {
 			init();
-			GetRequestPublisher request = new GetRequestPublisher(session.getCurrentUser(), attribute);
+			GetRequestPublisher request = new GetRequestPublisher(attribute);
 			subscriber.setAttribute(attribute);
 			subscriber.setDevice(device);
 			subscriber.setResponseDataType(responseDataType);
@@ -324,7 +324,7 @@ public class WebsocketClientSession  extends SessionManager {
 		}
 		
 		private Response get(String deviceId, String attribute) {
-			RequestPublishSyncHandler request = new RequestPublishSyncHandler(deviceId, new GetRequestPublisher(session.getCurrentUser(), attribute));
+			RequestPublishSyncHandler request = new RequestPublishSyncHandler(deviceId, new GetRequestPublisher(attribute));
 	        
 	        connect(request);
 			
@@ -388,7 +388,7 @@ public class WebsocketClientSession  extends SessionManager {
 		public void setAsync() {
 			try{
 				init();
-				SetRequestPublisher request = new SetRequestPublisher(session.getCurrentUser(), attribute, attributeValue);
+				SetRequestPublisher request = new SetRequestPublisher(attribute, attributeValue);
 				subscriber.setDevice(device);
 				subscriber.setAttribute(attribute);
 				subscriber.setValue(value);
@@ -401,7 +401,7 @@ public class WebsocketClientSession  extends SessionManager {
 		}
 		
 		private void set(String deviceId, String attribute, AttValueInfo value) {
-			RequestPublishSyncHandler request = new RequestPublishSyncHandler(deviceId, new SetRequestPublisher(session.getCurrentUser(), attribute, value));
+			RequestPublishSyncHandler request = new RequestPublishSyncHandler(deviceId, new SetRequestPublisher(attribute, value));
 	        
 	        connect(request);
 			
@@ -510,7 +510,7 @@ public class WebsocketClientSession  extends SessionManager {
 
 		public void actionAsync() {
 			AttValueInfo requestValue = init();
-			ActionRequestPublisher request = new ActionRequestPublisher(session.getCurrentUser(), action, requestValue);
+			ActionRequestPublisher request = new ActionRequestPublisher(action, requestValue);
 			subscriber.setAction(action);
 			subscriber.setDevice(device);
 			subscriber.setResponseDataType(actionType.getResponseAttributeType().getDataType());
@@ -551,7 +551,7 @@ public class WebsocketClientSession  extends SessionManager {
 		}
 		
 		private Response action(String deviceId, String action, AttValueInfo value) {
-			RequestPublishSyncHandler request = new RequestPublishSyncHandler(deviceId, new ActionRequestPublisher(session.getCurrentUser(), action, value));
+			RequestPublishSyncHandler request = new RequestPublishSyncHandler(deviceId, new ActionRequestPublisher(action, value));
 	        
 	        connect(request);
 			

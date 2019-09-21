@@ -8,7 +8,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.springframework.messaging.simp.stomp.StompHeaders;
 
-import top.microiot.api.dto.Response;
+import top.microiot.domain.Response;
 
 /**
  * 客户端请求发布处理抽象类，用于发起请求信息。

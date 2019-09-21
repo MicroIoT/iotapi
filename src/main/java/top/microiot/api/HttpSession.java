@@ -84,7 +84,7 @@ public abstract class HttpSession {
 				String url = getRestUri() + "/login";
 
 				ResponseEntity<Token> rssResponse = restTemplate.exchange(url, HttpMethod.POST, requestEntity, Token.class);
-				token = rssResponse.getBody();
+				this.token = rssResponse.getBody();
 			} catch (ResourceAccessException e) {
 				throw new StatusException(e.getMessage());
 			} catch (HttpClientErrorException | HttpServerErrorException | UnknownHttpStatusCodeException e) {
@@ -187,8 +187,7 @@ public abstract class HttpSession {
 	/**
 	 * 获取指定设备的信息。
 	 * 
-	 * @param id
-	 *            设备标识符。
+	 * @param id 设备标识符。
 	 * @return 返回指定设备。
 	 */
 	public Device getDevice(String id) {
@@ -201,8 +200,7 @@ public abstract class HttpSession {
 	/**
 	 * 获取指定设备组的信息。
 	 * 
-	 * @param id
-	 *            指定设备组的标识符
+	 * @param id 指定设备组的标识符
 	 * @return 返回指定设备组信息。
 	 */
 	public DeviceGroup getDeviceGroup(String id) {

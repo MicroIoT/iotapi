@@ -5,8 +5,8 @@ import java.util.Map;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 
-import top.microiot.api.dto.Action;
-import top.microiot.api.dto.Response;
+import top.microiot.domain.Action;
+import top.microiot.domain.Response;
 import top.microiot.domain.ActionType;
 import top.microiot.domain.Device;
 import top.microiot.domain.User;
@@ -72,6 +72,7 @@ public abstract class ActionRequestSubscriber extends RequestSubscriber {
 
 	/**
 	 * 不同设备的具体操作的实现。
+	 * @param requester 操作的请求者。
 	 * @param device 操作的设备。
 	 * @param action 操作的名称。
 	 * @param request 操作的请求值。

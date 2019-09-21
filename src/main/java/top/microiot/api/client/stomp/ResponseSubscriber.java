@@ -1,7 +1,7 @@
 package top.microiot.api.client.stomp;
 
 import top.microiot.api.client.WebsocketClientSession;
-import top.microiot.api.dto.Response;
+import top.microiot.domain.Response;
 import top.microiot.domain.Device;
 import top.microiot.domain.attribute.DataValue;
 

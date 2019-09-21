@@ -1,7 +1,6 @@
 package top.microiot.api.client.stomp;
 
-import top.microiot.api.dto.Set;
-import top.microiot.domain.User;
+import top.microiot.domain.Set;
 import top.microiot.domain.attribute.AttValueInfo;
 
 /**
@@ -13,15 +12,15 @@ public class SetRequestPublisher extends AbstractRequestPublier {
 	private String attribute;
 	private AttValueInfo value;
 	
-	public SetRequestPublisher(User requester, String attribute, AttValueInfo value) {
-		super(requester);
+	public SetRequestPublisher(String attribute, AttValueInfo value) {
+		super();
 		this.attribute = attribute;
 		this.value = value;
 	}
 
 	@Override
 	public Set getRequest(String sessionId) {
-		Set request = new Set(getRequester(), sessionId, attribute, value);
+		Set request = new Set(sessionId, attribute, value);
 		return request;
 	}
 
