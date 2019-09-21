@@ -6,7 +6,6 @@ import org.springframework.messaging.simp.stomp.StompHeaders;
 
 import top.microiot.api.stomp.SubscribeHandler;
 import top.microiot.domain.Alarm;
-import top.microiot.domain.Topic;
 
 /**
  * 客户端告警接收处理类。
@@ -26,6 +25,6 @@ public class AlarmSubscribeHandler extends SubscribeHandler {
 	@Override
 	public String getTopic() {
 		// TODO Auto-generated method stub
-		return Topic.TOPIC_ALARM;
+		return "/topic/alarm";
 	}
 }
