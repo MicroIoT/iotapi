@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
@@ -46,6 +47,7 @@ import top.microiot.exception.ValueException;
  */
 @Component
 public abstract class HttpSession {
+	private static final int RETRY = 3;
 	private static final String Token = "Authorization";
 	private static final String WS_IOT = "/ws_iot";
 	private static final String IOTP = "iotp";
@@ -310,10 +312,10 @@ public abstract class HttpSession {
 				throw new StatusException(e.getResponseBodyAsString());
 			} catch (HttpClientErrorException | HttpServerErrorException e) {
 				if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
-					if (count++ == 1)
+					if (count++ == RETRY)
 						throw new StatusException(e.getResponseBodyAsString());
 					else
-						refreshToken();
+						sleepToRefresh();
 				} else
 					throw new StatusException(e.getResponseBodyAsString());
 			}
@@ -341,10 +343,10 @@ public abstract class HttpSession {
 				throw new StatusException(e.getResponseBodyAsString());
 			} catch (HttpClientErrorException | HttpServerErrorException e) {
 				if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
-					if (count++ == 1)
+					if (count++ == RETRY)
 						throw new StatusException(e.getResponseBodyAsString());
 					else
-						refreshToken();
+						sleepToRefresh();
 				} else
 					throw new StatusException(e.getResponseBodyAsString());
 			}
@@ -386,13 +388,23 @@ public abstract class HttpSession {
 				throw new StatusException(e.getResponseBodyAsString());
 			} catch (HttpClientErrorException | HttpServerErrorException e) {
 				if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
-					if (count++ == 1)
+					if (count++ == RETRY)
 						throw new StatusException(e.getResponseBodyAsString());
-					else
-						refreshToken();
+					else 
+						sleepToRefresh();
 				} else
 					throw new StatusException(e.getResponseBodyAsString());
 			}
+		}
+	}
+
+	private void sleepToRefresh() {
+		try {
+			TimeUnit.SECONDS.sleep(5);
+			refreshToken();
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
 	}
 
