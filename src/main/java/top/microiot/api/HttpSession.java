@@ -48,7 +48,8 @@ import top.microiot.exception.ValueException;
 @Component
 public abstract class HttpSession {
 	private static final int RETRY = 3;
-	private static final String Token = "Authorization";
+	private static final String AUTH = "Authorization";
+	private static final String BEARER_TOKEN = "Bearer ";
 	private static final String WS_IOT = "/ws_iot";
 	private static final String IOTP = "iotp";
 	private static final String IOTPS = "iotps";
@@ -109,7 +110,7 @@ public abstract class HttpSession {
 
 	public void refreshToken() {
 		HttpHeaders requestHeaders = new HttpHeaders();
-		requestHeaders.set(Token, "Bearer " + token.getRefreshToken());
+		requestHeaders.set(AUTH, BEARER_TOKEN + token.getRefreshToken());
 
 		HttpEntity<HttpHeaders> requestEntity = new HttpEntity<HttpHeaders>(null, requestHeaders);
 		UriComponentsBuilder builder = getUrl("/token", null);
@@ -117,14 +118,8 @@ public abstract class HttpSession {
 
 		ResponseEntity<Token> rssResponse = null;
 
-		try {
-			rssResponse = restTemplate.exchange(uri, HttpMethod.GET, requestEntity, Token.class);
-			token = rssResponse.getBody();
-		} catch (ResourceAccessException e) {
-			throw new StatusException(e.getMessage());
-		} catch (HttpClientErrorException | HttpServerErrorException | UnknownHttpStatusCodeException e) {
-			throw new StatusException(e.getResponseBodyAsString());
-		}
+		rssResponse = restTemplate.exchange(uri, HttpMethod.GET, requestEntity, Token.class);
+		token = rssResponse.getBody();
 	}
 
 	protected LoginInfo getLoginInfo() {
@@ -142,14 +137,14 @@ public abstract class HttpSession {
 	public HttpHeaders getHttpAuth() {
 		assert logined : "login first";
 		HttpHeaders requestHeaders = new HttpHeaders();
-		requestHeaders.set(Token, "Bearer " + token.getToken());
+		requestHeaders.set(AUTH, BEARER_TOKEN + token.getToken());
 		return requestHeaders;
 	}
 
 	public StompHeaders getStompAuth() {
 		assert logined : "login first";
 		StompHeaders header = new StompHeaders();
-		header.set(Token, "Bearer " + token.getToken());
+		header.set(AUTH, BEARER_TOKEN + token.getToken());
 		return header;
 	}
 
