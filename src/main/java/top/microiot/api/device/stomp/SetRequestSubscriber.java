@@ -35,7 +35,7 @@ public abstract class SetRequestSubscriber extends RequestSubscriber {
 	 */
 	@Override
 	public Response getResponse() {
-		this.attDefinition = this.getDevice().getDeviceType().getAttDefinition();
+		this.attDefinition = this.getWebsocketDeviceSession().getDevice().getDeviceType().getAttDefinition();
 		Set req = (Set) request;
 		try {
 			DataType type = this.attDefinition.get(req.getAttribute()).getDataType();
@@ -52,7 +52,7 @@ public abstract class SetRequestSubscriber extends RequestSubscriber {
 			else
 				throw new NotFoundException(req.getAttribute() + " converter");
 			
-			setAttribute(req.getRequester(), this.getDevice(), req.getAttribute(), attributeValue);
+			setAttribute(req.getRequester(), this.getWebsocketDeviceSession().getDevice(), req.getAttribute(), attributeValue);
 			return new Response(true, null, null);
 		} catch(Throwable e) {
 			return new Response(false, e.getMessage(), null);

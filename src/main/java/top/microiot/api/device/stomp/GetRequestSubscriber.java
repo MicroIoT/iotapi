@@ -34,10 +34,10 @@ public abstract class GetRequestSubscriber extends RequestSubscriber {
 	 */
 	@Override
 	public Response getResponse() {
-		this.attDefinition = this.getDevice().getDeviceType().getAttDefinition();
+		this.attDefinition = this.getWebsocketDeviceSession().getDevice().getDeviceType().getAttDefinition();
 		Get req = (Get) request;
 		try {
-			Object res = getAttributeValue(req.getRequester(), this.getDevice(), req.getAttribute());
+			Object res = getAttributeValue(req.getRequester(), this.getWebsocketDeviceSession().getDevice(), req.getAttribute());
 			AttributeType type = this.attDefinition.get(req.getAttribute());
 			DataValue responseValue = type.getAttData(res);
 			return new Response(true, null, responseValue);

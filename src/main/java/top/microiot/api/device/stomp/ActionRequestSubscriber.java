@@ -37,7 +37,7 @@ public abstract class ActionRequestSubscriber extends RequestSubscriber {
 	 */
 	@Override
 	public Response getResponse() {
-		this.actionTypes = this.getDevice().getDeviceType().getActionTypes();
+		this.actionTypes = this.getWebsocketDeviceSession().getDevice().getDeviceType().getActionTypes();
 		Action req = (Action) request;
 		try {
 			ActionType actType = this.actionTypes.get(req.getAction());
@@ -54,7 +54,7 @@ public abstract class ActionRequestSubscriber extends RequestSubscriber {
 					requestValue = requestType.getValue(req.getValue(), t);
 				}
 			}
-			Object res = action(req.getRequester(), this.getDevice(), req.getAction(), requestValue);
+			Object res = action(req.getRequester(), this.getWebsocketDeviceSession().getDevice(), req.getAction(), requestValue);
 			DataValue responseValue = null;
 			if(actType.getResponse() != null) {
 				DataType resType = actType.getResponseAttributeType().getDataType();

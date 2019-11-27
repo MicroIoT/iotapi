@@ -18,7 +18,6 @@ public abstract class RequestSubscribeHandler extends SubscribeHandler {
 	
 	public RequestSubscribeHandler(WebsocketDeviceSession wsSession, RequestSubscriber subscriber) {
 		super(wsSession.getDevice().getId(), subscriber);
-		subscriber.setDevice(wsSession.getDevice());
 	}
 
 	@Override
