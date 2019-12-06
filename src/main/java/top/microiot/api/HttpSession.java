@@ -450,7 +450,7 @@ public abstract class HttpSession {
 	}
 
 	private Map<String, String> buildQueryDistinctParams(DistinctInfo info) {
-		Map<String, String> queryParams = buildQueryPageParams(info);
+		Map<String, String> queryParams = buildQueryParams(info);
 		queryParams.put("field", info.getField());
 		queryParams.put("returnClass", info.getReturnClass().toString());
 
