@@ -24,10 +24,10 @@ import top.microiot.api.client.stomp.RequestPublishSyncHandler;
 import top.microiot.api.client.stomp.SetAsyncHandler;
 import top.microiot.api.client.stomp.SetRequestPublisher;
 import top.microiot.api.client.stomp.SetResponseSubscriber;
-import top.microiot.domain.Response;
 import top.microiot.api.stomp.SessionManager;
 import top.microiot.domain.ActionType;
 import top.microiot.domain.Device;
+import top.microiot.domain.Response;
 import top.microiot.domain.attribute.AttValueInfo;
 import top.microiot.domain.attribute.AttributeType;
 import top.microiot.domain.attribute.DataType;
@@ -310,7 +310,10 @@ public class WebsocketClientSession  extends SessionManager {
 			device = session.getDevice(deviceId);
 			if(device == null)
 				throw new NotFoundException("device: " + deviceId);
-			responseDataType = device.getDeviceType().getAttDefinition().get(attribute).getDataType();
+			AttributeType type = device.getDeviceType().getAttDefinition().get(attribute);
+			if(type == null)
+				throw new NotFoundException("attribute: " + attribute);
+			responseDataType = type.getDataType();
 			if(responseDataType == null)
 				throw new NotFoundException("attribute: " + attribute);
 		}
@@ -523,6 +526,9 @@ public class WebsocketClientSession  extends SessionManager {
 			device = session.getDevice(deviceId);
 			if(device == null)
 				throw new NotFoundException("device: " + deviceId);
+			ActionType type = device.getDeviceType().getActionTypes().get(action);
+			if(type == null)
+				throw new NotFoundException("action: " + action);
 			actionType = device.getDeviceType().getActionTypes().get(action);
 			if(actionType == null)
 				throw new NotFoundException("action: " + action);
