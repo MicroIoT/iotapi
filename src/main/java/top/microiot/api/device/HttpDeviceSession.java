@@ -88,6 +88,8 @@ public class HttpDeviceSession extends HttpSession {
 	 */
 	public void reportAlarm(String alarmType, Object alarmInfo) {
 		Map<String, AttributeType> types = device.getDeviceType().getAlarmTypes();
+		if(types == null)
+			throw new NotFoundException("alarm type [" + alarmType + "]");
 		AttributeType type = types.get(alarmType);
 		if(type == null)
 			throw new NotFoundException("alarm type [" + alarmType + "]");
