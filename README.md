@@ -29,7 +29,7 @@ MicroIoT API for Java方便用户将MicroIoT平台提供的物联网服务集成
 
 ## 文档
 
-MicroIoT API for Java文档包括入门指南，开发指南，API参考，请访问MicroIoT网站：[microiot.top](https://www.microiot.top)
+MicroIoT API for Java文档包括入门指南，开发指南，API参考，请访问MicroIoT网站：[microiot.top](https://docs.microiot.top)
 
 ## 社区
 
