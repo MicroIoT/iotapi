@@ -8,8 +8,8 @@ MicroIoT API for Java方便用户将MicroIoT平台提供的物联网服务集成
 
 1. 安装Java开发环境，MicroIoT API for Java要求使用[JDK1.8](http://www.oracle.com/technetwork/java/javase/downloads/index.html)或更高版本。
 2. MicroIoT API for Java基于Spring Boot 2开发，推荐安装[Spring Tool Suite](https://spring.io/tools/sts/all)。
-3. 注册MicroIoT物联网平台账号，详细内容参见[注册MicroIoT](https://www.microiot.top/site/start/start/#microiot)。
-4. 使用MicroIoT Studio配置开发中使用的设备类型和场地类型，添加场地和设备。示例参见[配置共享单车](https://www.microiot.top/site/start/start/)。
+3. 注册MicroIoT物联网平台账号，详细内容参见[注册MicroIoT](https://docs.microiot.top/ru-men-zhi-nan/microiot-kuai-su-ru-men#zhu-ce-microiot-yong-hu)。
+4. 使用MicroIoT Studio配置开发中使用的设备类型和场地类型，添加场地和设备。示例参见[配置共享单车](https://docs.microiot.top/ru-men-zhi-nan/microiot-kuai-su-ru-men)。
 
 
 
