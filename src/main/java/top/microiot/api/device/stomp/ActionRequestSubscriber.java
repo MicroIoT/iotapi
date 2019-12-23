@@ -12,6 +12,7 @@ import top.microiot.domain.Device;
 import top.microiot.domain.User;
 import top.microiot.domain.attribute.DataType;
 import top.microiot.domain.attribute.DataValue;
+import top.microiot.exception.ValueException;
 
 /**
  * 设备端操作请求处理，设备收到操作请求后，将请求值转换为用户定义的类型，供用户处理操作请求，
@@ -53,6 +54,8 @@ public abstract class ActionRequestSubscriber extends RequestSubscriber {
 					ParameterizedTypeReference<?> t = (ParameterizedTypeReference<?>) type;
 					requestValue = requestType.getValue(req.getValue(), t);
 				}
+				else
+					throw new ValueException("action: " + req.getAction() + " request can't be converted, please add its convert class");
 			}
 			Object res = action(req.getRequester(), this.getWebsocketDeviceSession().getDevice(), req.getAction(), requestValue);
 			DataValue responseValue = null;

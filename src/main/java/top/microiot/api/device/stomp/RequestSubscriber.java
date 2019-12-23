@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import top.microiot.api.device.WebsocketDeviceSession;
 import top.microiot.api.stomp.AbstractEventSubscriber;
+import top.microiot.api.stomp.SessionManager;
 import top.microiot.domain.Request;
 import top.microiot.domain.Response;
 
@@ -14,6 +15,9 @@ public abstract class RequestSubscriber extends AbstractEventSubscriber {
 	protected Request request;
 	private WebsocketDeviceSession websocketDeviceSession;
 	
+	public RequestSubscriber() {
+		super();
+	}
 	public WebsocketDeviceSession getWebsocketDeviceSession() {
 		return websocketDeviceSession;
 	}
@@ -25,6 +29,10 @@ public abstract class RequestSubscriber extends AbstractEventSubscriber {
 	public void onEvent(Object event) {
 		request = (Request)event;
 		logger.debug("request: " + request);
+	}
+	@Override
+	public SessionManager getSessionManager() {
+		return websocketDeviceSession;
 	}
 
 }

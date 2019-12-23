@@ -21,7 +21,7 @@ MicroIoT API for Java方便用户将MicroIoT平台提供的物联网服务集成
 <dependency>
 	<groupId>top.microiot</groupId>
 	<artifactId>iotapi</artifactId>
-	<version>3.0.10</version>
+	<version>3.0.11</version>
 </dependency>
 ```
 

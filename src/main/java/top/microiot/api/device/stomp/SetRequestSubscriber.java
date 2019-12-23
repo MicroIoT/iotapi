@@ -5,13 +5,13 @@ import java.util.Map;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 
+import top.microiot.domain.Device;
 import top.microiot.domain.Response;
 import top.microiot.domain.Set;
-import top.microiot.domain.Device;
 import top.microiot.domain.User;
 import top.microiot.domain.attribute.DataType;
 import top.microiot.domain.attribute.DeviceAttributeType;
-import top.microiot.exception.NotFoundException;
+import top.microiot.exception.ValueException;
 
 /**
  * 设备端设置请求处理，设备收到设置请求后，将请求的属性值转换为用户定义的类型，供用户处理设置请求。
@@ -50,7 +50,7 @@ public abstract class SetRequestSubscriber extends RequestSubscriber {
 				attributeValue = type.getValue(req.getValue(), tclass);
 			}
 			else
-				throw new NotFoundException(req.getAttribute() + " converter");
+				throw new ValueException("attribute: " + req.getAttribute() + " can't be converted, please add its convert class");
 			
 			setAttribute(req.getRequester(), this.getWebsocketDeviceSession().getDevice(), req.getAttribute(), attributeValue);
 			return new Response(true, null, null);

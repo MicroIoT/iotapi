@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import top.microiot.api.client.WebsocketClientSession;
 import top.microiot.api.stomp.AbstractEventSubscriber;
+import top.microiot.api.stomp.SessionManager;
 import top.microiot.domain.Alarm;
 import top.microiot.domain.ManagedObject;
 import top.microiot.domain.attribute.DataType;
@@ -80,5 +81,10 @@ public abstract class AlarmSubscriber extends AbstractEventSubscriber{
 
 	private Object getType(Alarm alarm) {
 		return types.get(alarm.getAlarmType());
+	}
+
+	@Override
+	public SessionManager getSessionManager() {
+		return websocketClientSession;
 	}
 }

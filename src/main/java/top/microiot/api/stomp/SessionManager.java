@@ -37,4 +37,12 @@ public class SessionManager extends WebSocketStompSessionManager {
 		destroy();
 		session.stop();
 	}
+
+	public HttpSession getSession() {
+		return session;
+	}
+
+	public void setSession(HttpSession session) {
+		this.session = session;
+	}
 }

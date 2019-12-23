@@ -7,7 +7,21 @@ import org.springframework.core.ParameterizedTypeReference;
 
 public abstract class AbstractEventSubscriber implements EventSubscriber{
 	protected Map<String, Object> types = new HashMap<String, Object>();
+	private boolean durable;
 	
+	public AbstractEventSubscriber() {
+		super();
+		this.durable = false;
+	}
+
+	public boolean isDurable() {
+		return durable;
+	}
+
+	public void setDurable(boolean durable) {
+		this.durable = durable;
+	}
+
 	public void init() {
 		
 	}

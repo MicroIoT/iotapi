@@ -17,7 +17,6 @@ public class SetSubscribeHandler extends RequestSubscribeHandler {
 
 	public SetSubscribeHandler(WebsocketDeviceSession wsSession, SetRequestSubscriber subscriber) {
 		super(wsSession, subscriber);
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
