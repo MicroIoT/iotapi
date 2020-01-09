@@ -4,7 +4,6 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
@@ -19,6 +18,7 @@ import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.UnknownHttpStatusCodeException;
@@ -37,6 +37,7 @@ import top.microiot.dto.LoginInfo;
 import top.microiot.dto.QueryInfo;
 import top.microiot.dto.QueryNearPageInfo;
 import top.microiot.dto.QueryPageInfo;
+import top.microiot.exception.AuthenticationException;
 import top.microiot.exception.StatusException;
 import top.microiot.exception.ValueException;
 
@@ -47,7 +48,6 @@ import top.microiot.exception.ValueException;
  */
 @Component
 public abstract class HttpSession {
-	private static final int RETRY = 3;
 	private static final String AUTH = "Authorization";
 	private static final String BEARER_TOKEN = "Bearer ";
 	private static final String WS_IOT = "/ws_iot";
@@ -93,7 +93,7 @@ public abstract class HttpSession {
 			} catch (HttpClientErrorException | HttpServerErrorException | UnknownHttpStatusCodeException e) {
 				throw new StatusException(e.getResponseBodyAsString());
 			}
-
+			
 			this.logined = true;
 		}
 	}
@@ -118,8 +118,14 @@ public abstract class HttpSession {
 
 		ResponseEntity<Token> rssResponse = null;
 
-		rssResponse = restTemplate.exchange(uri, HttpMethod.GET, requestEntity, Token.class);
-		token = rssResponse.getBody();
+		try {
+			rssResponse = restTemplate.exchange(uri, HttpMethod.GET, requestEntity, Token.class);
+			token = rssResponse.getBody();
+		} catch (HttpClientErrorException | HttpServerErrorException e) {
+			if (e.getStatusCode() == HttpStatus.UNAUTHORIZED)
+				throw new StatusException(AuthenticationException.TOKEN_EXPIRED);
+			throw e;
+		}
 	}
 
 	protected LoginInfo getLoginInfo() {
@@ -289,7 +295,7 @@ public abstract class HttpSession {
 
 	protected <T> T getEntity(String getUri, Map<String, String> queryParams, Class<T> responseType) {
 		assert logined : "login first";
-		int count = 0;
+
 		ResponseEntity<T> rssResponse = null;
 		while (true) {
 			HttpHeaders header = getHttpAuth();
@@ -306,21 +312,24 @@ public abstract class HttpSession {
 			} catch (UnknownHttpStatusCodeException e) {
 				throw new StatusException(e.getResponseBodyAsString());
 			} catch (HttpClientErrorException | HttpServerErrorException e) {
-				if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
-					if (count++ == RETRY)
-						throw new StatusException(e.getResponseBodyAsString());
-					else
-						sleepToRefresh();
-				} else
-					throw new StatusException(e.getResponseBodyAsString());
+				processException(e);
 			}
 		}
+	}
+
+	private void processException(HttpStatusCodeException e) {
+		if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
+			if (e.getResponseBodyAsString().equals(AuthenticationException.TOKEN_NOT_EXIST))
+				throw new StatusException(e.getResponseBodyAsString());
+			else
+				refreshToken();
+		} else
+			throw new StatusException(e.getResponseBodyAsString());
 	}
 
 	protected <T> T getEntity(String getUri, Map<String, String> queryParams, ParameterizedTypeReference<T> responseType) {
 		assert logined : "login first";
 
-		int count = 0;
 		ResponseEntity<T> rssResponse = null;
 		while (true) {
 			HttpHeaders header = getHttpAuth();
@@ -337,13 +346,7 @@ public abstract class HttpSession {
 			} catch (UnknownHttpStatusCodeException e) {
 				throw new StatusException(e.getResponseBodyAsString());
 			} catch (HttpClientErrorException | HttpServerErrorException e) {
-				if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
-					if (count++ == RETRY)
-						throw new StatusException(e.getResponseBodyAsString());
-					else
-						sleepToRefresh();
-				} else
-					throw new StatusException(e.getResponseBodyAsString());
+				processException(e);
 			}
 		}
 
@@ -368,7 +371,6 @@ public abstract class HttpSession {
 	}
 
 	private <T> T manageEntity(String uri, HttpMethod method, Object request, Class<T> responseType) {
-		int count = 0;
 		ResponseEntity<T> rssResponse = null;
 		while (true) {
 			try {
@@ -382,24 +384,8 @@ public abstract class HttpSession {
 			} catch (UnknownHttpStatusCodeException e) {
 				throw new StatusException(e.getResponseBodyAsString());
 			} catch (HttpClientErrorException | HttpServerErrorException e) {
-				if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
-					if (count++ == RETRY)
-						throw new StatusException(e.getResponseBodyAsString());
-					else 
-						sleepToRefresh();
-				} else
-					throw new StatusException(e.getResponseBodyAsString());
+				processException(e);
 			}
-		}
-	}
-
-	private void sleepToRefresh() {
-		try {
-			TimeUnit.SECONDS.sleep(5);
-			refreshToken();
-		} catch (InterruptedException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
 		}
 	}
 

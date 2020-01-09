@@ -34,8 +34,8 @@ public class SessionManager extends WebSocketStompSessionManager {
 		for (StompSessionHandler handler : handlers) {
 			this.disconnect(handler);
 		}
-		destroy();
 		session.stop();
+		super.stop();
 	}
 
 	public HttpSession getSession() {
