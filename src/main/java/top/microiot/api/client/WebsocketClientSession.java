@@ -43,9 +43,13 @@ import top.microiot.exception.ValueException;
 public class WebsocketClientSession  extends SessionManager {
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	private HttpSession session;
-	@Autowired
 	private WebsocketProperties websocketProperties;
 	
+	@Autowired
+	public void setWebsocketProperties(WebsocketProperties websocketProperties) {
+		this.websocketProperties = websocketProperties;
+	}
+
 	public HttpSession getSession() {
 		return session;
 	}
@@ -291,7 +295,7 @@ public class WebsocketClientSession  extends SessionManager {
 				else
 					return getResponse();
 			} catch(Throwable e) {
-				logger.error("get attribute [" + attribute + "] error: ", e);
+				logger.error("get attribute [" + attribute + "] error: " + e.getMessage(), e);
 				throw new ValueException("get attribute [" + attribute + "] error: " + e.getMessage());
 			}
 		}
@@ -373,7 +377,7 @@ public class WebsocketClientSession  extends SessionManager {
 				init();
 				set(deviceId, attribute, attributeValue);
 			} catch(Throwable e) {
-				logger.error("set attribute [" + attribute + "] error: ", e);
+				logger.error("set attribute [" + attribute + "] error: " + e.getMessage(), e);
 				throw new ValueException("set attribute [" + attribute + "] error: " + e.getMessage());
 			}
 		}
@@ -506,7 +510,7 @@ public class WebsocketClientSession  extends SessionManager {
 						return null;
 				}
 			} catch(Throwable e) {
-				logger.error("action [" + action + "] response error: ", e);
+				logger.error("action [" + action + "] response error: " + e.getMessage(), e);
 				throw new ValueException("action [" + action + "] response error: " + e.getMessage());
 			}
 		}

@@ -65,15 +65,20 @@ public abstract class HttpSession {
 
 	protected HttpSessionProperties httpSessionProperties;
 
-	@Autowired
 	private RestTemplate restTemplate;
+
+	@Autowired
+	public void setRestTemplate(RestTemplate restTemplate) {
+		this.restTemplate = restTemplate;
+	}
 
 	public abstract User getCurrentUser();
 
 	public HttpSession(HttpSessionProperties httpSessionProperties) {
+		super();
 		this.httpSessionProperties = httpSessionProperties;
 	}
-
+	
 	/**
 	 * 建立http会话。
 	 */

@@ -32,10 +32,14 @@ import java.util.concurrent.TimeUnit;
 public class RestTemplateConfig {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @Autowired
     private HttpClientProperties clientProperties;
 
-    @Bean
+    @Autowired
+    public void setClientProperties(HttpClientProperties clientProperties) {
+		this.clientProperties = clientProperties;
+	}
+
+	@Bean
     @Scope("prototype")
     public RestTemplate restTemplate() {
         HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();

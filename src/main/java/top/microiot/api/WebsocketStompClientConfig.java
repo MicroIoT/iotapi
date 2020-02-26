@@ -17,10 +17,14 @@ import javax.websocket.WebSocketContainer;
 @Configuration
 @EnableConfigurationProperties(WebsocketProperties.class)
 public class WebsocketStompClientConfig {
-    @Autowired
     private WebsocketProperties websocketProperties;
 
-    @Bean
+    @Autowired
+    public void setWebsocketProperties(WebsocketProperties websocketProperties) {
+		this.websocketProperties = websocketProperties;
+	}
+
+	@Bean
     @Scope("prototype")
     public WebSocketStompClient websocketStompClient() {
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
