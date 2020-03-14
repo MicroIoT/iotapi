@@ -38,7 +38,7 @@ public abstract class ActionRequestSubscriber extends RequestSubscriber {
 	 */
 	@Override
 	public Response getResponse() {
-		this.actionTypes = this.getWebsocketDeviceSession().getDevice().getDeviceType().getActionTypes();
+		this.actionTypes = this.getDevice().getDeviceType().getActionTypes();
 		Action req = (Action) request;
 		try {
 			ActionType actType = this.actionTypes.get(req.getAction());

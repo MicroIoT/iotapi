@@ -39,9 +39,19 @@ public class WebsocketDeviceSession extends WebsocketClientSession {
 	 * @return 返回获取请求处理。
 	 */
 	public GetSubscribeHandler subscribe(GetRequestSubscriber subscriber) {
+		Device device = getDevice();
+		return subscribeGet(subscriber, device);
+	}
+	
+	public GetSubscribeHandler subscribe(GetRequestSubscriber subscriber, Device device) {
+		return subscribeGet(subscriber, device);
+	}
+	
+	private GetSubscribeHandler subscribeGet(GetRequestSubscriber subscriber, Device device) {
 		subscriber.init();
 		subscriber.setWebsocketDeviceSession(this);
-		GetSubscribeHandler sessionHandler = new GetSubscribeHandler(this, subscriber);
+		subscriber.setDevice(device);
+		GetSubscribeHandler sessionHandler = new GetSubscribeHandler(device.getId(), subscriber);
         connect(sessionHandler);
         handlers.add(sessionHandler);
         return sessionHandler;
@@ -53,9 +63,19 @@ public class WebsocketDeviceSession extends WebsocketClientSession {
 	 * @return 返回设置请求处理。
 	 */
 	public SetSubscribeHandler subscribe(SetRequestSubscriber subscriber) {
+		Device device = getDevice();
+		return subscribeSet(subscriber, device);
+	}
+	
+	public SetSubscribeHandler subscribe(SetRequestSubscriber subscriber, Device device) {
+		return subscribeSet(subscriber, device);
+	}
+	
+	private SetSubscribeHandler subscribeSet(SetRequestSubscriber subscriber, Device device) {
 		subscriber.init();
 		subscriber.setWebsocketDeviceSession(this);
-		SetSubscribeHandler sessionHandler = new SetSubscribeHandler(this, subscriber);
+		subscriber.setDevice(device);
+		SetSubscribeHandler sessionHandler = new SetSubscribeHandler(device.getId(), subscriber);
         connect(sessionHandler);
         handlers.add(sessionHandler);
         return sessionHandler;
@@ -67,9 +87,19 @@ public class WebsocketDeviceSession extends WebsocketClientSession {
 	 * @return 返回操作请求处理。
 	 */
 	public ActionSubscribeHandler subscribe(ActionRequestSubscriber subscriber) {
+		Device device = getDevice();
+		return subscribeAction(subscriber, device);
+	}
+	
+	public ActionSubscribeHandler subscribe(ActionRequestSubscriber subscriber, Device device) {
+		return subscribeAction(subscriber, device);
+	}
+
+	private ActionSubscribeHandler subscribeAction(ActionRequestSubscriber subscriber, Device device) {
 		subscriber.init();
 		subscriber.setWebsocketDeviceSession(this);
-		ActionSubscribeHandler sessionHandler = new ActionSubscribeHandler(this, subscriber);
+		subscriber.setDevice(device);
+		ActionSubscribeHandler sessionHandler = new ActionSubscribeHandler(device.getId(), subscriber);
         connect(sessionHandler);
         handlers.add(sessionHandler);
         return sessionHandler;

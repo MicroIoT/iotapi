@@ -6,7 +6,7 @@
 
 	<groupId>top.microiot</groupId>
 	<artifactId>iotapi</artifactId>
-	<version>3.0.14</version>
+	<version>3.1.0</version>
 	<packaging>jar</packaging>
 
 	<name>iotapi</name>
@@ -42,7 +42,7 @@
 		<dependency>
 			<groupId>top.microiot</groupId>
 			<artifactId>iotdomain</artifactId>
-			<version>2.2.0</version>
+			<version>2.3.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>

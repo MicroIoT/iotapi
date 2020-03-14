@@ -4,7 +4,6 @@ import java.lang.reflect.Type;
 
 import org.springframework.messaging.simp.stomp.StompHeaders;
 
-import top.microiot.api.device.WebsocketDeviceSession;
 import top.microiot.domain.Action;
 import top.microiot.domain.Topic;
 
@@ -15,8 +14,8 @@ import top.microiot.domain.Topic;
  */
 public class ActionSubscribeHandler extends RequestSubscribeHandler {
 
-	public ActionSubscribeHandler(WebsocketDeviceSession wsSession, ActionRequestSubscriber subscriber) {
-		super(wsSession, subscriber);
+	public ActionSubscribeHandler(String deviceId, ActionRequestSubscriber subscriber) {
+		super(deviceId, subscriber);
 		// TODO Auto-generated constructor stub
 	}
 

@@ -22,6 +22,11 @@ public class IoTDevice {
 			SetRequestSubscriber setHandler, ActionRequestSubscriber actionHandler) {
 		super();
 		this.deviceSession = deviceSession;
+		initDevice(getHandler, setHandler, actionHandler);
+	}
+
+	protected void initDevice(GetRequestSubscriber getHandler, SetRequestSubscriber setHandler,
+			ActionRequestSubscriber actionHandler) {
 		if(getHandler != null)
 			this.deviceSession.subscribe(getHandler);
 		if(setHandler != null)
@@ -56,6 +61,10 @@ public class IoTDevice {
 	
 	public List<DeviceGroup> getDeviceGroup() {
 		return deviceSession.getSession().getMyDeviceGroup();
+	}
+	
+	public List<Device> getSubDevice() {
+		return deviceSession.getSession().getMySubDevice();
 	}
 	
 	public void stop() {

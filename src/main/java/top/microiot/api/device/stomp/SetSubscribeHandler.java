@@ -4,7 +4,6 @@ import java.lang.reflect.Type;
 
 import org.springframework.messaging.simp.stomp.StompHeaders;
 
-import top.microiot.api.device.WebsocketDeviceSession;
 import top.microiot.domain.Set;
 import top.microiot.domain.Topic;
 
@@ -15,8 +14,8 @@ import top.microiot.domain.Topic;
  */
 public class SetSubscribeHandler extends RequestSubscribeHandler {
 
-	public SetSubscribeHandler(WebsocketDeviceSession wsSession, SetRequestSubscriber subscriber) {
-		super(wsSession, subscriber);
+	public SetSubscribeHandler(String deviceId, SetRequestSubscriber subscriber) {
+		super(deviceId, subscriber);
 	}
 
 	@Override

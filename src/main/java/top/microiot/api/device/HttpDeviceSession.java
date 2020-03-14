@@ -19,6 +19,8 @@ import top.microiot.domain.attribute.AttributeType;
 import top.microiot.domain.attribute.DeviceAttributeType;
 import top.microiot.dto.AlarmInfo;
 import top.microiot.dto.EventInfo;
+import top.microiot.dto.SubDeviceAlarmInfo;
+import top.microiot.dto.SubDeviceEventInfo;
 import top.microiot.exception.NotFoundException;
 
 /**
@@ -65,8 +67,23 @@ public class HttpDeviceSession extends HttpSession {
 	 * @param events 设备的多个属性的值。
 	 */
 	public void reportEvents(Map<String, Object> events) {
+		Map<String, AttValueInfo> values = getEventInfo(events, device);
+		EventInfo info = new EventInfo();
+		info.setValues(values);
+		info.setReportTime(new Date());
+		postEntity(HttpClientSession.eventUrl, info, null);
+	}
+	public void reportEvents(Map<String, Object> events, Device device) {
+		Map<String, AttValueInfo> values = getEventInfo(events, device);
+		SubDeviceEventInfo info = new SubDeviceEventInfo();
+		info.setValues(values);
+		info.setReportTime(new Date());
+		info.setDeviceId(device.getId());
+		postEntity(HttpClientSession.eventUrl+"/subdevice", info, null);
+	}
+	private Map<String, AttValueInfo> getEventInfo(Map<String, Object> events, Device mo) {
+		Map<String, DeviceAttributeType> types = mo.getDeviceType().getAttDefinition();
 		Map<String, AttValueInfo> values = new HashMap<String, AttValueInfo>();
-		Map<String, DeviceAttributeType> types = device.getDeviceType().getAttDefinition();
 		for(String attribute : events.keySet()) {
 			AttributeType type = types.get(attribute);
 			if(type == null)
@@ -75,10 +92,8 @@ public class HttpDeviceSession extends HttpSession {
 			AttValueInfo value = type.getAttValue(eventValue);
 			values.put(attribute, value);
 		}
-		EventInfo info = new EventInfo();
-		info.setValues(values);
-		info.setReportTime(new Date());
-		postEntity(HttpClientSession.eventUrl, info, null);
+		
+		return values;
 	}
 	
 	/**
@@ -87,6 +102,23 @@ public class HttpDeviceSession extends HttpSession {
 	 * @param alarmInfo 告警详细信息。
 	 */
 	public void reportAlarm(String alarmType, Object alarmInfo) {
+		AttValueInfo values = getAlarmInfo(alarmType, alarmInfo, device);
+		AlarmInfo info = new AlarmInfo();
+		info.setAlarmType(alarmType);
+		info.setAlarmInfo(values);
+		info.setReportTime(new Date());
+		postEntity(HttpClientSession.alarmUrl, info, null);
+	}
+	public void reportAlarm(String alarmType, Object alarmInfo, Device device) {
+		AttValueInfo values = getAlarmInfo(alarmType, alarmInfo, device);
+		SubDeviceAlarmInfo info = new SubDeviceAlarmInfo();
+		info.setAlarmType(alarmType);
+		info.setAlarmInfo(values);
+		info.setReportTime(new Date());
+		info.setDeviceId(device.getId());
+		postEntity(HttpClientSession.alarmUrl + "/subdevice", info, null);
+	}
+	private AttValueInfo getAlarmInfo(String alarmType, Object alarmInfo, Device device) {
 		Map<String, AttributeType> types = device.getDeviceType().getAlarmTypes();
 		if(types == null)
 			throw new NotFoundException("alarm type [" + alarmType + "]");
@@ -95,12 +127,8 @@ public class HttpDeviceSession extends HttpSession {
 			throw new NotFoundException("alarm type [" + alarmType + "]");
 		
 		AttValueInfo values = type.getDataType().getAttValue(alarmInfo);
-		
-		AlarmInfo info = new AlarmInfo();
-		info.setAlarmType(alarmType);
-		info.setAlarmInfo(values);
-		info.setReportTime(new Date());
-		postEntity(HttpClientSession.alarmUrl, info, null);
+
+		return values;
 	}
 	
 	/**
@@ -109,6 +137,13 @@ public class HttpDeviceSession extends HttpSession {
 	 */
 	public List<DeviceGroup> getMyDeviceGroup(){
 		return getEntity(HttpClientSession.deviceGroupUrl + "/me", null, new ParameterizedTypeReference<List<DeviceGroup>>() {});
+	}
+	/**
+	 * 获取网关设备的所有子设备信息
+	 * @return 返回子设备列表
+	 */
+	public List<Device> getMySubDevice(){
+		return getEntity(HttpClientSession.deviceUrl + "/subdevice", null, new ParameterizedTypeReference<List<Device>>() {});
 	}
 	@Override
 	public User getCurrentUser() {

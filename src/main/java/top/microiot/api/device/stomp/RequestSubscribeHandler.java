@@ -3,7 +3,6 @@ package top.microiot.api.device.stomp;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
 
-import top.microiot.api.device.WebsocketDeviceSession;
 import top.microiot.api.stomp.SubscribeHandler;
 import top.microiot.domain.Response;
 import top.microiot.domain.Topic;
@@ -16,8 +15,8 @@ import top.microiot.domain.Topic;
 public abstract class RequestSubscribeHandler extends SubscribeHandler {
 	private StompSession session;
 	
-	public RequestSubscribeHandler(WebsocketDeviceSession wsSession, RequestSubscriber subscriber) {
-		super(wsSession.getDevice().getId(), subscriber);
+	public RequestSubscribeHandler(String deviceId, RequestSubscriber subscriber) {
+		super(deviceId, subscriber);
 	}
 
 	@Override
